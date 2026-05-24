@@ -50,10 +50,10 @@ function cTax(d){return cSub(d)*(parseFloat(d.taxRate)||0)/100}
 function cTot(d){return cSub(d)+cTax(d)}
 function ago(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
 
-const toE=r=>r?({id:r.id,number:r.number,date:r.date||today(),status:r.status||"Draft",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,contractText:r.contract_text||DEF_CONTRACT,signature:r.signature,signedAt:r.signed_at,invoiceId:r.invoice_id,photos:r.photos||[]}):null;
-const frE=e=>({id:e.id,number:e.number,date:e.date,status:e.status,customer_id:e.customerId,customer_name:e.customerName,customer_phone:e.customerPhone,customer_email:e.customerEmail,customer_address:e.customerAddress,items:e.items,notes:e.notes,tax_rate:e.taxRate,contract_text:e.contractText,signature:e.signature,signed_at:e.signedAt,invoice_id:e.invoiceId,photos:e.photos||[]});
-const toI=r=>r?({id:r.id,number:r.number,estimateId:r.estimate_id,estimateNumber:r.estimate_number,date:r.date||today(),dueDate:r.due_date||dueDate(),status:r.status||"Unpaid",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,paidAt:r.paid_at,photos:r.photos||[]}):null;
-const frI=i=>({id:i.id,number:i.number,estimate_id:i.estimateId,estimate_number:i.estimateNumber,date:i.date,due_date:i.dueDate,status:i.status,customer_id:i.customerId,customer_name:i.customerName,customer_phone:i.customerPhone,customer_email:i.customerEmail,customer_address:i.customerAddress,items:i.items,notes:i.notes,tax_rate:i.taxRate,paid_at:i.paidAt,photos:i.photos||[]});
+const toE=r=>r?({id:r.id,number:r.number,date:r.date||today(),status:r.status||"Draft",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,contractText:r.contract_text||DEF_CONTRACT,signature:r.signature,signedAt:r.signed_at,invoiceId:r.invoice_id,photos:r.photos||[],shareToken:r.share_token,viewedAt:r.viewed_at,viewCount:r.view_count||0}):null;
+const frE=e=>({id:e.id,number:e.number,date:e.date,status:e.status,customer_id:e.customerId,customer_name:e.customerName,customer_phone:e.customerPhone,customer_email:e.customerEmail,customer_address:e.customerAddress,items:e.items,notes:e.notes,tax_rate:e.taxRate,contract_text:e.contractText,signature:e.signature,signed_at:e.signedAt,invoice_id:e.invoiceId,photos:e.photos||[],share_token:e.shareToken,viewed_at:e.viewedAt,view_count:e.viewCount});
+const toI=r=>r?({id:r.id,number:r.number,estimateId:r.estimate_id,estimateNumber:r.estimate_number,date:r.date||today(),dueDate:r.due_date||dueDate(),status:r.status||"Unpaid",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,paidAt:r.paid_at,photos:r.photos||[],shareToken:r.share_token,viewedAt:r.viewed_at,viewCount:r.view_count||0}):null;
+const frI=i=>({id:i.id,number:i.number,estimate_id:i.estimateId,estimate_number:i.estimateNumber,date:i.date,due_date:i.dueDate,status:i.status,customer_id:i.customerId,customer_name:i.customerName,customer_phone:i.customerPhone,customer_email:i.customerEmail,customer_address:i.customerAddress,items:i.items,notes:i.notes,tax_rate:i.taxRate,paid_at:i.paidAt,photos:i.photos||[],share_token:i.shareToken,viewed_at:i.viewedAt,view_count:i.viewCount});
 const toC=r=>r?({id:r.id,name:r.name||"",phone:r.phone||"",email:r.email||"",address:r.address||"",city:r.city||"",state:r.state||"TX",zip:r.zip||"",notes:r.notes||""}):null;
 const toT=r=>r?({id:r.id,description:r.description||"",unit:r.unit||"ea",price:r.price||0,sortOrder:r.sort_order||0}):null;
 
@@ -173,6 +173,38 @@ function SBar({val,set,ph}){return<div style={{display:"flex",alignItems:"center
 function SBdg({s}){const c={Draft:"#3b82f6",Sent:"#f59e0b",Approved:"#22c55e",Declined:"#ef4444"}[s]||"#64748b";return<span style={{background:c+"22",color:c,padding:"2px 10px",borderRadius:20,fontSize:10,fontWeight:700,border:`1px solid ${c}44`}}>{s}</span>}
 function IBdg({s}){const c={Unpaid:"#f59e0b",Paid:"#22c55e",Overdue:"#ef4444"}[s]||"#64748b";return<span style={{background:c+"22",color:c,padding:"2px 10px",borderRadius:20,fontSize:10,fontWeight:700,border:`1px solid ${c}44`}}>{s}</span>}
 
+
+const SHARE_BASE='https://mailboxrepairco.github.io/mbrc-estimator';
+function shareLink(doc,type){return `${SHARE_BASE}/view.html?token=${doc.shareToken}&type=${type}`;}
+
+function SendModal({doc,type,onClose}){
+  const[copied,setCopied]=useState(false);
+  if(!doc.shareToken)return<Modal title="Not Saved Yet" onClose={onClose}><div style={{color:"#94a3b8",fontSize:13}}>Please save this {type} first, then you can send it.</div></Modal>;
+  const link=shareLink(doc,type);
+  const lbl=type==="estimate"?"Estimate":"Invoice";
+  const tot=money(cTot(doc));
+  const subj=`Your ${lbl} #${doc.number} from The Mailbox Repair CO`;
+  const body=`Hi ${doc.customerName||"there"},\n\nPlease review your ${lbl.toLowerCase()} here:\n${link}\n\nTotal: ${tot}\n\nThank you,\nThe Mailbox Repair CO\n817-592-6678`;
+  const sms=`Hi ${doc.customerName||""}, your ${lbl} #${doc.number} (${tot}) from The Mailbox Repair CO: ${link}`;
+  const copy=()=>{try{navigator.clipboard.writeText(link)}catch{};setCopied(true);setTimeout(()=>setCopied(false),2200)};
+  return(<Modal title={`Send ${lbl} #${doc.number}`} onClose={onClose}>
+    {doc.viewCount>0&&<div style={{padding:"8px 12px",background:"#0e2a45",borderRadius:8,fontSize:12,color:"#38bdf8",marginBottom:14}}>👁 Viewed {doc.viewCount} time{doc.viewCount!==1?"s":""}  {doc.viewedAt?`· ${new Date(doc.viewedAt).toLocaleString()}`:""}</div>}
+    <div style={{marginBottom:14}}>
+      <div style={{fontSize:10,color:"#64748b",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:6}}>Customer Link</div>
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        <input style={{...S.inp,flex:1,fontSize:10}} value={link} readOnly onFocus={e=>e.target.select()}/>
+        <button style={{...S.pb,padding:"7px 12px",whiteSpace:"nowrap",background:copied?"#059669":"#0369a1"}} onClick={copy}>{copied?"✓ Copied!":"Copy"}</button>
+      </div>
+    </div>
+    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      <a href={`mailto:${doc.customerEmail||""}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`} style={{...S.pb,textDecoration:"none",justifyContent:"center",display:"flex",alignItems:"center",gap:6}}>📧 Send via Email</a>
+      <a href={`sms:${doc.customerPhone||""}?body=${encodeURIComponent(sms)}`} style={{...S.pb,textDecoration:"none",justifyContent:"center",display:"flex",alignItems:"center",gap:6,background:"#059669"}}>💬 Send via Text</a>
+      <a href={`https://wa.me/${(doc.customerPhone||"").replace(/\D/g,"")}?text=${encodeURIComponent(sms)}`} target="_blank" rel="noreferrer" style={{...S.pb,textDecoration:"none",justifyContent:"center",display:"flex",alignItems:"center",gap:6,background:"#16a34a"}}>📱 Send via WhatsApp</a>
+    </div>
+    <div style={{marginTop:12,fontSize:11,color:"#64748b",textAlign:"center"}}>Customer taps link → you get notified instantly</div>
+  </Modal>);
+}
+
 function Login({onLogin}){
   const[email,setEmail]=useState("");const[pw,setPw]=useState("");const[mode,setMode]=useState("login");const[loading,setLoading]=useState(false);const[err,setErr]=useState("");
   const submit=async()=>{setLoading(true);setErr("");try{let r;if(mode==="login"){r=await db.auth.signInWithPassword({email,password:pw})}else{r=await db.auth.signUp({email,password:pw})}if(r.error)throw r.error;if(mode==="signup")setErr("✅ Check your email to confirm, then log in.");else onLogin(r.data.user);}catch(e){setErr(e.message)}setLoading(false)};
@@ -225,7 +257,7 @@ function EstList({estimates,openEst,newEst,onDel}){
   return(<div style={S.pg}>
     <div style={S.ph}><div><h1 style={S.ttl}>Estimates</h1><div style={{color:"#64748b",fontSize:12}}>{estimates.length} total</div></div><button style={S.pb} onClick={newEst}><Ico n="plus" sz={13}/>New Estimate</button></div>
     <SBar val={srch} set={setSrch} ph="Search estimates..."/>
-    {f.length===0?<div style={S.emp}>No estimates found.</div>:<table style={S.tbl}><thead><tr><th style={S.th}>#</th><th style={S.th}>Customer</th><th style={S.th}>Date</th><th style={S.th}>Status</th><th style={S.th}>Signed</th><th style={S.th}>Total</th><th style={S.th}></th></tr></thead>
+    {f.length===0?<div style={S.emp}>No estimates found.</div>:<table style={S.tbl}><thead><tr><th style={S.th}>#</th><th style={S.th}>Customer</th><th style={S.th}>Date</th><th style={S.th}>Status</th><th style={S.th}>Signed</th><th style={S.th}>Views</th><th style={S.th}>Total</th><th style={S.th}></th></tr></thead>
     <tbody>{f.map(e=><tr key={e.id} className="rh"><td style={S.td} onClick={()=>openEst(e)}><span style={S.num}>#{e.number}</span></td><td style={S.td} onClick={()=>openEst(e)}>{e.customerName||"—"}</td><td style={S.td} onClick={()=>openEst(e)}>{e.date}</td><td style={S.td} onClick={()=>openEst(e)}><SBdg s={e.status}/></td><td style={S.td} onClick={()=>openEst(e)}>{e.signature?<span style={{color:"#22c55e",fontSize:11,fontWeight:700}}>✓ Signed</span>:<span style={{color:"#475569",fontSize:11}}>—</span>}</td><td style={{...S.td,color:"#4ade80",fontWeight:700}} onClick={()=>openEst(e)}>{money(cTot(e))}</td><td style={S.td}><button style={S.ib} onClick={()=>{if(confirm("Delete estimate?"))onDel(e.id)}}><Ico n="trash" sz={13}/></button></td></tr>)}</tbody></table>}
   </div>);
 }
@@ -243,6 +275,7 @@ function InvList({invoices,openInv}){
 }
 
 function EstEd({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
+  const[showSend,setShowSend]=useState(false);
   const[showC,setShowC]=useState(false);const[showT,setShowT]=useState(false);const[cs,setCs]=useState("");const[tab,setTab]=useState("items");
   const up=(f,v)=>setEst(e=>({...e,[f]:v}));
   const addItem=(tpl=null)=>{const item=tpl?{id:crypto.randomUUID(),description:tpl.description,qty:1,unit:tpl.unit,price:tpl.price}:{id:crypto.randomUUID(),description:"",qty:1,unit:"ea",price:0};setEst(e=>({...e,items:[...(e.items||[]),item]}));setShowT(false)};
@@ -256,6 +289,7 @@ function EstEd({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
       <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name}</div></div>
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
         <button style={S.gb} onClick={onCancel}><Ico n="x" sz={12}/>Cancel</button>
+        {est.shareToken&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>📤 Send</button>}
         {est.id&&<button style={{...S.pb,background:"#7c3aed"}} onClick={onConvert}><Ico n="invoice" sz={12}/>→ Invoice</button>}
         <button style={{...S.pb,background:"#1a3a5c"}} onClick={()=>window.print()} className="np"><Ico n="print" sz={12}/>Print</button>
         <button style={S.pb} onClick={()=>onSave(est)} disabled={saving}><Ico n="save" sz={12}/>{saving?"Saving...":"Save"}</button>
@@ -285,10 +319,12 @@ function EstEd({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
     {tab==="contract"&&<div style={{marginTop:12}}><div style={S.cl}>Contract / Agreement Text</div><textarea style={{...S.ta,boxSizing:"border-box",minHeight:260,fontFamily:"monospace",fontSize:11,marginTop:6}} rows={14} value={est.contractText} onChange={e=>up("contractText",e.target.value)}/></div>}
     {tab==="signature"&&<div style={{marginTop:12}}><div style={{background:"#111827",border:"1px solid #1e2d45",borderRadius:10,padding:16}}>{est.signedAt&&<div style={{marginBottom:10,padding:"8px 12px",background:"#14532d22",border:"1px solid #14532d",borderRadius:8,color:"#4ade80",fontSize:12}}>✓ Signed {new Date(est.signedAt).toLocaleString()}</div>}<SigPad value={est.signature} onChange={v=>setEst(e=>({...e,signature:v,signedAt:v?Date.now():null}))}/>{est.signature&&<div style={{marginTop:12,padding:12,background:"#0d1626",borderRadius:8,border:"1px solid #1e2d45"}}><div style={{fontSize:10,color:"#64748b",marginBottom:6}}>PREVIEW</div><img src={est.signature} alt="sig" style={{maxWidth:"100%",background:"#fff",borderRadius:6}}/></div>}</div></div>}
     {tab==="photos"&&<div style={{marginTop:12}}><PhotoGallery photos={est.photos||[]} onChange={v=>setEst(e=>({...e,photos:v}))}/></div>}
+  {showSend&&<SendModal doc={est} type="estimate" onClose={()=>setShowSend(false)}/>}
   </div>);
 }
 
 function InvEd({inv,setInv,onSave,onCancel,saving}){
+  const[showSend,setShowSend]=useState(false);
   const up=(f,v)=>setInv(i=>({...i,[f]:v}));
   const s=cSub(inv);const t=cTax(inv);const tot=cTot(inv);
   return(<div style={S.pg}>
@@ -326,6 +362,7 @@ function InvEd({inv,setInv,onSave,onCancel,saving}){
       </div>
       <div style={{marginTop:10}}><PhotoGallery photos={inv.photos||[]} onChange={v=>setInv(i=>({...i,photos:v}))}/></div>
     </div>}
+  {showSend&&<SendModal doc={inv} type="invoice" onClose={()=>setShowSend(false)}/>}
   </div>);
 }
 
@@ -363,8 +400,8 @@ function TplMgr({tpls,onSave,onDel,showToast}){
 }
 
 function NotifPanel({notifs,onMarkRead}){
-  const cc={estimate:"#3b82f6",invoice:"#f59e0b",signed:"#22c55e",paid:"#4ade80"};
-  const ci={estimate:"file",invoice:"invoice",signed:"pen",paid:"dollar"};
+  const cc={estimate:"#3b82f6",invoice:"#f59e0b",signed:"#22c55e",paid:"#4ade80",viewed:"#38bdf8",approved:"#22c55e"};
+  const ci={estimate:"file",invoice:"invoice",signed:"pen",paid:"dollar",viewed:"bell",approved:"check"};
   return(<div style={S.pg}>
     <div style={S.ph}><div><h1 style={S.ttl}>Notifications</h1><div style={{color:"#64748b",fontSize:12}}>{notifs.filter(n=>!n.read).length} unread</div></div><button style={S.gb} onClick={onMarkRead}>Mark All Read</button></div>
     {notifs.length===0?<div style={S.emp}>No activity yet.</div>:<div style={{display:"flex",flexDirection:"column",gap:8}}>{notifs.map(n=><div key={n.id} style={{...S.nc,borderLeft:`3px solid ${n.read?"transparent":(cc[n.type]||"#3b82f6")}`}}><div style={{width:32,height:32,borderRadius:"50%",background:(cc[n.type]||"#3b82f6")+"22",display:"flex",alignItems:"center",justifyContent:"center",color:cc[n.type]||"#3b82f6",flexShrink:0}}><Ico n={ci[n.type]||"bell"} sz={14}/></div><div style={{flex:1}}><div style={{fontSize:13}}>{n.message}</div><div style={{fontSize:11,color:"#64748b",marginTop:2}}>{ago(n.timestamp)}</div></div>{!n.read&&<div style={{width:8,height:8,borderRadius:"50%",background:"#3b82f6",flexShrink:0,marginTop:4}}/>}</div>)}</div>}
