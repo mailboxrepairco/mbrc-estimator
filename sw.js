@@ -1,4 +1,5 @@
-const CACHE = 'mbrc-estimator-v1';
+// Updated cache version forces fresh download
+const CACHE = 'mbrc-estimator-v3';
 const CORE = [
   '/mbrc-estimator/',
   '/mbrc-estimator/index.html',
@@ -7,14 +8,12 @@ const CORE = [
   '/mbrc-estimator/icon-512.png',
 ];
 
-// Install — cache core files
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())
   );
 });
 
-// Activate — clear old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -23,19 +22,14 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch — serve from cache first, fallback to network
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        // Only cache same-origin GET requests
-        if (e.request.method === 'GET' && e.request.url.startsWith(self.location.origin)) {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy));
-        }
-        return res;
-      }).catch(() => cached);
-    })
+    fetch(e.request).then(res => {
+      if(e.request.method === 'GET' && e.request.url.startsWith(self.location.origin)){
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
