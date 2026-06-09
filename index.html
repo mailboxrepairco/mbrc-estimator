@@ -74,7 +74,18 @@ const DB={
   async getCusts(){const{data}=await db.from("customers").select("*").order("name");return(data||[]).map(toC)},
   async saveCust(c){if(!c.id)c.id=crypto.randomUUID();const{data,error}=await db.from("customers").upsert(c).select().single();if(error)throw error;return toC(data)},
   async delCust(id){await db.from("customers").delete().eq("id",id)},
-  async getEsts(){const{data}=await db.from("estimates").select("*").order("created_at",{ascending:false});return(data||[]).map(toE)},
+  async getEsts(){
+    const{data}=await db.from("estimates").select("*").order("created_at",{ascending:false});
+    const rows=data||[];
+    // Fix any estimates missing shareToken
+    const needsFix=rows.filter(r=>!r.share_token);
+    for(const r of needsFix){
+      const token=crypto.randomUUID();
+      await db.from("estimates").update({share_token:token}).eq("id",r.id);
+      r.share_token=token;
+    }
+    return rows.map(toE);
+  },
   async saveEst(e){if(!e.id)e.id=crypto.randomUUID();const{data,error}=await db.from("estimates").upsert(frE(e)).select().single();if(error)throw error;return toE(data)},
   async delEst(id){await db.from("estimates").delete().eq("id",id)},
   async getInvs(){const{data}=await db.from("invoices").select("*").order("created_at",{ascending:false});return(data||[]).map(toI)},
@@ -522,7 +533,7 @@ function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
         <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name} &middot; <span style={{color:"#4ade80",fontSize:11}}>Auto-saving</span></div></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button style={S.gb} onClick={onCancel}><Ico n="x" sz={12}/>Cancel</button>
-          {est.id&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>}
+          <button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>
           {est.id&&<button style={{...S.pb,background:"#7c3aed"}} onClick={onConvert}><Ico n="invoice" sz={12}/>Invoice</button>}
           <button style={{...S.pb,background:"#1a3a5c"}} onClick={()=>window.print()} className="np"><Ico n="print" sz={12}/>Print</button>
           <button style={S.pb} onClick={()=>onSave(est)} disabled={saving}><Ico n="save" sz={12}/>{saving?"Saving...":"Save"}</button>
