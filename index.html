@@ -513,7 +513,7 @@ function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
   return(
     <div style={S.pg}>
       <div style={S.ph}>
-        <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name}</div></div>
+        <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name} &middot; <span style={{color:"#4ade80",fontSize:11}}>Auto-saving</span></div></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button style={S.gb} onClick={onCancel}><Ico n="x" sz={12}/>Cancel</button>
           {est.shareToken&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>}
@@ -875,9 +875,28 @@ function App(){
       try{
         const[c,e,i,t,n]=await Promise.all([DB.getCusts(),DB.getEsts(),DB.getInvs(),DB.getTpls(),DB.getNotifs()]);
         setCusts(c);setEsts(e);setInvs(i);setTpls(t);setNotifs(n);
+        // Restore last session after data loads
+        try{
+          const saved=localStorage.getItem("mbrc_session");
+          if(saved){
+            const sess=JSON.parse(saved);
+            if(sess.view)setView(sess.view);
+            if(sess.aEst)setAEst(sess.aEst);
+            if(sess.aInv)setAInv(sess.aInv);
+            if(sess.aCust)setACust(sess.aCust);
+          }
+        }catch(se){}
       }catch(err){showT("Failed to load data: "+err.message,"error");}
     })();
   },[user]);
+
+  // Auto-save session state whenever anything changes
+  useEffect(()=>{
+    if(!user)return;
+    try{
+      localStorage.setItem("mbrc_session",JSON.stringify({view,aEst,aInv,aCust}));
+    }catch(e){}
+  },[view,aEst,aInv,aCust,user]);
 
   const logout=async()=>{await db.auth.signOut();setUser(null);};
 
