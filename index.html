@@ -58,7 +58,13 @@ function cTot(d){return cSub(d)+cTax(d)}
 function ago(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
 
 const toE=r=>!r?null:({id:r.id,number:r.number,date:r.date||today(),status:r.status||"Draft",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,contractText:r.contract_text||DEF_CONTRACT,signature:r.signature||null,signedAt:r.signed_at||null,invoiceId:r.invoice_id||null,photos:r.photos||[],shareToken:r.share_token||null,viewedAt:r.viewed_at||null,viewCount:r.view_count||0});
-const frE=e=>({id:e.id,number:e.number,date:e.date,status:e.status,customer_id:e.customerId,customer_name:e.customerName,customer_phone:e.customerPhone,customer_email:e.customerEmail,customer_address:e.customerAddress,items:e.items,notes:e.notes,tax_rate:e.taxRate,contract_text:e.contractText,signature:e.signature,signed_at:e.signedAt,invoice_id:e.invoiceId,photos:e.photos||[],share_token:e.shareToken,viewed_at:e.viewedAt,view_count:e.viewCount});
+const frE=e=>{
+  const row={id:e.id,number:e.number,date:e.date,status:e.status,customer_id:e.customerId,customer_name:e.customerName,customer_phone:e.customerPhone,customer_email:e.customerEmail,customer_address:e.customerAddress,items:e.items,notes:e.notes,tax_rate:e.taxRate,contract_text:e.contractText,signature:e.signature,signed_at:e.signedAt,invoice_id:e.invoiceId,photos:e.photos||[]};
+  if(e.shareToken)row.share_token=e.shareToken;
+  if(e.viewedAt)row.viewed_at=e.viewedAt;
+  if(e.viewCount)row.view_count=e.viewCount;
+  return row;
+};
 const toI=r=>!r?null:({id:r.id,number:r.number,estimateId:r.estimate_id,estimateNumber:r.estimate_number,date:r.date||today(),dueDate:r.due_date||dueDate(),status:r.status||"Unpaid",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,paidAt:r.paid_at||null,photos:r.photos||[],shareToken:r.share_token||null,viewedAt:r.viewed_at||null,viewCount:r.view_count||0});
 const frI=i=>({id:i.id,number:i.number,estimate_id:i.estimateId,estimate_number:i.estimateNumber,date:i.date,due_date:i.dueDate,status:i.status,customer_id:i.customerId,customer_name:i.customerName,customer_phone:i.customerPhone,customer_email:i.customerEmail,customer_address:i.customerAddress,items:i.items,notes:i.notes,tax_rate:i.taxRate,paid_at:i.paidAt,photos:i.photos||[],share_token:i.shareToken,viewed_at:i.viewedAt,view_count:i.viewCount});
 const toC=r=>!r?null:({id:r.id,name:r.name||"",phone:r.phone||"",email:r.email||"",address:r.address||"",city:r.city||"",state:r.state||"TX",zip:r.zip||"",notes:r.notes||""});
@@ -93,7 +99,7 @@ async function shorten(url){
   }catch(e){}
   return url;
 }
-function viewLink(doc,type){return SHARE_BASE+"/view.html?token="+doc.shareToken+"&type="+type}
+function viewLink(doc,type){return SHARE_BASE+"/view.html?token="+(doc.shareToken||doc.id)+"&type="+type}
 
 const IC={plus:"M12 5v14M5 12h14",trash:"M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6",save:"M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2zM12 18v-6M9 15h6",edit:"M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z",user:"M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z",file:"M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6",invoice:"M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4",print:"M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z",x:"M18 6L6 18M6 6l12 12",search:"M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z",bell:"M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0",check:"M20 6L9 17l-5-5",list:"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",home:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10",pen:"M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z",dollar:"M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",logout:"M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9",gear:"M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",upload:"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"};
 const Ico=({n,sz=16})=>React.createElement("svg",{width:sz,height:sz,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round"},React.createElement("path",{d:IC[n]}));
@@ -277,7 +283,7 @@ function SendModal({doc,type,onClose}){
     setShortening(true);
     shorten(long).then(s=>{setLink(s);setShortening(false);});
   },[]);
-  if(!doc.shareToken)return <Modal title="Save First" onClose={onClose}><div style={{color:"#94a3b8",fontSize:13,padding:"8px 0"}}>Please save this {type} first, then you can send it.</div></Modal>;
+  if(!doc.id)return <Modal title="Save First" onClose={onClose}><div style={{color:"#94a3b8",fontSize:13,padding:"8px 0"}}>Please save this {type} first, then you can send it.</div></Modal>;
   const lbl=type==="estimate"?"Estimate":"Invoice";
   const tot=money(cTot(doc));
   const subj="Your "+lbl+" #"+doc.number+" from The Mailbox Repair CO";
@@ -516,7 +522,7 @@ function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
         <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name} &middot; <span style={{color:"#4ade80",fontSize:11}}>Auto-saving</span></div></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button style={S.gb} onClick={onCancel}><Ico n="x" sz={12}/>Cancel</button>
-          {est.shareToken&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>}
+          {est.id&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>}
           {est.id&&<button style={{...S.pb,background:"#7c3aed"}} onClick={onConvert}><Ico n="invoice" sz={12}/>Invoice</button>}
           <button style={{...S.pb,background:"#1a3a5c"}} onClick={()=>window.print()} className="np"><Ico n="print" sz={12}/>Print</button>
           <button style={S.pb} onClick={()=>onSave(est)} disabled={saving}><Ico n="save" sz={12}/>{saving?"Saving...":"Save"}</button>
@@ -672,7 +678,7 @@ function InvEditor({inv,setInv,onSave,onCancel,saving}){
         <div><h1 style={S.ttl}>Invoice #{inv.number}</h1>{inv.estimateNumber&&<div style={{color:"#64748b",fontSize:12}}>From Estimate #{inv.estimateNumber}</div>}</div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button style={S.gb} onClick={onCancel}><Ico n="x" sz={12}/>Cancel</button>
-          {inv.shareToken&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>}
+          {inv.id&&<button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>}
           {inv.status!=="Paid"&&<button style={{...S.pb,background:"#14532d"}} onClick={()=>setInv(i=>({...i,status:"Paid",paidAt:Date.now()}))}><Ico n="check" sz={12}/>Mark Paid</button>}
           <button style={{...S.pb,background:"#1a3a5c"}} onClick={()=>window.print()} className="np"><Ico n="print" sz={12}/>Print</button>
           <button style={S.pb} onClick={()=>onSave(inv)} disabled={saving}><Ico n="save" sz={12}/>{saving?"Saving...":"Save"}</button>
@@ -913,11 +919,15 @@ function App(){
   const saveEst=async(est)=>{
     setSaving(true);
     try{
+      // Always ensure a shareToken exists before saving
+      if(!est.shareToken) est={...est,shareToken:crypto.randomUUID()};
       const saved=await DB.saveEst(est);
       setEsts(p=>{const ex=p.find(e=>e.id===saved.id);return ex?p.map(e=>e.id===saved.id?saved:e):[...p,saved];});
+      // Update active estimate with saved data (including shareToken)
+      setAEst(saved);
       await aN(saved.signature?"signed":"estimate","Estimate #"+saved.number+" saved - "+(saved.customerName||"No customer")+" - "+money(cTot(saved)));
-      showT("Estimate saved!");
-      setView("estimates");
+      showT("Saved! Tap Send to share with customer.");
+      // Stay on estimate so user can send immediately
     }catch(err){showT(err.message,"error");}
     setSaving(false);
   };
