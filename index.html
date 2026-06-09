@@ -500,6 +500,43 @@ function InvList({invoices,openInv}){
   );
 }
 
+
+function SendPanel({doc, type}){
+  const [link, setLink] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
+  useEffect(()=>{
+    if(!doc.shareToken){setLoading(false);return;}
+    const long = SHARE_BASE+"/view.html?token="+doc.shareToken+"&type="+type;
+    shorten(long).then(s=>{setLink(s);setLoading(false);});
+  },[doc.shareToken]);
+  const copy=()=>{try{navigator.clipboard.writeText(link);}catch(e){}setCopied(true);setTimeout(()=>setCopied(false),2500);};
+  const tot = money(cTot(doc));
+  const name = doc.customerName||"there";
+  const num = doc.number;
+  const sms = "Hi "+name+", your estimate #"+num+" ("+tot+") from The Mailbox Repair CO is ready: "+link;
+  const subj = "Your Estimate #"+num+" from The Mailbox Repair CO";
+  const body = "Hi "+name+",\n\nYour estimate is ready to review:\n"+link+"\n\nTotal: "+tot+"\n\nThank you,\nThe Mailbox Repair CO\n817-592-6678";
+  if(loading) return <div style={{color:"#64748b",fontSize:13}}>Generating link...</div>;
+  return(
+    <div>
+      <div style={{marginBottom:16}}>
+        <div style={{fontSize:11,color:"#64748b",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Customer Link</div>
+        <div style={{display:"flex",gap:8}}>
+          <input readOnly value={link} onFocus={e=>e.target.select()} style={{flex:1,background:"#0d1626",border:"1px solid #1e2d45",borderRadius:6,color:"#38bdf8",padding:"8px 10px",fontSize:11,fontFamily:"monospace"}}/>
+          <button onClick={copy} style={{background:copied?"#059669":"#1e2d45",color:copied?"#fff":"#94a3b8",border:"none",borderRadius:6,padding:"8px 14px",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>{copied?"Copied!":"Copy"}</button>
+        </div>
+      </div>
+      {doc.viewCount>0&&<div style={{padding:"8px 12px",background:"#0e2a45",borderRadius:8,fontSize:12,color:"#38bdf8",marginBottom:14}}>Viewed {doc.viewCount} time{doc.viewCount!==1?"s":""}</div>}
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        <a href={"sms:"+(doc.customerPhone||"")+"?body="+encodeURIComponent(sms)} style={{background:"#059669",color:"#fff",borderRadius:8,padding:"13px 16px",fontSize:14,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>Send via Text Message</a>
+        <a href={"mailto:"+(doc.customerEmail||"")+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body)} style={{background:"#0369a1",color:"#fff",borderRadius:8,padding:"13px 16px",fontSize:14,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>Send via Email</a>
+        <a href={"https://wa.me/"+((doc.customerPhone||"").replace(/\D/g,""))+"?text="+encodeURIComponent(sms)} target="_blank" rel="noreferrer" style={{background:"#16a34a",color:"#fff",borderRadius:8,padding:"13px 16px",fontSize:14,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>Send via WhatsApp</a>
+      </div>
+    </div>
+  );
+}
+
 function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
   const[showC,setShowC]=useState(false);
   const[showT,setShowT]=useState(false);
@@ -581,11 +618,26 @@ function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
       {showSend&&<SendModal doc={est} type="estimate" onClose={()=>setShowSend(false)}/>}
 
       <div style={{display:"flex",gap:0,marginTop:16,borderBottom:"1px solid #1e2d45"}}>
-        {[["items","Line Items"],["contract","Contract"],["signature","eSignature"],["photos","Photos"]].map(([id,lbl])=>(
+        {[["items","Line Items"],["send","Send"],["contract","Contract"],["signature","eSignature"],["photos","Photos"]].map(([id,lbl])=>(
           <button key={id} style={{...S.tb,...(tab===id?S.ta2:{})}} onClick={()=>setTab(id)}>{lbl}</button>
         ))}
       </div>
 
+      {tab==="send"&&(
+        <div style={{marginTop:14}}>
+          <div style={{background:C.card,border:"1px solid "+C.border,borderRadius:12,padding:22}}>
+            <div style={{fontSize:16,fontWeight:700,color:C.text,marginBottom:6}}>Send Estimate to Customer</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:20}}>Save the estimate first, then send the link via text, email or WhatsApp.</div>
+            {est.shareToken
+              ?<SendPanel doc={est} type="estimate"/>
+              :<div>
+                <div style={{padding:"14px",background:"#1a2436",borderRadius:8,color:"#94a3b8",fontSize:13,marginBottom:14}}>Tap Save first to generate your send link.</div>
+                <button onClick={()=>onSave(est)} style={{background:"#0369a1",color:"#fff",border:"none",borderRadius:8,padding:"12px 24px",fontSize:14,fontWeight:700,cursor:"pointer",width:"100%"}}>Save &amp; Get Send Link</button>
+              </div>
+            }
+          </div>
+        </div>
+      )}
       {tab==="items"&&(
         <div style={{marginTop:12}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
@@ -1029,11 +1081,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/mbrc-estimator/sw.js')
-      .then(r => console.log('SW registered'))
-      .catch(e => console.log('SW failed:', e));
-  });
+  navigator.serviceWorker.getRegistrations().then(regs=>{regs.forEach(r=>r.unregister());});
 }
 </script>
 </body>
