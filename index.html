@@ -931,119 +931,91 @@ function NotifPanel({notifs,onMarkRead}){
 }
 
 
+
 function printDoc(doc, type) {
-  const isEst = type === "estimate";
-  const items = doc.items || [];
-  const sub = items.reduce((s,i)=>s+(parseFloat(i.qty)||0)*(parseFloat(i.price)||0),0);
-  const tax = sub * (parseFloat(doc.taxRate)||0) / 100;
-  const total = sub + tax;
-  const fmt = n => "$" + parseFloat(n||0).toFixed(2);
+  var isEst = type === "estimate";
+  var items = doc.items || [];
+  var sub = items.reduce(function(s,i){ return s+(parseFloat(i.qty)||0)*(parseFloat(i.price)||0); }, 0);
+  var tax = sub * (parseFloat(doc.taxRate)||0) / 100;
+  var total = sub + tax;
+  function fmt(n){ return "$" + parseFloat(n||0).toFixed(2); }
 
-  const rows = items.map(i => `
-    <tr>
-      <td style="padding:8px 10px;border-bottom:1px solid #ddd;font-size:13px;">
-        <div style="font-weight:500;color:#111;">${i.description||""}</div>
-        ${i.details ? `<div style="font-size:11px;color:#666;margin-top:3px;font-style:italic;">${i.details}</div>` : ""}
-      </td>
-      <td style="padding:8px 10px;border-bottom:1px solid #ddd;text-align:center;font-size:13px;">${i.qty||1}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #ddd;text-align:center;font-size:13px;">${i.unit||"ea"}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #ddd;text-align:right;font-size:13px;">${fmt(i.price)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #ddd;text-align:right;font-size:13px;font-weight:700;">${fmt((parseFloat(i.qty)||0)*(parseFloat(i.price)||0))}</td>
-    </tr>
-  `).join("");
+  var rows = items.map(function(i) {
+    var lineTotal = (parseFloat(i.qty)||0)*(parseFloat(i.price)||0);
+    var det = i.details ? '<div style="font-size:11px;color:#666;font-style:italic;margin-top:2px;">'+i.details+'</div>' : '';
+    return '<tr><td style="padding:9px 10px;border-bottom:1px solid #e5e5e5;font-size:13px;"><div>'+( i.description||'')+'</div>'+det+'</td>'
+      +'<td style="padding:9px 10px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:13px;">'+(i.qty||1)+'</td>'
+      +'<td style="padding:9px 10px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:13px;">'+(i.unit||'ea')+'</td>'
+      +'<td style="padding:9px 10px;border-bottom:1px solid #e5e5e5;text-align:right;font-size:13px;">'+fmt(i.price)+'</td>'
+      +'<td style="padding:9px 10px;border-bottom:1px solid #e5e5e5;text-align:right;font-size:13px;font-weight:700;">'+fmt(lineTotal)+'</td></tr>';
+  }).join('');
 
-  const win = window.open("", "_blank");
-  win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>${isEst?"Estimate":"Invoice"} #${doc.number} - The Mailbox Repair CO</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Segoe UI", Arial, sans-serif; color: #111; background: #fff; padding: 30px; }
-  .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 3px solid #1a2f4a; margin-bottom: 24px; }
-  .logo { height: 80px; }
-  .doc-title { text-align: right; }
-  .doc-title h1 { font-size: 26px; font-weight: 800; color: #1a2f4a; }
-  .doc-title p { font-size: 12px; color: #555; margin-top: 4px; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-  .info-box { border: 1px solid #ddd; border-radius: 6px; padding: 14px; }
-  .info-box h3 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 10px; }
-  .info-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .info-label { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; }
-  .info-value { font-size: 12px; color: #111; font-weight: 500; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
-  thead { background: #1a2f4a; }
-  thead th { padding: 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #fff; letter-spacing: 0.5px; }
-  thead th:last-child, thead th:nth-child(4) { text-align: right; }
-  thead th:nth-child(2), thead th:nth-child(3) { text-align: center; }
-  .totals { background: #f8f9fa; padding: 14px 16px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 6px 6px; }
-  .total-row { display: flex; justify-content: flex-end; gap: 40px; font-size: 13px; color: #555; margin-bottom: 4px; }
-  .grand-total { font-size: 18px; font-weight: 800; color: #1a2f4a; margin-top: 8px; padding-top: 8px; border-top: 2px solid #1a2f4a; }
-  .notes-box { margin-top: 20px; border: 1px solid #ddd; border-radius: 6px; padding: 14px; }
-  .notes-box h3 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 8px; }
-  .notes-box p { font-size: 12px; color: #333; white-space: pre-wrap; line-height: 1.6; }
-  .sig-box { margin-top: 20px; border: 1px solid #ddd; border-radius: 6px; padding: 14px; }
-  .sig-box h3 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 8px; }
-  .footer { margin-top: 30px; padding-top: 14px; border-top: 1px solid #ddd; text-align: center; font-size: 11px; color: #888; }
-  @media print {
-    body { padding: 15px; }
-    @page { margin: 1cm; size: letter; }
-  }
-</style>
-</head>
-<body>
-<div class="header">
-  <img src="${LOGO}" alt="The Mailbox Repair CO" class="logo"/>
-  <div class="doc-title">
-    <h1>${isEst ? "ESTIMATE" : "INVOICE"} #${doc.number}</h1>
-    <p>${doc.date || ""}${!isEst ? " &nbsp;&bull;&nbsp; Due: " + (doc.dueDate||"") : ""}</p>
-    <p style="margin-top:6px;font-size:13px;font-weight:700;color:${doc.status==="Approved"||doc.status==="Paid"?"#15803d":doc.status==="Declined"||doc.status==="Overdue"?"#b91c1c":"#92400e"};">${doc.status||""}</p>
-  </div>
-</div>
-<div class="info-grid">
-  <div class="info-box">
-    <h3>From</h3>
-    <div class="info-value" style="font-weight:700;margin-bottom:4px;">The Mailbox Repair CO</div>
-    <div style="font-size:12px;color:#555;">817-592-6678</div>
-    <div style="font-size:12px;color:#555;">Office@themailboxrepairco.com</div>
-    <div style="font-size:12px;color:#555;">DFW Metroplex</div>
-  </div>
-  <div class="info-box">
-    <h3>${isEst ? "Estimate For" : "Bill To"}</h3>
-    <div class="info-value" style="font-weight:700;font-size:14px;margin-bottom:4px;">${doc.customerName||"—"}</div>
-    ${doc.customerAddress ? `<div style="font-size:12px;color:#555;">${doc.customerAddress}</div>` : ""}
-    ${doc.customerPhone ? `<div style="font-size:12px;color:#555;">${doc.customerPhone}</div>` : ""}
-    ${doc.customerEmail ? `<div style="font-size:12px;color:#555;">${doc.customerEmail}</div>` : ""}
-  </div>
-</div>
-<div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;">
-  <table>
-    <thead>
-      <tr>
-        <th style="padding:10px;text-align:left;">Description</th>
-        <th style="padding:10px;text-align:center;">Qty</th>
-        <th style="padding:10px;text-align:center;">Unit</th>
-        <th style="padding:10px;text-align:right;">Price</th>
-        <th style="padding:10px;text-align:right;">Total</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <div class="totals">
-    <div class="total-row"><span>Subtotal</span><span>${fmt(sub)}</span></div>
-    <div class="total-row"><span>Tax (${doc.taxRate||0}%)</span><span>${fmt(tax)}</span></div>
-    <div class="total-row grand-total"><span>${isEst?"ESTIMATE TOTAL":"AMOUNT DUE"}</span><span>${fmt(total)}</span></div>
-  </div>
-</div>
-${doc.notes ? `<div class="notes-box"><h3>Notes</h3><p>${doc.notes}</p></div>` : ""}
-${doc.signature ? `<div class="sig-box"><h3>Customer Signature</h3><img src="${doc.signature}" style="max-width:300px;border:1px solid #ddd;border-radius:4px;background:#fff;"/><p style="font-size:11px;color:#888;margin-top:6px;">${doc.signedAt?"Signed: "+new Date(doc.signedAt).toLocaleString():""}</p></div>` : ""}
-<div class="footer">The Mailbox Repair CO &bull; 817-592-6678 &bull; Office@themailboxrepairco.com &bull; DFW Metroplex</div>
-<script>window.onload=function(){window.print();}</script>
-</body>
-</html>`);
+  var notesHtml = doc.notes
+    ? '<div style="margin-top:20px;border:1px solid #ddd;border-radius:6px;padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:8px;">Notes</div><pre style="font-size:12px;color:#333;white-space:pre-wrap;word-wrap:break-word;font-family:inherit;line-height:1.6;margin:0;">'+doc.notes+'</pre></div>'
+    : '';
+
+  var sigHtml = doc.signature
+    ? '<div style="margin-top:20px;border:1px solid #ddd;border-radius:6px;padding:16px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:8px;">Customer Signature</div><img src="'+doc.signature+'" style="max-width:280px;border:1px solid #ddd;border-radius:4px;background:#fff;"/>'+(doc.signedAt?'<div style="font-size:11px;color:#888;margin-top:6px;">Signed: '+new Date(doc.signedAt).toLocaleString()+'</div>':'')+'</div>'
+    : '';
+
+  var statusColor = (doc.status==="Approved"||doc.status==="Paid") ? "#15803d" : (doc.status==="Declined"||doc.status==="Overdue") ? "#b91c1c" : "#92400e";
+
+  var h = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<title>'+(isEst?"Estimate":"Invoice")+' #'+doc.number+' - The Mailbox Repair CO</title>'
+    + '<style>'
+    + '*{box-sizing:border-box;margin:0;padding:0}'
+    + 'body{font-family:Arial,sans-serif;color:#111;background:#fff;padding:28px;}'
+    + '.hdr{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:3px solid #1a2f4a;margin-bottom:22px;}'
+    + '.logo{height:75px;}'
+    + '.doc-num{font-size:24px;font-weight:800;color:#1a2f4a;text-align:right;}'
+    + '.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}'
+    + '.info-box{border:1px solid #ddd;border-radius:6px;padding:14px;}'
+    + '.info-box h3{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:8px;}'
+    + 'table{width:100%;border-collapse:collapse;border:1px solid #ddd;border-radius:6px;overflow:hidden;}'
+    + 'thead tr{background:#1a2f4a;}'
+    + 'thead th{padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:.5px;}'
+    + '.totals{background:#f8f9fa;padding:14px 16px;border:1px solid #ddd;border-top:none;}'
+    + '.tot-row{display:flex;justify-content:flex-end;gap:48px;font-size:13px;color:#555;margin-bottom:4px;}'
+    + '.grand{font-size:18px;font-weight:800;color:#1a2f4a;margin-top:8px;padding-top:8px;border-top:2px solid #1a2f4a;}'
+    + '.footer{margin-top:28px;padding-top:12px;border-top:1px solid #ddd;text-align:center;font-size:11px;color:#888;}'
+    + '@media print{@page{margin:1cm;size:letter}body{padding:10px;}}'
+    + '</style></head><body>'
+    + '<div class="hdr">'
+    + '<img src="'+LOGO+'" class="logo" alt="MBRC"/>'
+    + '<div>'
+    + '<div class="doc-num">'+(isEst?"ESTIMATE":"INVOICE")+' #'+doc.number+'</div>'
+    + '<div style="font-size:12px;color:#555;text-align:right;margin-top:4px;">'+(doc.date||'')+((!isEst&&doc.dueDate)?' &bull; Due: '+doc.dueDate:'')+'</div>'
+    + '<div style="font-size:13px;font-weight:700;color:'+statusColor+';text-align:right;margin-top:4px;">'+(doc.status||'')+'</div>'
+    + '</div></div>'
+    + '<div class="info-grid">'
+    + '<div class="info-box"><h3>From</h3><div style="font-weight:700;font-size:13px;margin-bottom:3px;">The Mailbox Repair CO</div><div style="font-size:12px;color:#555;">817-592-6678</div><div style="font-size:12px;color:#555;">Office@themailboxrepairco.com</div><div style="font-size:12px;color:#555;">DFW Metroplex</div></div>'
+    + '<div class="info-box"><h3>'+(isEst?"Estimate For":"Bill To")+'</h3><div style="font-weight:700;font-size:14px;margin-bottom:4px;">'+(doc.customerName||"—")+'</div>'
+    + (doc.customerAddress?'<div style="font-size:12px;color:#555;">'+doc.customerAddress+'</div>':'')
+    + (doc.customerPhone?'<div style="font-size:12px;color:#555;">'+doc.customerPhone+'</div>':'')
+    + (doc.customerEmail?'<div style="font-size:12px;color:#555;">'+doc.customerEmail+'</div>':'')
+    + '</div></div>'
+    + '<table><thead><tr>'
+    + '<th style="padding:10px;">Description</th>'
+    + '<th style="padding:10px;text-align:center;">Qty</th>'
+    + '<th style="padding:10px;text-align:center;">Unit</th>'
+    + '<th style="padding:10px;text-align:right;">Price</th>'
+    + '<th style="padding:10px;text-align:right;">Total</th>'
+    + '</tr></thead><tbody>'+rows+'</tbody></table>'
+    + '<div class="totals">'
+    + '<div class="tot-row"><span>Subtotal</span><span>'+fmt(sub)+'</span></div>'
+    + '<div class="tot-row"><span>Tax ('+( doc.taxRate||0)+'%)</span><span>'+fmt(tax)+'</span></div>'
+    + '<div class="tot-row grand"><span>'+(isEst?"ESTIMATE TOTAL":"AMOUNT DUE")+'</span><span>'+fmt(total)+'</span></div>'
+    + '</div>'
+    + notesHtml + sigHtml
+    + '<div class="footer">The Mailbox Repair CO &bull; 817-592-6678 &bull; Office@themailboxrepairco.com &bull; DFW Metroplex</div>'
+    + '<script>window.onload=function(){window.print();};<\/script>'
+    + '</body></html>';
+
+  var win = window.open("", "_blank");
+  win.document.write(h);
   win.document.close();
 }
+
 
 function App(){
   const[user,setUser]=useState(null);
