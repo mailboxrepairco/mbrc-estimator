@@ -566,8 +566,17 @@ function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
 
   return(
     <div style={S.pg}>
+      {/* Print-only header */}
+      <div className="print-header" style={{display:"none",alignItems:"center",justifyContent:"space-between",marginBottom:24,paddingBottom:16,borderBottom:"2px solid #1a2f4a"}}>
+        <img src={LOGO} alt="MBRC" style={{height:70}}/>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontSize:20,fontWeight:800,color:"#1a2f4a"}}>ESTIMATE #{est.number}</div>
+          <div style={{fontSize:11,color:"#555",marginTop:4}}>{CO.email} &middot; {CO.phone}</div>
+          <div style={{fontSize:11,color:"#555"}}>{CO.area}</div>
+        </div>
+      </div>
       <div style={S.ph}>
-        <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name} &middot; <span style={{color:"#4ade80",fontSize:11}}>Auto-saving</span></div></div>
+        <div><h1 style={S.ttl}>Estimate #{est.number}</h1><div style={{color:"#64748b",fontSize:12}}>{CO.name} &middot; <span className="auto-save-label" style={{color:"#4ade80",fontSize:11}}>Auto-saving</span></div></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button style={S.gb} onClick={onCancel}><Ico n="x" sz={12}/>Cancel</button>
           <button style={{...S.pb,background:"#059669"}} onClick={()=>setShowSend(true)}>Send</button>
@@ -703,7 +712,7 @@ function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
           </div>
           <div style={{marginTop:12}}>
             <div style={S.cl}>Notes</div>
-            <textarea style={{...S.ta,boxSizing:"border-box"}} rows={3} value={est.notes} onChange={ev=>up("notes",ev.target.value)} placeholder="Payment terms, warranty info..."/>
+            <textarea style={{...S.ta,boxSizing:"border-box",resize:"none",overflow:"hidden"}} value={est.notes} onChange={ev=>{up("notes",ev.target.value);}} onInput={ev=>{ev.target.style.height="auto";ev.target.style.height=(ev.target.scrollHeight)+"px";}} rows={4} placeholder="Payment terms, warranty info..."/>
           </div>
         </div>
       )}
@@ -737,6 +746,14 @@ function InvEditor({inv,setInv,onSave,onCancel,saving}){
   const s=cSub(inv);const t=cTax(inv);const tot=cTot(inv);
   return(
     <div style={S.pg}>
+      <div className="print-header" style={{display:"none",alignItems:"center",justifyContent:"space-between",marginBottom:24,paddingBottom:16,borderBottom:"2px solid #1a2f4a"}}>
+        <img src={LOGO} alt="MBRC" style={{height:70}}/>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontSize:20,fontWeight:800,color:"#1a2f4a"}}>INVOICE #{inv.number}</div>
+          <div style={{fontSize:11,color:"#555",marginTop:4}}>{CO.email} &middot; {CO.phone}</div>
+          <div style={{fontSize:11,color:"#555"}}>{CO.area}</div>
+        </div>
+      </div>
       <div style={S.ph}>
         <div><h1 style={S.ttl}>Invoice #{inv.number}</h1>{inv.estimateNumber&&<div style={{color:"#64748b",fontSize:12}}>From Estimate #{inv.estimateNumber}</div>}</div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
