@@ -65,24 +65,26 @@ const frE=e=>{
   if(e.viewCount)row.view_count=e.viewCount;
   return row;
 };
-const toI=r=>!r?null:({id:r.id,number:r.number,estimateId:r.estimate_id,estimateNumber:r.estimate_number,date:r.date||today(),dueDate:r.due_date||dueDate(),status:r.status||"Unpaid",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,paidAt:r.paid_at||null,photos:r.photos||[],shareToken:r.share_token||null,viewedAt:r.viewed_at||null,viewCount:r.view_count||0});
-const frI=i=>({id:i.id,number:i.number,estimate_id:i.estimateId,estimate_number:i.estimateNumber,date:i.date,due_date:i.dueDate,status:i.status,customer_id:i.customerId,customer_name:i.customerName,customer_phone:i.customerPhone,customer_email:i.customerEmail,customer_address:i.customerAddress,items:i.items,notes:i.notes,tax_rate:i.taxRate,paid_at:i.paidAt,photos:i.photos||[],share_token:i.shareToken,viewed_at:i.viewedAt,view_count:i.viewCount});
+const toI=r=>!r?null:({id:r.id,number:r.number,estimateId:r.estimate_id,estimateNumber:r.estimate_number,date:r.date||today(),dueDate:r.due_date||dueDate(),status:r.status||"Unpaid",customerId:r.customer_id,customerName:r.customer_name||"",customerPhone:r.customer_phone||"",customerEmail:r.customer_email||"",customerAddress:r.customer_address||"",items:r.items||[],notes:r.notes||"",taxRate:r.tax_rate||0,paidAt:r.paid_at||null,photos:r.photos||[],shareToken:r.share_token||null,viewedAt:r.viewed_at||null,viewCount:r.view_count||0,paymentLink:r.payment_link||""});
+const frI=i=>({id:i.id,number:i.number,estimate_id:i.estimateId,estimate_number:i.estimateNumber,date:i.date,due_date:i.dueDate,status:i.status,customer_id:i.customerId,customer_name:i.customerName,customer_phone:i.customerPhone,customer_email:i.customerEmail,customer_address:i.customerAddress,items:i.items,notes:i.notes,tax_rate:i.taxRate,paid_at:i.paidAt,photos:i.photos||[],share_token:i.shareToken,viewed_at:i.viewedAt,view_count:i.viewCount,payment_link:i.paymentLink||""});
 const toC=r=>!r?null:({id:r.id,name:r.name||"",phone:r.phone||"",email:r.email||"",address:r.address||"",city:r.city||"",state:r.state||"TX",zip:r.zip||"",notes:r.notes||""});
 const toT=r=>!r?null:({id:r.id,description:r.description||"",unit:r.unit||"ea",price:r.price||0,sortOrder:r.sort_order||0});
 
 const DB={
-  async getCusts(){const{data}=await db.from("customers").select("*").order("name");return(data||[]).map(toC)},
+  async getCusts(){const{data,error}=await db.from("customers").select("*").order("name");if(error)throw new Error("Customers: "+error.message);return(data||[]).map(toC)},
   async saveCust(c){if(!c.id)c.id=crypto.randomUUID();const{data,error}=await db.from("customers").upsert(c).select().single();if(error)throw error;return toC(data)},
   async delCust(id){await db.from("customers").delete().eq("id",id)},
   async getEsts(){
-    const{data}=await db.from("estimates").select("*").order("created_at",{ascending:false});
+    const{data,error}=await db.from("estimates").select("*").order("created_at",{ascending:false});
+    if(error)throw new Error("Estimates: "+error.message);
     const rows=data||[];
-    // Fix any estimates missing shareToken
-    const needsFix=rows.filter(r=>!r.share_token);
-    for(const r of needsFix){
-      const token=crypto.randomUUID();
-      await db.from("estimates").update({share_token:token}).eq("id",r.id);
-      r.share_token=token;
+    // Fix missing shareTokens
+    for(const r of rows){
+      if(!r.share_token){
+        const token=crypto.randomUUID();
+        await db.from("estimates").update({share_token:token}).eq("id",r.id);
+        r.share_token=token;
+      }
     }
     return rows.map(toE);
   },
@@ -362,7 +364,7 @@ function SettingsPage(){
 }
 
 function Sidebar({view,setView,newEst,newCust,unread,markRead,logout}){
-  const nav=[{id:"dashboard",l:"Dashboard",i:"home"},{id:"estimates",l:"Estimates",i:"file"},{id:"invoices",l:"Invoices",i:"invoice"},{id:"customers",l:"Customers",i:"user"},{id:"templates",l:"Price List",i:"list"},{id:"notifications",l:"Notifications",i:"bell"},{id:"settings",l:"Settings",i:"gear"}];
+  const nav=[{id:"dashboard",l:"Dashboard",i:"home"},{id:"pipeline",l:"Pipeline",i:"list"},{id:"reports",l:"Reports",i:"dollar"},{id:"estimates",l:"Estimates",i:"file"},{id:"invoices",l:"Invoices",i:"invoice"},{id:"customers",l:"Customers",i:"user"},{id:"templates",l:"Price List",i:"list"},{id:"notifications",l:"Notifications",i:"bell"},{id:"settings",l:"Settings",i:"gear"}];
   return(
     <aside style={{width:185,minHeight:"100vh",background:"#0d1626",borderRight:"1px solid #1e2d45",display:"flex",flexDirection:"column",padding:"10px 0 14px",position:"sticky",top:0,flexShrink:0}}>
       <div style={{padding:"0 10px 10px",borderBottom:"1px solid #1e2d45",marginBottom:6}}>
@@ -528,6 +530,16 @@ function SendPanel({doc, type}){
         </div>
       </div>
       {doc.viewCount>0&&<div style={{padding:"8px 12px",background:"#0e2a45",borderRadius:8,fontSize:12,color:"#38bdf8",marginBottom:14}}>Viewed {doc.viewCount} time{doc.viewCount!==1?"s":""}</div>}
+      {doc.paymentLink&&(
+        <div style={{marginBottom:14,padding:"12px 14px",background:"#1a2436",borderRadius:10,border:"1px solid #1e2d45"}}>
+          <div style={{fontSize:11,color:"#64748b",fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginBottom:8}}>Payment Link</div>
+          <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:6}}>
+            <input readOnly value={doc.paymentLink} style={{flex:1,background:"#0d1626",border:"1px solid #1e2d45",borderRadius:6,color:"#38bdf8",padding:"7px 10px",fontSize:11,fontFamily:"monospace"}} onFocus={ev=>ev.target.select()}/>
+            <button onClick={()=>{try{navigator.clipboard.writeText(doc.paymentLink);}catch(e){}}} style={{background:"#1e2d45",color:"#94a3b8",border:"none",borderRadius:6,padding:"7px 12px",fontSize:11,cursor:"pointer",fontWeight:600,whiteSpace:"nowrap"}}>Copy</button>
+          </div>
+          <div style={{fontSize:11,color:"#64748b"}}>This link is included automatically when you send via text or email.</div>
+        </div>
+      )}
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         <a href={"sms:"+(doc.customerPhone||"")+"?body="+encodeURIComponent(sms)} style={{background:"#059669",color:"#fff",borderRadius:8,padding:"13px 16px",fontSize:14,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>Send via Text Message</a>
         <a href={"mailto:"+(doc.customerEmail||"")+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body)} style={{background:"#0369a1",color:"#fff",borderRadius:8,padding:"13px 16px",fontSize:14,fontWeight:700,textDecoration:"none",textAlign:"center",display:"block"}}>Send via Email</a>
@@ -537,6 +549,221 @@ function SendPanel({doc, type}){
   );
 }
 
+
+const STAGES = ['Lead','Estimate Sent','Approved','In Progress','Completed','Follow Up'];
+const SOURCES = ['Insurance Claim','Google Search','Referral','Door Hanger','Nextdoor','Drive By','Other'];
+const ACTIVITY_TYPES = ['Call','Text','Email','Visit','Note','Follow Up','Payment'];
+const STAGE_COLORS = {'Lead':'#3b82f6','Estimate Sent':'#f59e0b','Approved':'#8b5cf6','In Progress':'#f97316','Completed':'#22c55e','Follow Up':'#ef4444'};
+
+function StageBadge({stage}){
+  const c=STAGE_COLORS[stage]||'#64748b';
+  return <span style={{background:c+'22',color:c,padding:'2px 10px',borderRadius:20,fontSize:10,fontWeight:700,border:'1px solid '+c+'44'}}>{stage||'Lead'}</span>;
+}
+
+function Pipeline({customers, onOpen}){
+  return(
+    <div style={{padding:'20px 22px',maxWidth:1060}}>
+      <div style={{marginBottom:18}}><h1 style={{fontSize:22,fontWeight:800,color:'#e2e8f0',margin:0}}>Pipeline</h1><div style={{color:'#64748b',fontSize:12}}>All customers by stage</div></div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:12}}>
+        {STAGES.map(stage=>{
+          const custs=customers.filter(c=>( c.stage||'Lead')===stage);
+          const val=custs.reduce((s,c)=>s+(c.totalSpent||0),0);
+          return(
+            <div key={stage} style={{background:'#111827',border:'1px solid #1e2d45',borderRadius:10,overflow:'hidden'}}>
+              <div style={{background:STAGE_COLORS[stage]+'22',borderBottom:'1px solid #1e2d45',padding:'10px 12px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <span style={{fontSize:11,fontWeight:700,color:STAGE_COLORS[stage]}}>{stage}</span>
+                <span style={{fontSize:11,color:'#64748b',fontWeight:600}}>{custs.length}</span>
+              </div>
+              <div style={{padding:8,display:'flex',flexDirection:'column',gap:6,maxHeight:300,overflowY:'auto'}}>
+                {custs.length===0?<div style={{color:'#475569',fontSize:11,padding:'8px 4px'}}>No customers</div>:custs.map(c=>(
+                  <div key={c.id} onClick={()=>onOpen(c)} style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:7,padding:'8px 10px',cursor:'pointer'}}>
+                    <div style={{fontWeight:700,fontSize:12,color:'#e2e8f0',marginBottom:2}}>{c.name}</div>
+                    <div style={{fontSize:11,color:'#64748b'}}>{c.phone}</div>
+                    {c.totalSpent>0&&<div style={{fontSize:11,color:'#4ade80',marginTop:2,fontWeight:600}}>${c.totalSpent.toFixed(0)} total</div>}
+                    {c.followUpDate&&<div style={{fontSize:10,color:'#f59e0b',marginTop:2}}>Follow up: {c.followUpDate}</div>}
+                  </div>
+                ))}
+              </div>
+              {val>0&&<div style={{padding:'6px 12px',borderTop:'1px solid #1e2d45',fontSize:11,color:'#4ade80',fontWeight:600}}>${val.toFixed(0)} total</div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CustomerProfile({cust, setCust, estimates, invoices, onSave, onCancel, onNewEst, saving}){
+  const [tab,setTab]=useState('info');
+  const [activities,setActivities]=useState([]);
+  const [newNote,setNewNote]=useState('');
+  const [actType,setActType]=useState('Note');
+  const [loadingActs,setLoadingActs]=useState(false);
+  const up=(k,v)=>setCust(c=>({...c,[k]:v}));
+
+  const custEsts=estimates.filter(e=>e.customerId===cust.id);
+  const custInvs=invoices.filter(i=>i.customerId===cust.id);
+  const totalSpent=custInvs.filter(i=>i.status==='Paid').reduce((s,i)=>{
+    const t=(i.items||[]).reduce((x,li)=>x+(parseFloat(li.qty)||0)*(parseFloat(li.price)||0),0);
+    return s+t;
+  },0);
+
+  useEffect(()=>{
+    if(tab==='activity'&&cust.id){
+      setLoadingActs(true);
+      DB.getActivities(cust.id).then(a=>{setActivities(a);setLoadingActs(false);}).catch(()=>setLoadingActs(false));
+    }
+  },[tab,cust.id]);
+
+  const addAct=async()=>{
+    if(!newNote.trim())return;
+    try{
+      const a=await DB.addActivity(cust.id,actType,newNote);
+      setActivities(prev=>[a,...prev]);
+      setNewNote('');
+    }catch(e){}
+  };
+
+  const delAct=async(id)=>{
+    await DB.delActivity(id);
+    setActivities(prev=>prev.filter(a=>a.id!==id));
+  };
+
+  const typeIcon={'Call':'📞','Text':'💬','Email':'📧','Visit':'🏠','Note':'📝','Follow Up':'🔔','Payment':'💰'};
+
+  return(
+    <div style={{padding:'20px 22px',maxWidth:1060}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16,flexWrap:'wrap',gap:8}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:48,height:48,borderRadius:'50%',background:'#0e3a5c',color:'#38bdf8',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:20,flexShrink:0}}>{(cust.name||'?')[0].toUpperCase()}</div>
+          <div>
+            <h1 style={{fontSize:22,fontWeight:800,color:'#e2e8f0',margin:0}}>{cust.name||'New Customer'}</h1>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginTop:4}}><StageBadge stage={cust.stage}/>{cust.leadSource&&<span style={{fontSize:11,color:'#64748b'}}>{cust.leadSource}</span>}</div>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <button onClick={onCancel} style={{background:'transparent',color:'#94a3b8',border:'1px solid #1e2d45',borderRadius:7,padding:'8px 12px',fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}>Cancel</button>
+          <button onClick={()=>onNewEst(cust)} style={{background:'#7c3aed',color:'#fff',border:'none',borderRadius:7,padding:'8px 14px',fontSize:12,fontWeight:600,cursor:'pointer'}}>+ New Estimate</button>
+          <button onClick={()=>onSave({...cust,totalSpent})} disabled={saving} style={{background:'#0369a1',color:'#fff',border:'none',borderRadius:7,padding:'8px 14px',fontSize:12,fontWeight:600,cursor:'pointer'}}>{saving?'Saving...':'Save'}</button>
+        </div>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:10,marginBottom:16}}>
+        {[{l:'Estimates',v:custEsts.length,c:'#8b5cf6'},{l:'Invoices',v:custInvs.length,c:'#f59e0b'},{l:'Total Spent',v:'$'+(totalSpent).toFixed(0),c:'#22c55e'},{l:'Stage',v:cust.stage||'Lead',c:STAGE_COLORS[cust.stage||'Lead']}].map(s=>(
+          <div key={s.l} style={{background:'#111827',border:'1px solid #1e2d45',borderRadius:8,padding:'10px 12px',borderTop:'2px solid '+s.c}}>
+            <div style={{fontSize:16,fontWeight:800,color:s.c}}>{s.v}</div>
+            <div style={{fontSize:10,color:'#64748b',marginTop:2}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{display:'flex',borderBottom:'1px solid #1e2d45',marginBottom:0}}>
+        {[['info','Info'],['activity','Activity'],['history','Job History']].map(([id,lbl])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{background:'none',border:'none',borderBottom:'2px solid '+(tab===id?'#38bdf8':'transparent'),color:tab===id?'#38bdf8':'#94a3b8',padding:'10px 16px',fontSize:12,fontWeight:600,cursor:'pointer'}}>{lbl}</button>
+        ))}
+      </div>
+
+      {tab==='info'&&(
+        <div style={{marginTop:14}}>
+          <div style={{background:'#111827',border:'1px solid #1e2d45',borderRadius:10,padding:16,marginBottom:14}}>
+            <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',color:'#64748b',letterSpacing:1,marginBottom:12}}>Contact Info</div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:8}}>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:2,minWidth:100}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Full Name</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.name} onChange={e=>up('name',e.target.value)} placeholder="John Smith"/></div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:100}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Phone</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.phone} onChange={e=>up('phone',e.target.value)} placeholder="(817) 555-5555"/></div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:100}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Email</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.email} onChange={e=>up('email',e.target.value)} placeholder="john@email.com"/></div>
+            </div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:3,minWidth:100}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Street</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.address} onChange={e=>up('address',e.target.value)} placeholder="1234 Oak St"/></div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:80}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>City</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.city} onChange={e=>up('city',e.target.value)} placeholder="Dallas"/></div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,minWidth:60,maxWidth:70}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>State</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.state} onChange={e=>up('state',e.target.value)}/></div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,minWidth:70,maxWidth:85}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Zip</label><input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.zip} onChange={e=>up('zip',e.target.value)} placeholder="75001"/></div>
+            </div>
+          </div>
+          <div style={{background:'#111827',border:'1px solid #1e2d45',borderRadius:10,padding:16}}>
+            <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',color:'#64748b',letterSpacing:1,marginBottom:12}}>CRM Info</div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:8}}>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:130}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Stage</label>
+                <select style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.stage||'Lead'} onChange={e=>up('stage',e.target.value)}>
+                  {STAGES.map(s=><option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:130}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Lead Source</label>
+                <select style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.leadSource||''} onChange={e=>up('leadSource',e.target.value)}>
+                  <option value="">Select source...</option>
+                  {SOURCES.map(s=><option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1,minWidth:130}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Follow Up Date</label>
+                <input type="date" style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 9px',fontSize:12,width:'100%',outline:'none'}} value={cust.followUpDate||''} onChange={e=>up('followUpDate',e.target.value)}/>
+              </div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:4}}><label style={{fontSize:10,color:'#64748b',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Notes</label>
+              <textarea style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'8px 10px',fontSize:12,resize:'vertical',width:'100%',fontFamily:'inherit',outline:'none',minHeight:60}} value={cust.notes} onChange={e=>up('notes',e.target.value)} placeholder="HOA, gate code, special instructions..."/>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab==='activity'&&(
+        <div style={{marginTop:14}}>
+          <div style={{background:'#111827',border:'1px solid #1e2d45',borderRadius:10,padding:14,marginBottom:14}}>
+            <div style={{display:'flex',gap:8,marginBottom:10,flexWrap:'wrap'}}>
+              <select style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 10px',fontSize:12,outline:'none'}} value={actType} onChange={e=>setActType(e.target.value)}>
+                {ACTIVITY_TYPES.map(t=><option key={t}>{t}</option>)}
+              </select>
+              <input style={{background:'#0d1626',border:'1px solid #1e2d45',borderRadius:6,color:'#e2e8f0',padding:'7px 10px',fontSize:12,flex:1,minWidth:150,outline:'none'}} value={newNote} onChange={e=>setNewNote(e.target.value)} placeholder="Add a note..." onKeyDown={e=>e.key==='Enter'&&addAct()}/>
+              <button onClick={addAct} style={{background:'#0369a1',color:'#fff',border:'none',borderRadius:6,padding:'7px 16px',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>+ Add</button>
+            </div>
+          </div>
+          {loadingActs?<div style={{color:'#64748b',fontSize:13}}>Loading...</div>:activities.length===0?<div style={{color:'#475569',fontSize:13}}>No activity yet. Log your first interaction above.</div>:
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {activities.map(a=>(
+                <div key={a.id} style={{background:'#111827',border:'1px solid #1e2d45',borderRadius:10,padding:'12px 14px',display:'flex',alignItems:'flex-start',gap:10}}>
+                  <span style={{fontSize:18,flexShrink:0}}>{typeIcon[a.type]||'📝'}</span>
+                  <div style={{flex:1}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                      <span style={{fontSize:11,fontWeight:700,color:'#38bdf8',textTransform:'uppercase'}}>{a.type}</span>
+                      <span style={{fontSize:11,color:'#475569'}}>{a.date}</span>
+                    </div>
+                    <div style={{fontSize:13,color:'#e2e8f0'}}>{a.note}</div>
+                  </div>
+                  <button onClick={()=>delAct(a.id)} style={{background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:16,padding:'0 4px',flexShrink:0}}>x</button>
+                </div>
+              ))}
+            </div>
+          }
+        </div>
+      )}
+
+      {tab==='history'&&(
+        <div style={{marginTop:14}}>
+          {custEsts.length===0&&custInvs.length===0?<div style={{color:'#475569',fontSize:13}}>No job history yet.</div>:<>
+            {custEsts.length>0&&<>
+              <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',color:'#94a3b8',letterSpacing:.5,marginBottom:10}}>Estimates</div>
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:12,marginBottom:18}}>
+                <thead><tr>{['#','Date','Status','Total'].map(h=><th key={h} style={{textAlign:'left',padding:'7px 10px',color:'#64748b',fontSize:10,textTransform:'uppercase',borderBottom:'1px solid #1e2d45'}}>{h}</th>)}</tr></thead>
+                <tbody>{custEsts.map(e=>{
+                  const t=(e.items||[]).reduce((s,i)=>s+(parseFloat(i.qty)||0)*(parseFloat(i.price)||0),0);
+                  return<tr key={e.id}><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e',color:'#38bdf8',fontFamily:'monospace',fontWeight:700}}>#{e.number}</td><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e',color:'#94a3b8'}}>{e.date}</td><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e'}}><span style={{background:(e.status==='Approved'?'#22c55e':'#3b82f6')+'22',color:e.status==='Approved'?'#22c55e':'#3b82f6',padding:'2px 8px',borderRadius:20,fontSize:10,fontWeight:700}}>{e.status}</span></td><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e',color:'#4ade80',fontWeight:700}}>${t.toFixed(2)}</td></tr>;
+                })}</tbody>
+              </table>
+            </>}
+            {custInvs.length>0&&<>
+              <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',color:'#94a3b8',letterSpacing:.5,marginBottom:10}}>Invoices</div>
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+                <thead><tr>{['#','Date','Status','Total'].map(h=><th key={h} style={{textAlign:'left',padding:'7px 10px',color:'#64748b',fontSize:10,textTransform:'uppercase',borderBottom:'1px solid #1e2d45'}}>{h}</th>)}</tr></thead>
+                <tbody>{custInvs.map(i=>{
+                  const t=(i.items||[]).reduce((s,li)=>s+(parseFloat(li.qty)||0)*(parseFloat(li.price)||0),0);
+                  return<tr key={i.id}><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e',color:'#fb923c',fontFamily:'monospace',fontWeight:700}}>#{i.number}</td><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e',color:'#94a3b8'}}>{i.date}</td><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e'}}><span style={{background:(i.status==='Paid'?'#22c55e':'#f59e0b')+'22',color:i.status==='Paid'?'#22c55e':'#f59e0b',padding:'2px 8px',borderRadius:20,fontSize:10,fontWeight:700}}>{i.status}</span></td><td style={{padding:'9px 10px',borderBottom:'1px solid #161f2e',color:'#4ade80',fontWeight:700}}>${t.toFixed(2)}</td></tr>;
+                })}</tbody>
+              </table>
+            </>}
+          </>}
+        </div>
+      )}
+    </div>
+  );
+}
 function EstEditor({est,setEst,custs,tpls,onSave,onConvert,onCancel,saving}){
   const[showC,setShowC]=useState(false);
   const[showT,setShowT]=useState(false);
@@ -1017,6 +1244,184 @@ function printDoc(doc, type) {
 }
 
 
+
+function Reports({ estimates, invoices, customers }) {
+  // ── Key Metrics ─────────────────────────────────────────────────────────────
+  const paidInvs = invoices.filter(i => i.status === 'Paid');
+  const unpaidInvs = invoices.filter(i => i.status === 'Unpaid');
+  const invTotal = inv => (inv.items||[]).reduce((s,i)=>(s+(parseFloat(i.qty)||0)*(parseFloat(i.price)||0)),0);
+  const totalRevenue = paidInvs.reduce((s,i)=>s+invTotal(i),0);
+  const totalOutstanding = unpaidInvs.reduce((s,i)=>s+invTotal(i),0);
+  const approved = estimates.filter(e=>e.status==='Approved').length;
+  const convRate = estimates.length > 0 ? Math.round((approved/estimates.length)*100) : 0;
+  const avgJob = paidInvs.length > 0 ? totalRevenue / paidInvs.length : 0;
+
+  // ── Monthly Revenue (last 6 months) ─────────────────────────────────────────
+  const months = [];
+  for(let i=5; i>=0; i--){
+    const d = new Date();
+    d.setMonth(d.getMonth()-i);
+    months.push({ label: d.toLocaleString('default',{month:'short'}), year: d.getFullYear(), month: d.getMonth() });
+  }
+  const monthlyData = months.map(m => {
+    const rev = paidInvs.filter(inv => {
+      if(!inv.date) return false;
+      const d = new Date(inv.date);
+      return d.getMonth()===m.month && d.getFullYear()===m.year;
+    }).reduce((s,inv)=>s+invTotal(inv),0);
+    return { ...m, rev };
+  });
+  const maxRev = Math.max(...monthlyData.map(m=>m.rev), 1);
+
+  // ── Top Customers ────────────────────────────────────────────────────────────
+  const custSpend = customers.map(c => {
+    const spent = paidInvs.filter(i=>i.customerId===c.id).reduce((s,i)=>s+invTotal(i),0);
+    const jobs = invoices.filter(i=>i.customerId===c.id).length;
+    return { ...c, spent, jobs };
+  }).filter(c=>c.spent>0).sort((a,b)=>b.spent-a.spent).slice(0,5);
+
+  // ── Lead Source Breakdown ────────────────────────────────────────────────────
+  const srcMap = {};
+  customers.forEach(c=>{
+    const src = c.leadSource||'Unknown';
+    srcMap[src] = (srcMap[src]||0)+1;
+  });
+  const srcData = Object.entries(srcMap).sort((a,b)=>b[1]-a[1]);
+  const totalCusts = customers.length||1;
+
+  // ── Stage Summary ────────────────────────────────────────────────────────────
+  const stageMap = {};
+  customers.forEach(c=>{ const s=c.stage||'Lead'; stageMap[s]=(stageMap[s]||0)+1; });
+
+  const fmt = n => '$'+parseFloat(n||0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  const fmtFull = n => '$'+parseFloat(n||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+
+  const cardStyle = {background:'#111827',border:'1px solid #1e2d45',borderRadius:10,padding:16};
+  const secTitle = {fontSize:12,fontWeight:700,textTransform:'uppercase',color:'#94a3b8',letterSpacing:.5,marginBottom:14};
+
+  return(
+    <div style={{padding:'20px 22px',maxWidth:1060}}>
+      <div style={{marginBottom:18}}>
+        <h1 style={{fontSize:22,fontWeight:800,color:'#e2e8f0',margin:0}}>Revenue Reports</h1>
+        <div style={{color:'#64748b',fontSize:12}}>Business performance overview</div>
+      </div>
+
+      {/* Key Metrics */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:12,marginBottom:22}}>
+        {[
+          {l:'Total Revenue',v:fmtFull(totalRevenue),c:'#22c55e',sub:'All time collected'},
+          {l:'Outstanding',v:fmtFull(totalOutstanding),c:'#ef4444',sub:'Unpaid invoices'},
+          {l:'Avg Job Value',v:fmt(avgJob),c:'#38bdf8',sub:'Per paid invoice'},
+          {l:'Conversion Rate',v:convRate+'%',c:'#8b5cf6',sub:'Estimates approved'},
+          {l:'Total Customers',v:customers.length,c:'#f59e0b',sub:'In database'},
+          {l:'Jobs Completed',v:paidInvs.length,c:'#4ade80',sub:'Paid invoices'},
+        ].map(s=>(
+          <div key={s.l} style={{...cardStyle,borderTop:'3px solid '+s.c}}>
+            <div style={{fontSize:20,fontWeight:800,color:s.c}}>{s.v}</div>
+            <div style={{fontSize:11,color:'#e2e8f0',marginTop:2,fontWeight:600}}>{s.l}</div>
+            <div style={{fontSize:10,color:'#64748b',marginTop:1}}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+
+        {/* Monthly Revenue Chart */}
+        <div style={cardStyle}>
+          <div style={secTitle}>Monthly Revenue (Last 6 Months)</div>
+          {totalRevenue===0
+            ?<div style={{color:'#475569',fontSize:13,padding:'20px 0',textAlign:'center'}}>No paid invoices yet.</div>
+            :<div style={{display:'flex',alignItems:'flex-end',gap:8,height:140,paddingBottom:24,position:'relative'}}>
+              {monthlyData.map((m,i)=>{
+                const h = maxRev > 0 ? Math.max((m.rev/maxRev)*120, m.rev>0?8:0) : 0;
+                return(
+                  <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
+                    <div style={{fontSize:10,color:'#4ade80',fontWeight:700,marginBottom:3,height:16}}>{m.rev>0?fmt(m.rev):''}</div>
+                    <div style={{width:'100%',background:m.rev>0?'#22c55e':'#1e2d45',borderRadius:'4px 4px 0 0',height:h+'px',minHeight:m.rev>0?8:0,transition:'height .3s'}}/>
+                    <div style={{fontSize:10,color:'#64748b',marginTop:5,fontWeight:600}}>{m.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+          }
+        </div>
+
+        {/* Top Customers */}
+        <div style={cardStyle}>
+          <div style={secTitle}>Top Customers by Revenue</div>
+          {custSpend.length===0
+            ?<div style={{color:'#475569',fontSize:13}}>No paid invoices yet.</div>
+            :<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {custSpend.map((c,i)=>(
+                <div key={c.id} style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{width:22,height:22,borderRadius:'50%',background:'#0e3a5c',color:'#38bdf8',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0}}>{i+1}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:600,color:'#e2e8f0',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.name}</div>
+                    <div style={{fontSize:11,color:'#64748b'}}>{c.jobs} job{c.jobs!==1?'s':''}</div>
+                  </div>
+                  <div style={{fontSize:13,fontWeight:700,color:'#4ade80',flexShrink:0}}>{fmtFull(c.spent)}</div>
+                </div>
+              ))}
+            </div>
+          }
+        </div>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+
+        {/* Lead Source Breakdown */}
+        <div style={cardStyle}>
+          <div style={secTitle}>Lead Sources</div>
+          {srcData.length===0||( srcData.length===1&&srcData[0][0]==='Unknown')
+            ?<div style={{color:'#475569',fontSize:13}}>No lead sources set. Add them in customer profiles.</div>
+            :<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {srcData.filter(([k])=>k!=='Unknown').map(([src,count])=>{
+                const pct = Math.round((count/totalCusts)*100);
+                return(
+                  <div key={src}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <span style={{fontSize:12,color:'#e2e8f0'}}>{src}</span>
+                      <span style={{fontSize:12,color:'#38bdf8',fontWeight:700}}>{count} ({pct}%)</span>
+                    </div>
+                    <div style={{background:'#1e2d45',borderRadius:4,height:6}}>
+                      <div style={{background:'#38bdf8',borderRadius:4,height:6,width:pct+'%'}}/>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          }
+        </div>
+
+        {/* Pipeline Stage Summary */}
+        <div style={cardStyle}>
+          <div style={secTitle}>Pipeline Summary</div>
+          {Object.keys(stageMap).length===0
+            ?<div style={{color:'#475569',fontSize:13}}>No customers yet.</div>
+            :<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {Object.entries(stageMap).map(([stage,count])=>{
+                const pct = Math.round((count/totalCusts)*100);
+                const col = {Lead:'#3b82f6','Estimate Sent':'#f59e0b',Approved:'#8b5cf6','In Progress':'#f97316',Completed:'#22c55e','Follow Up':'#ef4444'}[stage]||'#64748b';
+                return(
+                  <div key={stage}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <span style={{fontSize:12,color:'#e2e8f0'}}>{stage}</span>
+                      <span style={{fontSize:12,fontWeight:700,color:col}}>{count} customer{count!==1?'s':''}</span>
+                    </div>
+                    <div style={{background:'#1e2d45',borderRadius:4,height:6}}>
+                      <div style={{background:col,borderRadius:4,height:6,width:pct+'%'}}/>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App(){
   const[user,setUser]=useState(null);
   const[booting,setBooting]=useState(true);
@@ -1044,24 +1449,30 @@ function App(){
 
   useEffect(()=>{
     if(!user)return;
-    (async()=>{
-      try{
-        const[c,e,i,t,n]=await Promise.all([DB.getCusts(),DB.getEsts(),DB.getInvs(),DB.getTpls(),DB.getNotifs()]);
-        setCusts(c);setEsts(e);setInvs(i);setTpls(t);setNotifs(n);
-        // Restore last session after data loads
-        try{
-          const saved=localStorage.getItem("mbrc_session");
-          if(saved){
-            const sess=JSON.parse(saved);
-            if(sess.view)setView(sess.view);
-            if(sess.aEst)setAEst(sess.aEst);
-            if(sess.aInv)setAInv(sess.aInv);
-            if(sess.aCust)setACust(sess.aCust);
-          }
-        }catch(se){}
-      }catch(err){showT("Failed to load data: "+err.message,"error");}
-    })();
+    loadData();
   },[user]);
+
+  const loadData=async()=>{
+    try{
+      const[c,e,i,t,n]=await Promise.all([
+        DB.getCusts().catch(err=>{console.error("custs:",err);return[];}),
+        DB.getEsts().catch(err=>{console.error("ests:",err);return[];}),
+        DB.getInvs().catch(err=>{console.error("invs:",err);return[];}),
+        DB.getTpls().catch(err=>{console.error("tpls:",err);return DEFAULT_TEMPLATES;}),
+        DB.getNotifs().catch(err=>{console.error("notifs:",err);return[];})
+      ]);
+      setCusts(c);setEsts(e);setInvs(i);setTpls(t.length>0?t:DEFAULT_TEMPLATES);setNotifs(n);
+      if(e.length===0&&c.length===0){
+        showT("Connected but no data found. If you have existing data, check your Supabase connection.","error");
+      }
+      try{
+        const saved=localStorage.getItem("mbrc_session");
+        if(saved){const sess=JSON.parse(saved);if(sess.view)setView(sess.view);if(sess.aEst)setAEst(sess.aEst);if(sess.aInv)setAInv(sess.aInv);}
+      }catch(se){}
+    }catch(err){
+      showT("Load failed: "+err.message,"error");
+    }
+  };
 
   // Auto-save session state whenever anything changes
   useEffect(()=>{
@@ -1165,7 +1576,7 @@ function App(){
       {showImport&&<ImportModal onImport={reloadAll} onClose={()=>setShowImport(false)}/>}
       <Sidebar view={view} setView={setView} newEst={()=>newEst()} newCust={newCust} unread={unread} markRead={markRead} logout={logout}/>
       <main style={{flex:1,overflowY:"auto"}}>
-        {view==="dashboard"&&<Dashboard estimates={ests} invoices={invs} customers={custs} openEst={openEst} openInv={openInv} newEst={newEst} onImport={()=>setShowImport(true)}/>}
+        {view==="dashboard"&&<Dashboard estimates={ests} invoices={invs} customers={custs} openEst={openEst} openInv={openInv} newEst={newEst} onImport={()=>setShowImport(true)} onReload={loadData}/>}
         {view==="estimates"&&<EstList estimates={ests} openEst={openEst} newEst={newEst} onDel={delEst}/>}
         {view==="invoices"&&<InvList invoices={invs} openInv={openInv}/>}
         {view==="customers"&&<CustList custs={custs} openC={openCust} newC={newCust} newEstFor={newEst} onDel={delCust}/>}
