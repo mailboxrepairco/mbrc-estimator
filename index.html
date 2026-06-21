@@ -1328,6 +1328,123 @@ canEdit&&h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,paddin
 );
 }
 
+// ── TEAM ──────────────────────────────────────────────────────────────────
+function Team({profile}){
+const [people,setPeople]=useState([]);
+const [loading,setLoading]=useState(true);
+const [showInvite,setShowInvite]=useState(false);
+const [inviteEmail,setInviteEmail]=useState('');
+const [inviteName,setInviteName]=useState('');
+const [inviteRole,setInviteRole]=useState('crew');
+const [sending,setSending]=useState(false);
+const [msg,setMsg]=useState('');
+
+const appUrl='https://mailboxrepairco.github.io/mbrc-estimator';
+
+function load(){
+setLoading(true);
+sb.from('profiles').select('*').order('name').then(r=>{
+setPeople(r.data||[]);
+setLoading(false);
+});
+}
+useEffect(()=>{load();},[]);
+
+async function setRole(pid,role){
+await sb.from('profiles').update({role}).eq('id',pid);
+load();
+}
+
+async function sendInvite(){
+if(!inviteEmail){setMsg('Enter an email address.');return;}
+setSending(true);setMsg('');
+try{
+// Send invite via Supabase auth
+const {error}=await sb.auth.admin?sb.auth.admin.inviteUserByEmail(inviteEmail,{data:{name:inviteName,role:inviteRole}}):await sb.auth.signInWithOtp({email:inviteEmail,options:{emailRedirectTo:appUrl,data:{name:inviteName,role:inviteRole}}});
+if(error)throw error;
+setMsg('✅ Invite sent to '+inviteEmail+'! They will get an email to join.');
+setInviteEmail('');setInviteName('');
+}catch(e){
+// Fallback: generate a sharable link to send manually
+setMsg('');
+setShowInvite(false);
+const smsText='Hi '+inviteName+', you\'ve been invited to join The Mailbox Repair CO team app. Sign up here: '+appUrl+' — Use your email and create a password. Your role will be set to '+inviteRole+' once you sign in.';
+const smsUrl='sms:'+encodeURIComponent(inviteEmail.includes('@')?'':''+inviteEmail)+'?body='+encodeURIComponent(smsText);
+window.open('sms:?body='+encodeURIComponent(smsText));
+}
+setSending(false);
+}
+
+function shareLink(method){
+const text='You\'ve been invited to join The Mailbox Repair CO team app!\n\nSign up at: '+appUrl+'\n\nCreate an account with your email and password. Your role will be set once you log in.';
+if(method==='sms') window.open('sms:?body='+encodeURIComponent(text));
+if(method==='whatsapp') window.open('https://wa.me/?text='+encodeURIComponent(text));
+if(method==='copy'){navigator.clipboard&&navigator.clipboard.writeText(appUrl);mbrcAlert('App link copied! Share it with your team member.');}
+}
+
+if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
+
+return h('div',{className:'content'},
+h('div',{className:'section-header'},
+h('h2',{className:'section-title'},'Team ('+people.length+')'),
+h('button',{className:'btn btn-primary btn-sm',onClick:()=>{setShowInvite(!showInvite);setMsg('');}},'+ Invite')
+),
+
+showInvite&&h('div',{className:'card',style:{marginBottom:16}},
+h('div',{className:'card-title'},'Invite Team Member'),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Their Name'),
+h('input',{className:'input',placeholder:'John Smith',value:inviteName,onChange:e=>setInviteName(e.target.value)})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Role'),
+h('select',{className:'input',value:inviteRole,onChange:e=>setInviteRole(e.target.value)},
+h('option',{value:'crew'},'Crew — Can view & update assigned jobs'),
+h('option',{value:'manager'},'Manager — Can create estimates, invoices, assign jobs'),
+h('option',{value:'owner'},'Owner — Full access')
+)
+),
+h('div',{className:'card-title',style:{marginTop:12}},'Send Invite Via'),
+h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:12}},
+h('button',{className:'btn btn-ghost',style:{flexDirection:'column',gap:4,padding:'12px 8px'},onClick:()=>shareLink('sms')},
+h('div',{style:{fontSize:22}},'💬'),h('div',{style:{fontSize:11}},'Text')
+),
+h('button',{className:'btn btn-ghost',style:{flexDirection:'column',gap:4,padding:'12px 8px'},onClick:()=>shareLink('whatsapp')},
+h('div',{style:{fontSize:22}},'📱'),h('div',{style:{fontSize:11}},'WhatsApp')
+),
+h('button',{className:'btn btn-ghost',style:{flexDirection:'column',gap:4,padding:'12px 8px'},onClick:()=>shareLink('copy')},
+h('div',{style:{fontSize:22}},'🔗'),h('div',{style:{fontSize:11}},'Copy Link')
+)
+),
+h('div',{className:'alert alert-info',style:{fontSize:12}},
+'They sign up at the app link with their email. Once they log in, set their role below.'
+),
+msg&&h('div',{className:'alert alert-success',style:{fontSize:13}},msg)
+),
+
+people.length===0?h('div',{className:'empty'},
+h('div',{className:'empty-icon'},'👥'),
+h('div',null,'No team members yet'),
+h('div',{style:{fontSize:12,color:'#94a3b8',marginTop:6}},'Invite your crew using the button above')
+):
+people.map(p=>h('div',{key:p.id,className:'card',style:{marginBottom:8}},
+h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+h('div',null,
+h('div',{style:{fontWeight:700,fontSize:15}},p.name||'(no name)'),
+h('div',{style:{fontSize:12,color:'#64748b',marginTop:2}},p.email||''),
+p.id===profile.id&&h('span',{style:{fontSize:10,color:'#2563eb',fontWeight:600}},' (You)')
+),
+p.id!==profile.id?h('select',{className:'input',value:p.role||'crew',onChange:e=>setRole(p.id,e.target.value),style:{width:110,fontSize:12}},
+h('option',{value:'crew'},'Crew'),
+h('option',{value:'manager'},'Manager'),
+h('option',{value:'owner'},'Owner')
+):h('span',{className:'badge badge-approved'},'Owner')
+)
+))
+);
+}
+
+
 // ── MAIN APP ──────────────────────────────────────────────────────────────
 function App({profile,onLogout}){
 const isMgr=profile.role==='owner'||profile.role==='manager';
