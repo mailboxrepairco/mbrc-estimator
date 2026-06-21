@@ -1121,8 +1121,11 @@ if(loading||!job) return h('div',{className:'content'},h('div',{className:'loadi
 
 async function save(updates){
 setSaving(true);
-await sb.from('jobs').update(updates).eq('id',id);
-refresh();
+try{
+const res=await sb.from('jobs').update(updates).eq('id',id).select().single();
+if(res.error)throw res.error;
+setJob(res.data);
+}catch(e){console.error('Save error:',e);}
 setSaving(false);
 }
 
@@ -1132,33 +1135,51 @@ const person=crew.find(c=>c.id===personId);
 await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'assigned'});
 }
 
-async function addPhoto(file){
-if(!file)return;
-setUploading(true);
-try{
-const compressed=await new Promise((res,rej)=>{
+function compressImage(file){
+return new Promise((res,rej)=>{
 const reader=new FileReader();
 reader.onload=ev=>{
 const img=new Image();
 img.onload=()=>{
+try{
 const MAX=900;
-const r=Math.min(MAX/img.width,MAX/img.height,1);
+const ratio=Math.min(MAX/img.width,MAX/img.height,1);
 const c=document.createElement('canvas');
-c.width=img.width*r;c.height=img.height*r;
-c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-res(c.toDataURL('image/jpeg',0.75));
+c.width=Math.round(img.width*ratio);
+c.height=Math.round(img.height*ratio);
+const ctx=c.getContext('2d');
+if(!ctx){rej(new Error('Canvas not supported'));return;}
+ctx.drawImage(img,0,0,c.width,c.height);
+res(c.toDataURL('image/jpeg',0.72));
+}catch(err){rej(err);}
 };
-img.onerror=rej;
+img.onerror=()=>rej(new Error('Image failed to load'));
 img.src=ev.target.result;
 };
-reader.onerror=rej;
+reader.onerror=()=>rej(new Error('File read failed'));
 reader.readAsDataURL(file);
 });
-const photos=Array.isArray(job.photos)?[...job.photos]:[];
-photos.push({id:Date.now().toString(),data:compressed,phase,caption,by:profile.name||profile.email,ts:new Date().toISOString()});
-await save({photos});
+}
+
+async function addPhotos(files){
+if(!files||!files.length)return;
+setUploading(true);
+const fileArr=Array.from(files);
+let current=Array.isArray(job.photos)?[...job.photos]:[];
+let failed=0;
+for(const file of fileArr){
+try{
+const data=await compressImage(file);
+current.push({id:Date.now().toString()+Math.random().toString(36).slice(2,6),data,phase,caption,by:profile.name||profile.email||'',ts:new Date().toISOString()});
+}catch(e){failed++;}
+}
+try{
+const res=await sb.from('jobs').update({photos:current}).eq('id',id).select().single();
+if(res.error)throw res.error;
+setJob(res.data);
 setCaption('');
-}catch(e){await mbrcAlert('Upload failed: '+e.message);}
+if(failed>0)await mbrcAlert(failed+' photo(s) failed to upload.');
+}catch(e){await mbrcAlert('Save failed: '+(e.message||'Unknown error. Check photos column exists in jobs table.'));}
 setUploading(false);
 if(camRef.current)camRef.current.value='';
 if(galRef.current)galRef.current.value='';
@@ -1166,7 +1187,7 @@ if(galRef.current)galRef.current.value='';
 
 async function delPhoto(photoId){
 if(!await mbrcConfirm('Delete this photo?'))return;
-const photos=(job.photos||[]).filter(p=>p.id!==photoId);
+const photos=(Array.isArray(job.photos)?job.photos:[]).filter(p=>p.id!==photoId);
 await save({photos});
 }
 
@@ -1271,8 +1292,8 @@ h('div',{style:{display:'flex',gap:4,marginBottom:10}},
 ['before','progress','after','damage','complete'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flexShrink:0,fontSize:11}},ph.charAt(0).toUpperCase()+ph.slice(1)))
 ),
 h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:10}}),
-h('input',{ref:camRef,type:'file',accept:'image/*',capture:'environment',onChange:e=>addPhoto(e.target.files[0]),style:{display:'none'}}),
-h('input',{ref:galRef,type:'file',accept:'image/*',onChange:e=>addPhoto(e.target.files[0]),style:{display:'none'}}),
+h('input',{ref:camRef,type:'file',accept:'image/*',capture:'environment',onChange:e=>addPhotos(e.target.files),style:{display:'none'}}),
+h('input',{ref:galRef,type:'file',accept:'image/*',multiple:true,onChange:e=>addPhotos(e.target.files),style:{display:'none'}}),
 h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
 h('button',{className:'btn btn-primary',onClick:()=>camRef.current&&camRef.current.click(),disabled:uploading},uploading?'Uploading...':'📷 Camera'),
 h('button',{className:'btn btn-ghost',onClick:()=>galRef.current&&galRef.current.click(),disabled:uploading},'🖼️ Gallery')
