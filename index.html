@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
+<meta charset="UTF-8"/><!-- v7 -->
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -1138,15 +1138,22 @@ await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'
 
 async function compressImage(file){
 try{
-// Step 1: Convert HEIC/HEIF to JPEG if needed
+// Step 1: Try to convert HEIC first (Android may not report correct type)
 let src=file;
-const isHeic=file.type==='image/heic'||file.type==='image/heif'||
-(file.name&&(file.name.toLowerCase().endsWith('.heic')||file.name.toLowerCase().endsWith('.heif')));
-if(isHeic&&typeof heic2any!=='undefined'){
+if(typeof heic2any!=='undefined'){
+// Always try heic2any if file type suggests it might be HEIC
+const t=file.type||'';
+const n=(file.name||'').toLowerCase();
+const maybeHeic=t.includes('heic')||t.includes('heif')||t===''||t==='application/octet-stream'||n.endsWith('.heic')||n.endsWith('.heif');
+if(maybeHeic){
 try{
 const blob=await heic2any({blob:file,toType:'image/jpeg',quality:0.85});
 src=Array.isArray(blob)?blob[0]:blob;
-}catch(he){throw new Error('HEIC convert failed: '+he.message);}
+}catch(he){
+// Not HEIC or conversion failed — use original
+src=file;
+}
+}
 }
 // Step 2: Compress via canvas
 const bm=await createImageBitmap(src);
