@@ -131,6 +131,7 @@ canvas{border:1px solid #d8e0ec;border-radius:10px;width:100%;touch-action:none;
 <body>
 <div id="root"><div class="loading">Loading MBRC Estimator...</div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -1136,46 +1137,34 @@ await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'
 }
 
 async function compressImage(file){
-// Try multiple methods to handle different Android file access scenarios
-return new Promise((res,rej)=>{
-function tryCompress(src){
-const img=new Image();
-img.onload=()=>{
-const MAX=500;
-const r=Math.min(MAX/img.width,MAX/img.height,1);
-const c=document.createElement('canvas');
-c.width=Math.round(img.width*r)||1;
-c.height=Math.round(img.height*r)||1;
-const ctx=c.getContext('2d');
-if(!ctx){rej(new Error('No canvas'));return;}
-try{ctx.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.55));}
-catch(e){rej(new Error('Draw failed'));}
-};
-img.onerror=()=>rej(new Error('img.onerror for: '+src.slice(0,30)));
-img.src=src;
-}
-// Method 1: blob URL (best for large files)
 try{
-const burl=URL.createObjectURL(file);
-const img=new Image();
-img.onload=()=>{URL.revokeObjectURL(burl);
-const MAX=500;const r=Math.min(MAX/img.width,MAX/img.height,1);
-const c=document.createElement('canvas');c.width=Math.round(img.width*r)||1;c.height=Math.round(img.height*r)||1;
-const ctx=c.getContext('2d');if(!ctx){URL.revokeObjectURL(burl);rej(new Error('No ctx'));return;}
-try{ctx.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.55));}
-catch(e){rej(new Error('Draw:'+e.message));}
-};
-img.onerror=()=>{
-URL.revokeObjectURL(burl);
-// Method 2: FileReader fallback
-const fr=new FileReader();
-fr.onload=ev=>tryCompress(ev.target.result);
-fr.onerror=()=>rej(new Error('FileReader also failed'));
-fr.readAsDataURL(file);
-};
-img.src=burl;
-}catch(e){rej(new Error('createObjectURL failed: '+e.message));}
-});}
+// Step 1: Convert HEIC/HEIF to JPEG if needed
+let src=file;
+const isHeic=file.type==='image/heic'||file.type==='image/heif'||
+(file.name&&(file.name.toLowerCase().endsWith('.heic')||file.name.toLowerCase().endsWith('.heif')));
+if(isHeic&&typeof heic2any!=='undefined'){
+try{
+const blob=await heic2any({blob:file,toType:'image/jpeg',quality:0.85});
+src=Array.isArray(blob)?blob[0]:blob;
+}catch(he){throw new Error('HEIC convert failed: '+he.message);}
+}
+// Step 2: Compress via canvas
+const bm=await createImageBitmap(src);
+const MAX=700;
+const r=Math.min(MAX/bm.width,MAX/bm.height,1);
+const w=Math.round(bm.width*r)||1;
+const h=Math.round(bm.height*r)||1;
+const c=document.createElement('canvas');
+c.width=w;c.height=h;
+const ctx=c.getContext('2d');
+if(!ctx){bm.close();throw new Error('No canvas context');}
+ctx.drawImage(bm,0,0,w,h);
+bm.close();
+return c.toDataURL('image/jpeg',0.65);
+}catch(e){
+throw new Error(e.message||'Photo processing failed');
+}
+}
 
 async function addPhotos(files){
 if(!files||!files.length)return;
