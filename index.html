@@ -1137,70 +1137,64 @@ await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'
 
 function compressImage(file){
 return new Promise((res,rej)=>{
-// First read the file as data URL
 const reader=new FileReader();
-reader.onerror=()=>rej(new Error('Could not read file'));
+reader.onerror=()=>rej(new Error('Read failed'));
 reader.onload=ev=>{
-const original=ev.target.result;
-// Try canvas compression
-try{
 const img=new Image();
-img.onerror=()=>{
-// If image fails to load in canvas, just use original (works for most formats)
-res(original);
-};
+img.onerror=()=>rej(new Error('Image load failed'));
 img.onload=()=>{
-try{
-// Use smaller size to avoid memory issues on mobile
-const MAX=800;
+// Always resize to max 600px regardless of input size
+const MAX=600;
 const ratio=Math.min(MAX/img.width,MAX/img.height,1);
+const w=Math.max(1,Math.round(img.width*ratio));
+const h=Math.max(1,Math.round(img.height*ratio));
 const c=document.createElement('canvas');
-c.width=Math.max(1,Math.round(img.width*ratio));
-c.height=Math.max(1,Math.round(img.height*ratio));
+c.width=w; c.height=h;
 const ctx=c.getContext('2d');
-if(!ctx){res(original);return;}
-ctx.drawImage(img,0,0,c.width,c.height);
-const compressed=c.toDataURL('image/jpeg',0.65);
-// Use compressed only if it's smaller than original
-res(compressed.length<original.length?compressed:original);
-}catch(e){res(original);}
+if(!ctx){rej(new Error('No canvas'));return;}
+ctx.drawImage(img,0,0,w,h);
+res(c.toDataURL('image/jpeg',0.6));
 };
-img.src=original;
-}catch(e){res(original);}
+// Use smaller blob URL to avoid memory issues
+img.src=ev.target.result;
 };
+// Read as blob URL instead of dataURL for large files
+const blobUrl=URL.createObjectURL(file);
+const img2=new Image();
+img2.onerror=()=>{
+// Fallback: read as dataURL
+URL.revokeObjectURL(blobUrl);
 reader.readAsDataURL(file);
+};
+img2.onload=()=>{
+const MAX=600;
+const ratio=Math.min(MAX/img2.width,MAX/img2.height,1);
+const w=Math.max(1,Math.round(img2.width*ratio));
+const h=Math.max(1,Math.round(img2.height*ratio));
+const c=document.createElement('canvas');
+c.width=w; c.height=h;
+const ctx=c.getContext('2d');
+if(!ctx){URL.revokeObjectURL(blobUrl);reader.readAsDataURL(file);return;}
+ctx.drawImage(img2,0,0,w,h);
+URL.revokeObjectURL(blobUrl);
+res(c.toDataURL('image/jpeg',0.6));
+};
+img2.src=blobUrl;
 });
 }
 
 async function addPhotos(files){
 if(!files||!files.length)return;
 setUploading(true);
-const fileArr=Array.from(files);
+const fileArr=Array.from(files).filter(f=>f.type.startsWith('image/'));
+if(!fileArr.length){setUploading(false);return;}
 let current=Array.isArray(job.photos)?[...job.photos]:[];
 let failed=0;
 for(const file of fileArr){
 try{
-if(!file.type.startsWith('image/')){failed++;continue;}
 const data=await compressImage(file);
-if(!data||data.length<100){failed++;continue;}
-// Skip if individual photo exceeds 2MB base64 (too large for DB row)
-if(data.length>2*1024*1024){
-// Try with very low quality
-try{
-const img=new Image();
-await new Promise((r,j)=>{img.onload=r;img.onerror=j;img.src=data;});
-const c=document.createElement('canvas');
-const ratio=Math.min(400/img.width,400/img.height,1);
-c.width=Math.round(img.width*ratio);c.height=Math.round(img.height*ratio);
-const ctx=c.getContext('2d');
-ctx.drawImage(img,0,0,c.width,c.height);
-const small=c.toDataURL('image/jpeg',0.5);
-current.push({id:Date.now().toString()+Math.random().toString(36).slice(2,6),data:small,phase,caption,by:profile.name||profile.email||'',ts:new Date().toISOString()});
-}catch(e2){failed++;}
-continue;
-}
-current.push({id:Date.now().toString()+Math.random().toString(36).slice(2,6),data,phase,caption,by:profile.name||profile.email||'',ts:new Date().toISOString()});
-}catch(e){failed++;}
+current.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),data,phase,caption:caption||'',by:profile.name||profile.email||'',ts:new Date().toISOString()});
+}catch(e){console.error('compress failed',e);failed++;}
 }
 try{
 const res=await sb.from('jobs').update({photos:current}).eq('id',id).select().single();
