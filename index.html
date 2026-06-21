@@ -1100,161 +1100,196 @@ j.scheduled_date&&h('div',{style:{fontSize:11,color:'#64748b',marginTop:2}},j.sc
 // ── JOB DETAIL ────────────────────────────────────────────────────────────
 function JobDetail({id,profile,onBack}){
 const [job,setJob]=useState(null);
-const [photos,setPhotos]=useState([]);
 const [crew,setCrew]=useState([]);
 const [loading,setLoading]=useState(true);
-const [phase,setPhase]=useState('progress');
-const [caption,setCaption]=useState('');
+const [tab,setTab]=useState('overview');
+const [saving,setSaving]=useState(false);
 const [uploading,setUploading]=useState(false);
-const fileRef=useRef(null);
+const [phase,setPhase]=useState('before');
+const [caption,setCaption]=useState('');
+const camRef=useRef(null);
+const galRef=useRef(null);
 const isMgr=profile.role==='owner'||profile.role==='manager';
 
-function refreshJob(){sb.from('jobs').select('*').eq('id',id).single().then(r=>setJob(r.data));}
-function refreshPhotos(){sb.from('job_photos').select('*').eq('job_id',id).order('created_at',{ascending:false}).then(r=>setPhotos(r.data||[]));}
-
+function refresh(){sb.from('jobs').select('*').eq('id',id).single().then(r=>{setJob(r.data);});}
 useEffect(()=>{
 sb.from('jobs').select('*').eq('id',id).single().then(r=>{setJob(r.data);setLoading(false)});
-refreshPhotos();
 if(isMgr) sb.from('profiles').select('*').order('name').then(r=>setCrew(r.data||[]));
 },[id]);
 
 if(loading||!job) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
 
-async function toggleDeposit(){
-const paid=!job.deposit_paid;
-const newStatus=paid?(job.status==='awaiting_deposit'?'unassigned':job.status):'awaiting_deposit';
-await sb.from('jobs').update({deposit_paid:paid,status:newStatus}).eq('id',id);
-refreshJob();
+async function save(updates){
+setSaving(true);
+await sb.from('jobs').update(updates).eq('id',id);
+refresh();
+setSaving(false);
 }
+
 async function assignTo(personId){
 if(!personId)return;
 const person=crew.find(c=>c.id===personId);
-await sb.from('jobs').update({assigned_to:personId,assigned_to_name:person?person.name:null,assigned_by:profile.id,assigned_at:new Date().toISOString(),status:'assigned'}).eq('id',id);
-refreshJob();
+await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'assigned'});
 }
-async function setStatus(s){await sb.from('jobs').update({status:s}).eq('id',id);refreshJob();}
-async function setSchedule(d){await sb.from('jobs').update({scheduled_date:d||null}).eq('id',id);refreshJob();}
 
-async function onFile(e){
-const file=e.target.files&&e.target.files[0];
+async function addPhoto(file){
 if(!file)return;
 setUploading(true);
 try{
-await uploadPhoto(id,file,profile,phase,caption);
+const compressed=await new Promise((res,rej)=>{
+const reader=new FileReader();
+reader.onload=ev=>{
+const img=new Image();
+img.onload=()=>{
+const MAX=900;
+const r=Math.min(MAX/img.width,MAX/img.height,1);
+const c=document.createElement('canvas');
+c.width=img.width*r;c.height=img.height*r;
+c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+res(c.toDataURL('image/jpeg',0.75));
+};
+img.onerror=rej;
+img.src=ev.target.result;
+};
+reader.onerror=rej;
+reader.readAsDataURL(file);
+});
+const photos=Array.isArray(job.photos)?[...job.photos]:[];
+photos.push({id:Date.now().toString(),data:compressed,phase,caption,by:profile.name||profile.email,ts:new Date().toISOString()});
+await save({photos});
 setCaption('');
-refreshPhotos();
-}catch(err){alert('Upload failed: '+err.message);}
+}catch(e){await mbrcAlert('Upload failed: '+e.message);}
 setUploading(false);
-if(fileRef.current)fileRef.current.value='';
-}
-async function delPhoto(p){
-if(!confirm('Delete this photo?'))return;
-try{
-if(p.storage_path) await sb.storage.from('job-photos').remove([p.storage_path]);
-await sb.from('job_photos').delete().eq('id',p.id);
-refreshPhotos();
-}catch(err){alert('Delete failed: '+err.message);}
+if(camRef.current)camRef.current.value='';
+if(galRef.current)galRef.current.value='';
 }
 
-const canUpload=isMgr||job.assigned_to===profile.id;
+async function delPhoto(photoId){
+if(!await mbrcConfirm('Delete this photo?'))return;
+const photos=(job.photos||[]).filter(p=>p.id!==photoId);
+await save({photos});
+}
+
+const photos=Array.isArray(job.photos)?job.photos:[];
+const canEdit=isMgr||job.assigned_to===profile.id;
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 jobStatusBadge(job.status)
 ),
-h('div',{className:'card'},
-h('h2',{style:{fontSize:18,fontWeight:700}},job.title||job.customer_name||'Job'),
-job.customer_name&&h('div',{style:{fontSize:13,color:'#64748b',marginTop:4}},job.customer_name),
+
+h('div',{className:'card',style:{marginBottom:12}},
+h('div',{style:{fontWeight:700,fontSize:16,color:'#0f1e36'}},job.title||job.customer_name||'Job'),
+job.customer_address&&h('div',{style:{fontSize:13,color:'#64748b',marginTop:2}},job.customer_address),
 job.customer_phone&&h('div',{style:{fontSize:13,color:'#64748b'}},job.customer_phone),
-job.customer_address&&h('div',{style:{fontSize:13,color:'#64748b'}},job.customer_address),
-h('div',{style:{fontSize:18,fontWeight:700,color:'#047857',marginTop:8}},fmt(job.amount))
+h('div',{style:{fontSize:18,fontWeight:800,color:'#047857',marginTop:6}},fmt(job.amount))
 ),
 
-isMgr&&h('div',{className:'card'},
-h('div',{className:'card-title'},'Job Management'),
-h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}},
-h('div',{style:{fontSize:14}},'Deposit paid'),
-h('button',{className:'btn btn-sm '+(job.deposit_paid?'btn-success':'btn-ghost'),onClick:toggleDeposit},job.deposit_paid?'✓ Paid':'Mark Paid')
-),
-job.deposit_paid?h('div',{className:'form-group'},
-h('label',{className:'label'},'Assign to'),
-h('select',{className:'input',value:job.assigned_to||'',onChange:e=>assignTo(e.target.value)},
-h('option',{value:''},'— Select crew —'),
-crew.map(c=>h('option',{key:c.id,value:c.id},(c.name||'(no name)')+' ('+c.role+')'))
-)
-):h('div',{className:'alert alert-warn'},'Mark the deposit paid to assign this job.'),
-h('div',{className:'form-group'},
-h('label',{className:'label'},'Scheduled date'),
-h('input',{className:'input',type:'date',value:job.scheduled_date||'',onChange:e=>setSchedule(e.target.value)})
-),
-h('div',{className:'form-group'},
-h('label',{className:'label'},'Status'),
-h('select',{className:'input',value:job.status,onChange:e=>setStatus(e.target.value)},
-['awaiting_deposit','unassigned','assigned','in_progress','complete'].map(s=>h('option',{key:s,value:s},s))
-)
-)
+h('div',{className:'tab-bar'},
+['overview','assignment','photos'].map(t=>h('button',{key:t,className:'tab-btn'+(tab===t?' active':''),onClick:()=>setTab(t)},
+t==='overview'?'Overview':t==='assignment'?'Assignment':'Photos ('+photos.length+')'
+))
 ),
 
-!isMgr&&job.assigned_to===profile.id&&h('div',{className:'card'},
-h('div',{className:'card-title'},'Update Status'),
-h('div',{style:{display:'flex',gap:6}},
-h('button',{className:'btn btn-sm '+(job.status==='in_progress'?'btn-primary':'btn-ghost'),style:{flex:1},onClick:()=>setStatus('in_progress')},'Start'),
-h('button',{className:'btn btn-sm '+(job.status==='complete'?'btn-success':'btn-ghost'),style:{flex:1},onClick:()=>setStatus('complete')},'Complete')
-)
-),
-
+tab==='overview'&&h('div',null,
 h('div',{className:'card'},
-h('div',{className:'card-title'},'Photos ('+photos.length+')'),
-canUpload&&h('div',{style:{marginBottom:12}},
-h('div',{style:{display:'flex',gap:4,marginBottom:8}},
-['before','progress','after'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flex:1}},ph.charAt(0).toUpperCase()+ph.slice(1)))
+h('div',{className:'card-title'},'Job Info'),
+h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}},
+h('span',{style:{fontSize:14}},'Deposit'),
+h('button',{className:'btn btn-sm '+(job.deposit_paid?'btn-success':'btn-ghost'),onClick:async()=>{const paid=!job.deposit_paid;await save({deposit_paid:paid,status:paid&&job.status==='awaiting_deposit'?'unassigned':job.status});}},job.deposit_paid?'✓ Paid':'Mark Paid')
 ),
-h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:8}}),
-h('input',{ref:fileRef,type:'file',accept:'image/*',capture:'environment',onChange:onFile,style:{display:'none'}}),
-h('button',{className:'btn btn-primary btn-block',onClick:()=>fileRef.current&&fileRef.current.click(),disabled:uploading},uploading?'Uploading...':'📷 Add Photo ('+phase+')')
+job.assigned_to_name&&h('div',{style:{fontSize:13,color:'#64748b',marginBottom:4}},'Assigned to: '+job.assigned_to_name),
+job.scheduled_date&&h('div',{style:{fontSize:13,color:'#64748b',marginBottom:4}},'Date: '+job.scheduled_date),
+job.eta_time&&h('div',{style:{fontSize:13,color:'#64748b',marginBottom:4}},'ETA: '+job.eta_time),
+job.work_instructions&&h('div',{style:{marginTop:8,padding:10,background:'#f8fafc',borderRadius:8,fontSize:13,color:'#0f1e36',lineHeight:1.5}},job.work_instructions)
 ),
-photos.length===0?h('div',{className:'empty',style:{padding:'20px'}},h('div',{className:'empty-icon'},'📷'),h('div',null,'No photos yet')):
+canEdit&&h('div',{className:'card'},
+h('div',{className:'card-title'},'Update Status'),
+h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}},
+['in_progress','complete'].map(s=>h('button',{key:s,className:'btn btn-sm '+(job.status===s?'btn-primary':'btn-ghost'),onClick:()=>save({status:s})},s==='in_progress'?'▶ Start Work':'✓ Complete'))
+)
+)
+),
+
+tab==='assignment'&&isMgr&&h('div',null,
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Assign Personnel'),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Assign To'),
+h('select',{className:'input',value:job.assigned_to||'',onChange:e=>assignTo(e.target.value)},
+h('option',{value:''},'— Select crew member —'),
+crew.map(c=>h('option',{key:c.id,value:c.id},(c.name||c.email||'(no name)')+' · '+c.role))
+)
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Scheduled Date'),
+h('input',{className:'input',type:'date',value:job.scheduled_date||'',onChange:e=>save({scheduled_date:e.target.value})})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'ETA / Start Time'),
+h('input',{className:'input',type:'time',value:job.eta_time||'',onChange:e=>save({eta_time:e.target.value})})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Job Status'),
+h('select',{className:'input',value:job.status,onChange:e=>save({status:e.target.value})},
+['awaiting_deposit','unassigned','assigned','in_progress','complete'].map(s=>h('option',{key:s,value:s},{awaiting_deposit:'Awaiting Deposit',unassigned:'Unassigned',assigned:'Assigned',in_progress:'In Progress',complete:'Complete'}[s]))
+)
+)
+),
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Work Instructions for Crew'),
+h('textarea',{className:'input',rows:5,placeholder:'Describe exactly what needs to be done — scope of work, materials to bring, access instructions, special notes...',value:job.work_instructions||'',onChange:e=>save({work_instructions:e.target.value}),style:{resize:'vertical'}})
+),
+h('div',{className:'card'},
+h('div',{className:'card-title'},'PM Notes (Internal)'),
+h('textarea',{className:'input',rows:4,placeholder:'Internal notes — HOA approvals, permit status, customer special requests, issues to watch...',value:job.pm_notes||'',onChange:e=>save({pm_notes:e.target.value}),style:{resize:'vertical'}})
+),
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Job Address'),
+h('input',{className:'input',placeholder:'Job site address',value:job.customer_address||'',onChange:e=>save({customer_address:e.target.value}),style:{marginBottom:8}}),
+job.customer_address&&h('a',{href:'https://maps.google.com/?q='+encodeURIComponent(job.customer_address),target:'_blank',className:'btn btn-ghost btn-block',style:{marginTop:4}},'📍 Open in Maps')
+)
+),
+
+tab==='assignment'&&!isMgr&&h('div',{className:'card'},
+h('div',{className:'card-title'},'Your Assignment'),
+job.work_instructions?h('div',{style:{fontSize:14,color:'#0f1e36',lineHeight:1.6,padding:'8px 0'}},job.work_instructions):h('div',{style:{color:'#94a3b8',fontSize:13}},'No instructions yet.'),
+job.scheduled_date&&h('div',{style:{marginTop:12,padding:'10px 12px',background:'#eff6ff',borderRadius:10,fontSize:13}},
+h('span',{style:{fontWeight:600}},'Date: '),job.scheduled_date,
+job.eta_time&&h('span',null,' · ETA: '+job.eta_time)
+),
+h('div',{style:{marginTop:12,display:'flex',gap:8}},
+h('button',{className:'btn btn-sm '+(job.status==='in_progress'?'btn-primary':'btn-ghost'),style:{flex:1},onClick:()=>save({status:'in_progress'})},'▶ Start'),
+h('button',{className:'btn btn-sm '+(job.status==='complete'?'btn-success':'btn-ghost'),style:{flex:1},onClick:()=>save({status:'complete'})},'✓ Done')
+)
+),
+
+tab==='photos'&&h('div',null,
+canEdit&&h('div',{className:'card'},
+h('div',{style:{display:'flex',gap:4,marginBottom:10}},
+['before','progress','after','damage','complete'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flexShrink:0,fontSize:11}},ph.charAt(0).toUpperCase()+ph.slice(1)))
+),
+h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:10}}),
+h('input',{ref:camRef,type:'file',accept:'image/*',capture:'environment',onChange:e=>addPhoto(e.target.files[0]),style:{display:'none'}}),
+h('input',{ref:galRef,type:'file',accept:'image/*',onChange:e=>addPhoto(e.target.files[0]),style:{display:'none'}}),
+h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
+h('button',{className:'btn btn-primary',onClick:()=>camRef.current&&camRef.current.click(),disabled:uploading},uploading?'Uploading...':'📷 Camera'),
+h('button',{className:'btn btn-ghost',onClick:()=>galRef.current&&galRef.current.click(),disabled:uploading},'🖼️ Gallery')
+)
+),
+photos.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'📷'),h('div',null,'No photos yet')):
 h('div',{className:'photo-grid'},
 photos.map(p=>h('div',{key:p.id,className:'photo-card'},
 h('span',{className:'photo-phase'},p.phase),
-h('img',{src:p.url,alt:p.caption||'',loading:'lazy'}),
+h('img',{src:p.data,alt:p.caption||'',loading:'lazy'}),
 h('div',{className:'photo-meta'},
-(p.caption?p.caption+' · ':'')+(p.uploaded_by_name||''),
-(isMgr||p.uploaded_by===profile.id)&&h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,padding:'2px 8px'},onClick:()=>delPhoto(p)},'Delete')
+(p.caption?p.caption+' · ':'')+(p.by||''),
+canEdit&&h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,padding:'2px 8px',display:'block'},onClick:()=>delPhoto(p.id)},'Delete')
 )
 ))
 )
 )
-);
-}
-
-// ── TEAM (owner only) ─────────────────────────────────────────────────────
-function Team({profile}){
-const [people,setPeople]=useState([]);
-const [loading,setLoading]=useState(true);
-
-function load(){sb.from('profiles').select('*').order('name').then(r=>{setPeople(r.data||[]);setLoading(false)});}
-useEffect(()=>{load()},[]);
-
-async function setRole(pid,role){await sb.from('profiles').update({role}).eq('id',pid);load();}
-
-if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
-
-return h('div',{className:'content'},
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'Team')),
-h('div',{className:'alert alert-info'},'New sign-ups start as Crew. Promote people to Manager or Owner here.'),
-people.map(p=>h('div',{key:p.id,className:'list-item',style:{cursor:'default'}},
-h('div',null,
-h('div',{className:'list-item-title'},p.name||'(no name)'),
-p.phone&&h('div',{className:'list-item-sub'},p.phone)
-),
-h('div',null,
-h('select',{className:'input',value:p.role,onChange:e=>setRole(p.id,e.target.value),style:{width:130}},
-['crew','manager','owner'].map(r=>h('option',{key:r,value:r},r))
-)
-)
-))
 );
 }
 
