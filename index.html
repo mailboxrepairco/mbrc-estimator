@@ -1135,32 +1135,47 @@ const person=crew.find(c=>c.id===personId);
 await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'assigned'});
 }
 
-function compressImage(file){
+async function compressImage(file){
+// Try multiple methods to handle different Android file access scenarios
 return new Promise((res,rej)=>{
-// Use createObjectURL — works with camera files on Android where FileReader fails
-const url=URL.createObjectURL(file);
+function tryCompress(src){
 const img=new Image();
 img.onload=()=>{
-URL.revokeObjectURL(url);
 const MAX=500;
 const r=Math.min(MAX/img.width,MAX/img.height,1);
 const c=document.createElement('canvas');
 c.width=Math.round(img.width*r)||1;
 c.height=Math.round(img.height*r)||1;
 const ctx=c.getContext('2d');
-if(!ctx){rej(new Error('Canvas context failed'));return;}
+if(!ctx){rej(new Error('No canvas'));return;}
+try{ctx.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.55));}
+catch(e){rej(new Error('Draw failed'));}
+};
+img.onerror=()=>rej(new Error('img.onerror for: '+src.slice(0,30)));
+img.src=src;
+}
+// Method 1: blob URL (best for large files)
 try{
-ctx.drawImage(img,0,0,c.width,c.height);
-res(c.toDataURL('image/jpeg',0.55));
-}catch(e){rej(new Error('Canvas draw: '+e.message));}
+const burl=URL.createObjectURL(file);
+const img=new Image();
+img.onload=()=>{URL.revokeObjectURL(burl);
+const MAX=500;const r=Math.min(MAX/img.width,MAX/img.height,1);
+const c=document.createElement('canvas');c.width=Math.round(img.width*r)||1;c.height=Math.round(img.height*r)||1;
+const ctx=c.getContext('2d');if(!ctx){URL.revokeObjectURL(burl);rej(new Error('No ctx'));return;}
+try{ctx.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.55));}
+catch(e){rej(new Error('Draw:'+e.message));}
 };
 img.onerror=()=>{
-URL.revokeObjectURL(url);
-rej(new Error('Image load failed — try a different photo'));
+URL.revokeObjectURL(burl);
+// Method 2: FileReader fallback
+const fr=new FileReader();
+fr.onload=ev=>tryCompress(ev.target.result);
+fr.onerror=()=>rej(new Error('FileReader also failed'));
+fr.readAsDataURL(file);
 };
-img.src=url;
-});
-}
+img.src=burl;
+}catch(e){rej(new Error('createObjectURL failed: '+e.message));}
+});}
 
 async function addPhotos(files){
 if(!files||!files.length)return;
@@ -1172,7 +1187,7 @@ const errors=[];
 for(let i=0;i<fileArr.length;i++){
 try{
 const data=await compressImage(fileArr[i]);
-if(!data){errors.push('Photo '+(i+1)+': could not read file');continue;}
+
 current.push({id:Date.now().toString(36)+i,data,phase,caption:caption||'',by:profile.name||profile.email||'',ts:new Date().toISOString()});
 }catch(e){errors.push('Photo '+(i+1)+': '+(e&&e.message||'unknown error'));}
 }
