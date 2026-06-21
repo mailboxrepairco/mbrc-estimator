@@ -1323,15 +1323,25 @@ const [loading,setLoading]=useState(true);
 
 useEffect(()=>{
 let active=true;
-async function loadProfile(userId){
-const r=await sb.from('profiles').select('*').eq('id',userId).single();
-return r.data;
+async function loadProfile(user){
+  try{
+    const r=await sb.from('profiles').select('*').eq('id',user.id).single();
+    if(r.data) return r.data;
+  }catch(e){}
+  // Fallback profile from auth user (works even without profiles table)
+  return {
+    id:user.id,
+    name:(user.email||'User').split('@')[0],
+    email:user.email||'',
+    role:'owner',
+    company:'The Mailbox Repair CO'
+  };
 }
 sb.auth.getSession().then(async ({data})=>{
 if(!active)return;
 if(data.session){
 setSession(data.session);
-const p=await loadProfile(data.session.user.id);
+const p=await loadProfile(data.session.user);
 if(active)setProfile(p);
 }
 if(active)setLoading(false);
@@ -1339,7 +1349,7 @@ if(active)setLoading(false);
 const {data:listener}=sb.auth.onAuthStateChange(async (_e,sess)=>{
 setSession(sess);
 if(sess){
-const p=await loadProfile(sess.user.id);
+const p=await loadProfile(sess.user);
 setProfile(p);
 } else {
 setProfile(null);
