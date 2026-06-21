@@ -428,6 +428,25 @@ h('div',{className:'list-item-amount'},fmt(p.price))
 );
 }
 
+
+// ── ERROR BOUNDARY ─────────────────────────────────────────────────────────
+class ErrorBoundary extends React.Component{
+constructor(p){super(p);this.state={err:null};}
+static getDerivedStateFromError(e){return{err:e};}
+componentDidCatch(e,info){console.error('Boundary caught:',e,info);}
+render(){
+if(this.state.err){
+return h('div',{className:'content'},
+h('div',{className:'alert alert-warn',style:{margin:'20px 0'}},
+h('b',null,'Error: '),this.state.err.message
+),
+h('button',{className:'btn btn-ghost btn-sm',onClick:()=>this.setState({err:null})},'← Back')
+);
+}
+return this.props.children;
+}
+}
+
 // ── ESTIMATE DETAIL ───────────────────────────────────────────────────────
 function EstimateDetail({id,onBack,onEdit,onConvert}){
 const [est,setEst]=useState(null);
@@ -1290,7 +1309,7 @@ h(EstimateForm,{estimate:view.data,onSave:(est)=>{setView({type:'estimate-detail
 );
 if(view.type==='estimate-detail')
 return h('div',{className:'app'},
-h(EstimateDetail,{
+h(ErrorBoundary,null,h(EstimateDetail,{
 id:view.id,
 onBack:()=>setView(null),
 onEdit:()=>{
@@ -1299,7 +1318,7 @@ if(r.data)setView({type:'edit-estimate',data:r.data});
 });
 },
 onConvert:(est)=>setView({type:'new-invoice',data:est})
-})
+})))
 );
 if(view.type==='new-invoice')
 return h('div',{className:'app'},
