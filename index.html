@@ -1136,72 +1136,50 @@ await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'
 }
 
 function compressImage(file){
-return new Promise((res,rej)=>{
+return new Promise(res=>{
 const reader=new FileReader();
-reader.onerror=()=>rej(new Error('Read failed'));
 reader.onload=ev=>{
 const img=new Image();
-img.onerror=()=>rej(new Error('Image load failed'));
 img.onload=()=>{
-// Always resize to max 600px regardless of input size
-const MAX=600;
-const ratio=Math.min(MAX/img.width,MAX/img.height,1);
-const w=Math.max(1,Math.round(img.width*ratio));
-const h=Math.max(1,Math.round(img.height*ratio));
+const MAX=500;
+const r=Math.min(MAX/img.width,MAX/img.height,1);
 const c=document.createElement('canvas');
-c.width=w; c.height=h;
+c.width=Math.round(img.width*r)||1;
+c.height=Math.round(img.height*r)||1;
+try{
 const ctx=c.getContext('2d');
-if(!ctx){rej(new Error('No canvas'));return;}
-ctx.drawImage(img,0,0,w,h);
-res(c.toDataURL('image/jpeg',0.6));
+if(ctx){ctx.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.55));}
+else{res(ev.target.result);}
+}catch(e){res(ev.target.result);}
 };
-// Use smaller blob URL to avoid memory issues
+img.onerror=()=>res(null);
 img.src=ev.target.result;
 };
-// Read as blob URL instead of dataURL for large files
-const blobUrl=URL.createObjectURL(file);
-const img2=new Image();
-img2.onerror=()=>{
-// Fallback: read as dataURL
-URL.revokeObjectURL(blobUrl);
+reader.onerror=()=>res(null);
 reader.readAsDataURL(file);
-};
-img2.onload=()=>{
-const MAX=600;
-const ratio=Math.min(MAX/img2.width,MAX/img2.height,1);
-const w=Math.max(1,Math.round(img2.width*ratio));
-const h=Math.max(1,Math.round(img2.height*ratio));
-const c=document.createElement('canvas');
-c.width=w; c.height=h;
-const ctx=c.getContext('2d');
-if(!ctx){URL.revokeObjectURL(blobUrl);reader.readAsDataURL(file);return;}
-ctx.drawImage(img2,0,0,w,h);
-URL.revokeObjectURL(blobUrl);
-res(c.toDataURL('image/jpeg',0.6));
-};
-img2.src=blobUrl;
 });
 }
 
 async function addPhotos(files){
 if(!files||!files.length)return;
 setUploading(true);
-const fileArr=Array.from(files).filter(f=>f.type.startsWith('image/'));
+const fileArr=Array.from(files).filter(f=>f&&f.type&&f.type.startsWith('image/'));
 if(!fileArr.length){setUploading(false);return;}
 let current=Array.isArray(job.photos)?[...job.photos]:[];
-let failed=0;
-for(const file of fileArr){
+const errors=[];
+for(let i=0;i<fileArr.length;i++){
 try{
-const data=await compressImage(file);
-current.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),data,phase,caption:caption||'',by:profile.name||profile.email||'',ts:new Date().toISOString()});
-}catch(e){console.error('compress failed',e);failed++;}
+const data=await compressImage(fileArr[i]);
+if(!data){errors.push('Photo '+(i+1)+': could not read file');continue;}
+current.push({id:Date.now().toString(36)+i,data,phase,caption:caption||'',by:profile.name||profile.email||'',ts:new Date().toISOString()});
+}catch(e){errors.push('Photo '+(i+1)+': '+(e&&e.message||'unknown error'));}
 }
 try{
 const res=await sb.from('jobs').update({photos:current}).eq('id',id).select().single();
 if(res.error)throw res.error;
 setJob(res.data);
 setCaption('');
-if(failed>0)await mbrcAlert(failed+' photo(s) failed to upload.');
+if(errors.length>0)await mbrcAlert(errors.length+' photo(s) failed.\n'+errors.join('\n'));
 }catch(e){await mbrcAlert('Save failed: '+(e.message||'Unknown error. Check photos column exists in jobs table.'));}
 setUploading(false);
 if(camRef.current)camRef.current.value='';
