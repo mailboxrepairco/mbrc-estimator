@@ -320,21 +320,6 @@ result=await sb.from('estimates').update(data).eq('id',data.id).select().single(
 result=await sb.from('estimates').insert(data).select().single();
 }
 if(result.error) throw result.error;
-// Auto-create job if status is Approved
-if(data.status==='Approved'&&result.data){
-const existing=await sb.from('jobs').select('id').eq('estimate_id',result.data.id).maybeSingle();
-if(!existing.data){
-await sb.from('jobs').insert({
-estimate_id:result.data.id,
-title:(result.data.customer_name||'Job')+' — '+result.data.number,
-customer_name:result.data.customer_name,
-customer_phone:result.data.customer_phone,
-customer_address:result.data.customer_address,
-amount:calcTotal(result.data.items||[],result.data.tax_rate),
-status:'unassigned',deposit_paid:false
-}).catch(()=>{});
-}
-}
 onSave(result.data);
 } catch(e){
 alert('Error saving: '+e.message);
@@ -428,31 +413,12 @@ h('div',{className:'list-item-amount'},fmt(p.price))
 );
 }
 
-
-// ── ERROR BOUNDARY ─────────────────────────────────────────────────────────
-class ErrorBoundary extends React.Component{
-constructor(p){super(p);this.state={err:null};}
-static getDerivedStateFromError(e){return{err:e};}
-componentDidCatch(e,info){console.error('Boundary caught:',e,info);}
-render(){
-if(this.state.err){
-return h('div',{className:'content'},
-h('div',{className:'alert alert-warn',style:{margin:'20px 0'}},
-h('b',null,'Error: '),this.state.err.message
-),
-h('button',{className:'btn btn-ghost btn-sm',onClick:()=>this.setState({err:null})},'← Back')
-);
-}
-return this.props.children;
-}
-}
-
 // ── ESTIMATE DETAIL ───────────────────────────────────────────────────────
 function EstimateDetail({id,onBack,onEdit,onConvert}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
 const [loading,setLoading]=useState(true);
-const [movingToJob,setMovingToJob]=useState(false);
+const [moving,setMoving]=useState(false);
 
 useEffect(()=>{
 sb.from('estimates').select('*').eq('id',id).single().then(r=>{setEst(r.data);setLoading(false)});
@@ -470,6 +436,17 @@ const sendEmail=()=>window.open('mailto:'+est.customer_email+'?subject=Your Esti
 const sendWA=()=>window.open('https://wa.me/1'+est.customer_phone.replace(/\D/g,'')+'?text=Hi '+est.customer_name+', your estimate from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View: '+shareUrl);
 const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
 
+async function moveToJob(){
+if(!confirm('Move to Jobs?'))return;
+setMoving(true);
+try{
+const chk=await sb.from('jobs').select('id').eq('estimate_id',est.id).maybeSingle();
+if(chk.data){alert('Job already exists for this estimate.');setMoving(false);return;}
+await sb.from('jobs').insert({estimate_id:est.id,title:(est.customer_name||'Job')+' — '+est.number,customer_name:est.customer_name,customer_phone:est.customer_phone,customer_address:est.customer_address,amount:calcTotal(est.items||[],est.tax_rate),status:'unassigned',deposit_paid:false});
+alert('Job created!');
+}catch(e){alert('Error: '+e.message);}
+setMoving(false);
+}
 function printEst(){
 const w=window.open('','_blank');
 w.document.write('<html><head><title>'+est.number+'</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}.total{font-size:20px;font-weight:bold;margin-top:16px}</style></head><body>');
@@ -488,36 +465,12 @@ w.document.write('<br/><hr/><p>Thank you for your business!</p></body></html>');
 w.document.close();w.print();
 }
 
-async function moveToJob(){
-if(!confirm('Move this estimate to Jobs?'))return;
-setMovingToJob(true);
-try{
-const existing=await sb.from('jobs').select('id').eq('estimate_id',est.id).maybeSingle();
-if(existing.data){alert('This estimate already has a job.');setMovingToJob(false);return;}
-await sb.from('jobs').insert({
-estimate_id:est.id,
-title:(est.customer_name||'Job')+' — '+est.number,
-customer_name:est.customer_name,
-customer_phone:est.customer_phone,
-customer_address:est.customer_address,
-amount:calcTotal(est.items||[],est.tax_rate),
-status:'unassigned',
-deposit_paid:false
-});
-if(est.status==='Draft'||est.status==='Sent'){
-await sb.from('estimates').update({status:'Approved'}).eq('id',est.id);
-}
-alert('Job created! Check the Jobs tab.');
-}catch(e){alert('Error: '+e.message);}
-setMovingToJob(false);
-}
-
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
-h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
-h('button',{className:'btn btn-sm',style:{background:'#7c3aed',color:'#fff'},onClick:moveToJob,disabled:movingToJob},movingToJob?'Moving...':'→ Jobs'),
+h('button',{className:'btn btn-sm',style:{background:'#7c3aed',color:'#fff'},onClick:moveToJob,disabled:moving},moving?'...':'→ Jobs'),
 h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'→ Invoice')
 )
 ),
@@ -730,17 +683,12 @@ const [invoices,setInvoices]=useState([]);
 const [loading,setLoading]=useState(true);
 const [filter,setFilter]=useState('All');
 
-function load(){setLoading(true);sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});}
-useEffect(()=>{load();},[]);
-
-async function delInv(e,id){
-e.stopPropagation();
-if(!confirm('Delete this invoice? This cannot be undone.'))return;
-await sb.from('invoices').delete().eq('id',id);
-load();
-}
+function loadInvs(){sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});}
+useEffect(()=>{loadInvs();},[]);
+async function delInv(e,id){e.stopPropagation();if(!confirm('Delete invoice?'))return;await sb.from('invoices').delete().eq('id',id);loadInvs();}
 
 const filtered=filter==='All'?invoices:invoices.filter(i=>i.status===filter);
+
 if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
 
 return h('div',{className:'content'},
@@ -758,10 +706,10 @@ h('div',{className:'list-item-title'},inv.number),
 h('div',{className:'list-item-sub'},inv.customer_name),
 h('div',{style:{marginTop:4}},statusBadge(inv.status))
 ),
-h('div',{style:{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}},
-h('div',{className:'list-item-amount',onClick:()=>onSelect(inv.id)},fmt(calcTotal(inv.items||[],inv.tax_rate))),
-h('div',{style:{fontSize:11,color:'#64748b'},onClick:()=>onSelect(inv.id)},inv.due_date?'Due: '+inv.due_date:''),
-h('button',{className:'btn btn-danger btn-sm',onClick:e=>delInv(e,inv.id),style:{fontSize:11,padding:'3px 8px'}},'🗑 Delete')
+h('div',{style:{textAlign:'right'}},
+h('div',{className:'list-item-amount'},fmt(calcTotal(inv.items||[],inv.tax_rate))),
+h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:''),
+h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,fontSize:11},onClick:e=>delInv(e,inv.id)},'🗑 Delete')
 )
 ))
 );
@@ -797,10 +745,10 @@ setInv(v=>({...v,status:'Paid',paid_at:Date.now()}));
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
-h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
 inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Paid'),
-h('button',{className:'btn btn-danger btn-sm',onClick:async()=>{if(!confirm('Delete invoice '+inv.number+'?'))return;await sb.from('invoices').delete().eq('id',id);onBack();}},'🗑')
+h('button',{className:'btn btn-danger btn-sm',onClick:async()=>{if(!confirm('Delete invoice?'))return;await sb.from('invoices').delete().eq('id',id);onBack();}},'🗑')
 )
 ),
 h('div',{className:'tab-bar'},
@@ -1391,18 +1339,8 @@ const [loading,setLoading]=useState(true);
 useEffect(()=>{
 let active=true;
 async function loadProfile(user){
-  try{
-    const r=await sb.from('profiles').select('*').eq('id',user.id).single();
-    if(r.data) return r.data;
-  }catch(e){}
-  // Fallback profile from auth user (works even without profiles table)
-  return {
-    id:user.id,
-    name:(user.email||'User').split('@')[0],
-    email:user.email||'',
-    role:'owner',
-    company:'The Mailbox Repair CO'
-  };
+try{const r=await sb.from('profiles').select('*').eq('id',user.id).single();if(r.data)return r.data;}catch(e){}
+return {id:user.id,name:(user.email||'User').split('@')[0],email:user.email||'',role:'owner',company:'The Mailbox Repair CO'};
 }
 sb.auth.getSession().then(async ({data})=>{
 if(!active)return;
