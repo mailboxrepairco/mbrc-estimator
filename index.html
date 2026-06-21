@@ -433,6 +433,7 @@ function EstimateDetail({id,onBack,onEdit,onConvert}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
 const [loading,setLoading]=useState(true);
+const [movingToJob,setMovingToJob]=useState(false);
 
 useEffect(()=>{
 sb.from('estimates').select('*').eq('id',id).single().then(r=>{setEst(r.data);setLoading(false)});
@@ -468,7 +469,6 @@ w.document.write('<br/><hr/><p>Thank you for your business!</p></body></html>');
 w.document.close();w.print();
 }
 
-const [movingToJob,setMovingToJob]=useState(false);
 async function moveToJob(){
 if(!confirm('Move this estimate to Jobs?'))return;
 setMovingToJob(true);
