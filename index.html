@@ -1309,7 +1309,7 @@ h(EstimateForm,{estimate:view.data,onSave:(est)=>{setView({type:'estimate-detail
 );
 if(view.type==='estimate-detail')
 return h('div',{className:'app'},
-h(ErrorBoundary,null,h(EstimateDetail,{
+h(EstimateDetail,{
 id:view.id,
 onBack:()=>setView(null),
 onEdit:()=>{
@@ -1318,7 +1318,7 @@ if(r.data)setView({type:'edit-estimate',data:r.data});
 });
 },
 onConvert:(est)=>setView({type:'new-invoice',data:est})
-})))
+})
 );
 if(view.type==='new-invoice')
 return h('div',{className:'app'},
