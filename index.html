@@ -161,6 +161,28 @@ Unpaid:'badge-unpaid',Paid:'badge-paid',Overdue:'badge-overdue'}[s]||'badge-draf
 return h('span',{className:'badge '+cls},s);
 }
 
+
+// ── CUSTOM MODALS (replaces browser alert/confirm) ───────────────────────
+function mbrcAlert(msg){
+return new Promise(r=>{
+const o=document.createElement('div');
+o.style.cssText='position:fixed;inset:0;background:rgba(15,30,54,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+o.innerHTML='<div style="background:#fff;border-radius:20px;padding:32px 24px;max-width:300px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(15,30,54,.22)"><div style="font-size:20px;font-weight:800;color:#0f1e36;line-height:1.3;margin-bottom:24px">'+msg+'</div><button style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:12px;padding:14px 0;font-size:16px;font-weight:700;cursor:pointer;width:100%">OK</button></div>';
+o.querySelector('button').onclick=()=>{document.body.removeChild(o);r(true);};
+document.body.appendChild(o);
+});
+}
+function mbrcConfirm(msg){
+return new Promise(r=>{
+const o=document.createElement('div');
+o.style.cssText='position:fixed;inset:0;background:rgba(15,30,54,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+o.innerHTML='<div style="background:#fff;border-radius:20px;padding:32px 24px;max-width:300px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(15,30,54,.22)"><div style="font-size:20px;font-weight:800;color:#0f1e36;line-height:1.3;margin-bottom:24px">'+msg+'</div><div style="display:flex;gap:10px"><button id="mc" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:14px 0;font-size:15px;font-weight:600;cursor:pointer">Cancel</button><button id="mo" style="flex:1;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:12px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer">OK</button></div></div>';
+o.querySelector('#mc').onclick=()=>{document.body.removeChild(o);r(false);};
+o.querySelector('#mo').onclick=()=>{document.body.removeChild(o);r(true);};
+document.body.appendChild(o);
+});
+}
+
 function jobStatusBadge(s){
 const map={awaiting_deposit:['Awaiting Deposit','badge-awaiting'],unassigned:['Unassigned','badge-unassigned'],assigned:['Assigned','badge-assigned'],in_progress:['In Progress','badge-inprogress'],complete:['Complete','badge-complete']};
 const e=map[s]||[s,'badge-draft'];
@@ -434,17 +456,18 @@ const shareUrl='https://mailboxrepairco.github.io/mbrc-estimator/view.html?id='+
 const sendSMS=()=>window.open('sms:'+est.customer_phone+'?body=Hi '+est.customer_name+', your estimate from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View here: '+shareUrl);
 const sendEmail=()=>window.open('mailto:'+est.customer_email+'?subject=Your Estimate '+est.number+' - The Mailbox Repair CO&body=Hi '+est.customer_name+',%0A%0AYour estimate is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+'%0A%0AThank you!%0AThe Mailbox Repair CO');
 const sendWA=()=>window.open('https://wa.me/1'+est.customer_phone.replace(/\D/g,'')+'?text=Hi '+est.customer_name+', your estimate from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View: '+shareUrl);
-const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
+const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);mbrcAlert('Link copied!')};
 
 async function moveToJob(){
-if(!confirm('Move to Jobs?'))return;
+if(!await mbrcConfirm('Move this estimate to Jobs?'))return;
 setMoving(true);
 try{
 const chk=await sb.from('jobs').select('id').eq('estimate_id',est.id).maybeSingle();
-if(chk.data){alert('Job already exists for this estimate.');setMoving(false);return;}
-await sb.from('jobs').insert({estimate_id:est.id,title:(est.customer_name||'Job')+' — '+est.number,customer_name:est.customer_name,customer_phone:est.customer_phone,customer_address:est.customer_address,amount:calcTotal(est.items||[],est.tax_rate),status:'unassigned',deposit_paid:false});
-alert('Job created!');
-}catch(e){alert('Error: '+e.message);}
+if(chk.data){await mbrcAlert('A job already exists for this estimate.');setMoving(false);return;}
+const res=await sb.from('jobs').insert({estimate_id:est.id,title:(est.customer_name||'Job')+' — '+est.number,customer_name:est.customer_name,customer_phone:est.customer_phone,customer_address:est.customer_address,amount:calcTotal(est.items||[],est.tax_rate),status:'unassigned',deposit_paid:false}).select().single();
+if(res.error)throw res.error;
+await mbrcAlert('Job created!');
+}catch(e){await mbrcAlert('Error: '+e.message);}
 setMoving(false);
 }
 function printEst(){
@@ -685,7 +708,7 @@ const [filter,setFilter]=useState('All');
 
 function loadInvs(){sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});}
 useEffect(()=>{loadInvs();},[]);
-async function delInv(e,id){e.stopPropagation();if(!confirm('Delete invoice?'))return;await sb.from('invoices').delete().eq('id',id);loadInvs();}
+async function delInv(e,id){e.stopPropagation();if(!await mbrcConfirm('Delete this invoice?'))return;await sb.from('invoices').delete().eq('id',id);loadInvs();}
 
 const filtered=filter==='All'?invoices:invoices.filter(i=>i.status===filter);
 
@@ -735,7 +758,7 @@ const shareUrl='https://mailboxrepairco.github.io/mbrc-estimator/view.html?inv='
 const payMsg=inv.payment_link?'%0A%0APay here: '+encodeURIComponent(inv.payment_link):'';
 const sendSMS=()=>window.open('sms:'+inv.customer_phone+'?body=Hi '+inv.customer_name+', your invoice '+inv.number+' from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View: '+shareUrl+payMsg);
 const sendEmail=()=>window.open('mailto:'+inv.customer_email+'?subject=Invoice '+inv.number+' - The Mailbox Repair CO&body=Hi '+inv.customer_name+',%0A%0AYour invoice is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+(inv.payment_link?'%0A%0APay here: '+inv.payment_link:'')+'%0A%0AThank you!');
-const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
+const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);mbrcAlert('Link copied!')};
 
 async function markPaid(){
 await sb.from('invoices').update({status:'Paid',paid_at:Date.now()}).eq('id',id);
@@ -748,7 +771,7 @@ h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
 inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Paid'),
-h('button',{className:'btn btn-danger btn-sm',onClick:async()=>{if(!confirm('Delete invoice?'))return;await sb.from('invoices').delete().eq('id',id);onBack();}},'🗑')
+h('button',{className:'btn btn-danger btn-sm',onClick:async()=>{if(!await mbrcConfirm('Delete this invoice?'))return;await sb.from('invoices').delete().eq('id',id);onBack();}},'🗑')
 )
 ),
 h('div',{className:'tab-bar'},
