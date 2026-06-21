@@ -320,6 +320,21 @@ result=await sb.from('estimates').update(data).eq('id',data.id).select().single(
 result=await sb.from('estimates').insert(data).select().single();
 }
 if(result.error) throw result.error;
+// Auto-create job if status is Approved
+if(data.status==='Approved'&&result.data){
+const existing=await sb.from('jobs').select('id').eq('estimate_id',result.data.id).maybeSingle();
+if(!existing.data){
+await sb.from('jobs').insert({
+estimate_id:result.data.id,
+title:(result.data.customer_name||'Job')+' — '+result.data.number,
+customer_name:result.data.customer_name,
+customer_phone:result.data.customer_phone,
+customer_address:result.data.customer_address,
+amount:calcTotal(result.data.items||[],result.data.tax_rate),
+status:'unassigned',deposit_paid:false
+}).catch(()=>{});
+}
+}
 onSave(result.data);
 } catch(e){
 alert('Error saving: '+e.message);
@@ -453,11 +468,37 @@ w.document.write('<br/><hr/><p>Thank you for your business!</p></body></html>');
 w.document.close();w.print();
 }
 
+const [movingToJob,setMovingToJob]=useState(false);
+async function moveToJob(){
+if(!confirm('Move this estimate to Jobs?'))return;
+setMovingToJob(true);
+try{
+const existing=await sb.from('jobs').select('id').eq('estimate_id',est.id).maybeSingle();
+if(existing.data){alert('This estimate already has a job.');setMovingToJob(false);return;}
+await sb.from('jobs').insert({
+estimate_id:est.id,
+title:(est.customer_name||'Job')+' — '+est.number,
+customer_name:est.customer_name,
+customer_phone:est.customer_phone,
+customer_address:est.customer_address,
+amount:calcTotal(est.items||[],est.tax_rate),
+status:'unassigned',
+deposit_paid:false
+});
+if(est.status==='Draft'||est.status==='Sent'){
+await sb.from('estimates').update({status:'Approved'}).eq('id',est.id);
+}
+alert('Job created! Check the Jobs tab.');
+}catch(e){alert('Error: '+e.message);}
+setMovingToJob(false);
+}
+
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
-h('div',{style:{display:'flex',gap:6}},
+h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
+h('button',{className:'btn btn-sm',style:{background:'#7c3aed',color:'#fff'},onClick:moveToJob,disabled:movingToJob},movingToJob?'Moving...':'→ Jobs'),
 h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'→ Invoice')
 )
 ),
@@ -670,12 +711,17 @@ const [invoices,setInvoices]=useState([]);
 const [loading,setLoading]=useState(true);
 const [filter,setFilter]=useState('All');
 
-useEffect(()=>{
-sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});
-},[]);
+function load(){setLoading(true);sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});}
+useEffect(()=>{load();},[]);
+
+async function delInv(e,id){
+e.stopPropagation();
+if(!confirm('Delete this invoice? This cannot be undone.'))return;
+await sb.from('invoices').delete().eq('id',id);
+load();
+}
 
 const filtered=filter==='All'?invoices:invoices.filter(i=>i.status===filter);
-
 if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
 
 return h('div',{className:'content'},
@@ -687,15 +733,16 @@ h('div',{style:{display:'flex',gap:4,overflowX:'auto',marginBottom:12}},
 ['All','Unpaid','Paid','Overdue'].map(s=>h('button',{key:s,className:'btn btn-sm '+(filter===s?'btn-primary':'btn-ghost'),onClick:()=>setFilter(s),style:{flexShrink:0}},s))
 ),
 filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'🧾'),h('div',null,'No invoices yet')):
-filtered.map(inv=>h('div',{key:inv.id,className:'list-item',onClick:()=>onSelect(inv.id)},
-h('div',null,
+filtered.map(inv=>h('div',{key:inv.id,className:'list-item'},
+h('div',{style:{flex:1},onClick:()=>onSelect(inv.id)},
 h('div',{className:'list-item-title'},inv.number),
 h('div',{className:'list-item-sub'},inv.customer_name),
 h('div',{style:{marginTop:4}},statusBadge(inv.status))
 ),
-h('div',{style:{textAlign:'right'}},
-h('div',{className:'list-item-amount'},fmt(calcTotal(inv.items||[],inv.tax_rate))),
-h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:'')
+h('div',{style:{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}},
+h('div',{className:'list-item-amount',onClick:()=>onSelect(inv.id)},fmt(calcTotal(inv.items||[],inv.tax_rate))),
+h('div',{style:{fontSize:11,color:'#64748b'},onClick:()=>onSelect(inv.id)},inv.due_date?'Due: '+inv.due_date:''),
+h('button',{className:'btn btn-danger btn-sm',onClick:e=>delInv(e,inv.id),style:{fontSize:11,padding:'3px 8px'}},'🗑 Delete')
 )
 ))
 );
@@ -731,9 +778,10 @@ setInv(v=>({...v,status:'Paid',paid_at:Date.now()}));
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
-h('div',{style:{display:'flex',gap:6}},
+h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
-inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Mark Paid')
+inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Paid'),
+h('button',{className:'btn btn-danger btn-sm',onClick:async()=>{if(!confirm('Delete invoice '+inv.number+'?'))return;await sb.from('invoices').delete().eq('id',id);onBack();}},'🗑')
 )
 ),
 h('div',{className:'tab-bar'},
