@@ -59,7 +59,7 @@ async function init(){
   const token=p.get("token");const type=p.get("type")||"estimate";
   if(!token){show("err","Invalid link — no token found.");return}
   const tbl=type==="invoice"?"invoices":"estimates";
-  const{data,error}=await db.from(tbl).select("*").eq("share_token",token).single();
+  const{data,error}=await db.rpc(tbl==="invoices"?"get_shared_invoice":"get_shared_estimate",{tok:token}).single();
   if(error||!data){show("err","Document not found or link expired.");return}
   try{
     await db.from(tbl).update({viewed_at:Date.now(),view_count:(data.view_count||0)+1}).eq("share_token",token);
