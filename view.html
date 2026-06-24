@@ -65,15 +65,19 @@ async function init(){
     await db.from(tbl).update({viewed_at:Date.now(),view_count:(data.view_count||0)+1}).eq("share_token",token);
     await db.from("notifications").insert({id:crypto.randomUUID(),type:"viewed",message:`${data.customer_name||"Customer"} viewed ${type} #${data.number}`,timestamp:Date.now(),read:false});
   }catch(e){}
-  render(data,type,token);
+  try{ await db.rpc("record_share_open",{tok:token,doc_type:type}); }catch(e){}
+  let __brand=null; try{ const __br=await db.rpc("get_share_branding",{tok:token,doc_type:type}); if(__br&&__br.data&&__br.data[0])__brand=__br.data[0]; }catch(e){}
+  render(data,type,token,__brand);
 }
 
 function show(cls,msg){document.getElementById("app").innerHTML=`<div class="${cls}">${msg}</div>`}
 
-function render(d,type,token){
+function brandHeader(b){ if(!b) return ""; var logo=b.logo_url||""; var parts=[b.phone,b.email,b.website].filter(Boolean).join("   \u2022   "); var img=logo?('<img src="'+logo+'" alt="logo" style="max-height:72px;margin-bottom:6px"/><br/>'):""; var sub=parts?('<div style="font-size:13px;color:#64748b;margin-top:2px">'+parts+'</div>'):""; return '<div style="text-align:center;margin-bottom:16px">'+img+'<div style="font-size:20px;font-weight:700;color:#0f172a">'+(b.name||"")+'</div>'+sub+'</div>'; }
+function render(d,type,token,brand){
   const isE=type==="estimate";
   const items=d.items||[];const photos=d.photos||[];
   document.getElementById("app").innerHTML=`
+    ${brand?brandHeader(brand):""}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
         <div><div class="lbl">${isE?"Estimate":"Invoice"}</div><div style="font-size:24px;font-weight:800;color:#0369a1">#${d.number}</div></div>
