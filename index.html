@@ -333,6 +333,8 @@ function applyBranding(co){
   document.title = ((co && co.name) || 'Estimator') + ' | Estimator';
 }
 function coName(){ return (COMPANY && COMPANY.name) || 'Your Company'; }
+function coContactLine(){ if(!COMPANY) return ''; return [COMPANY.phone,COMPANY.email,COMPANY.website].filter(Boolean).join('   \u2022   '); }
+function coPrintHeader(){ var logo=(COMPANY&&COMPANY.logo_url)||''; var line=coContactLine(); return (logo?('<img src="'+logo+'" alt="logo" style="max-height:70px;margin-bottom:8px"/><br/>'):'')+'<h1 style="margin:4px 0">'+coName()+'</h1>'+(line?('<div style="color:#555;font-size:13px;margin-bottom:6px">'+line+'</div>'):'')+'<hr/>'; }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
 const fmt = n => '$' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
@@ -623,7 +625,7 @@ const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl)
 function printEst(){
 const w=window.open('','_blank');
 w.document.write('<html><head><title>'+est.number+'</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}.total{font-size:20px;font-weight:bold;margin-top:16px}</style></head><body>');
-w.document.write('<h1>'+coName()+'</h1><hr/>');
+w.document.write(coPrintHeader());
 w.document.write('<h2>Estimate '+est.number+'</h2>');
 w.document.write('<p><strong>Date:</strong> '+est.date+'<br/><strong>Status:</strong> '+est.status+'</p>');
 w.document.write('<h3>Customer</h3><p>'+est.customer_name+'<br/>'+est.customer_phone+'<br/>'+est.customer_email+'<br/>'+est.customer_address+'</p>');
@@ -658,6 +660,7 @@ h('h2',{style:{fontSize:20,fontWeight:700}},est.number),
 statusBadge(est.status)
 ),
 h('div',{style:{fontSize:13,color:'#64748b',marginTop:4}},est.date),
+h(StatusQuick,{est}),
 h('div',{className:'divider'}),
 h('div',{style:{fontSize:14}},
 h('div',{style:{fontWeight:600}},est.customer_name),
@@ -1558,6 +1561,7 @@ h('div',{className:'nav-logo'},
 (company&&company.logo_url)?h('img',{src:company.logo_url,alt:coName,style:{height:28,borderRadius:6}}):coInit,
 h('span',null,coName)),
 h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+h(NotifBell,{profile}),
 h('span',{className:'role-pill'},profile.is_platform?'platform':profile.role),
 h('button',{className:'btn btn-ghost btn-sm',onClick:onLogout},'Logout')
 )
@@ -1584,6 +1588,57 @@ tab==='platform'&&profile.is_platform&&h(Platform,{profile})
 }
 
 // ── PLATFORM (reseller only) — create companies + see join codes ───────────
+function StatusQuick({est}){
+const [st,setSt]=useState(est.status||'Draft');
+const [busy,setBusy]=useState(false);
+async function ch(v){ setBusy(true); setSt(v); est.status=v; await sb.from('estimates').update({status:v}).eq('id',est.id); setBusy(false); }
+return h('div',{style:{display:'flex',alignItems:'center',gap:8,marginTop:8}},
+h('span',{style:{fontSize:13,color:'#64748b'}},'Status:'),
+h('select',{className:'input',style:{width:'auto',padding:'4px 8px'},value:st,disabled:busy,onChange:e=>ch(e.target.value)},
+['Draft','Sent','Approved','Declined'].map(s=>h('option',{key:s,value:s},s)))
+);
+}
+function NotifBell({profile}){
+const [open,setOpen]=useState(false);
+const [items,setItems]=useState([]);
+function load(){ sb.from('notifications').select('*').order('timestamp',{ascending:false}).limit(20).then(r=>{ let d=r.data||[]; if(profile&&profile.company_id){ d=d.filter(n=>!n.company_id||n.company_id===profile.company_id); } setItems(d); }); }
+useEffect(()=>{ load(); const t=setInterval(load,60000); return ()=>clearInterval(t); },[]);
+const unread=items.filter(n=>!n.read).length;
+async function markAll(){ const ids=items.filter(n=>!n.read).map(n=>n.id); if(ids.length){ await sb.from('notifications').update({read:true}).in('id',ids); load(); } }
+return h('div',{style:{position:'relative'}},
+h('button',{className:'btn btn-ghost btn-sm',onClick:()=>{const willOpen=!open; setOpen(willOpen); if(willOpen)setTimeout(markAll,1500);}},unread?('\uD83D\uDD14 '+unread):'\uD83D\uDD14'),
+open?h('div',{style:{position:'absolute',right:0,top:36,width:300,maxHeight:380,overflowY:'auto',background:'#fff',border:'1px solid #e5e7eb',borderRadius:10,boxShadow:'0 8px 24px rgba(0,0,0,.12)',zIndex:50,padding:8}},
+items.length?items.map(n=>h('div',{key:n.id,style:{padding:'8px 10px',borderBottom:'1px solid #f1f5f9',background:n.read?'#fff':'#f0f7ff',borderRadius:6,marginBottom:4}},
+h('div',{style:{fontSize:13,color:'#0f172a'}},n.message||n.type||'Notification'),
+h('div',{style:{fontSize:11,color:'#94a3b8',marginTop:2}},n.timestamp?new Date(n.timestamp).toLocaleString():'')
+)):h('div',{style:{padding:12,color:'#94a3b8',fontSize:13}},'No notifications yet.')
+):null
+);
+}
+function CompanyProfile({profile}){
+const [co,setCo]=useState(COMPANY||null);
+const [busy,setBusy]=useState(false);
+const [msg,setMsg]=useState('');
+useEffect(()=>{ if(profile&&profile.company_id){ sb.from('companies').select('*').eq('id',profile.company_id).single().then(r=>{ if(r.data){setCo(r.data); applyBranding(r.data);} }); } },[]);
+function up(k,v){ setCo(c=>({...(c||{}),[k]:v})); }
+function onLogo(e){ const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=256; let w=img.width,hh=img.height; if(w>=hh){ if(w>max){hh=Math.round(hh*max/w);w=max;} } else { if(hh>max){w=Math.round(w*max/hh);hh=max;} } const cv=document.createElement('canvas'); cv.width=w;cv.height=hh; cv.getContext('2d').drawImage(img,0,0,w,hh); up('logo_url',cv.toDataURL('image/png')); }; img.src=rd.result; }; rd.readAsDataURL(f); }
+async function save(){ if(!co||!profile.company_id){setMsg('No company to save.');return;} setBusy(true);setMsg(''); const patch={name:co.name,accent:co.accent,logo_url:co.logo_url||null,phone:co.phone||null,email:co.email||null,website:co.website||null}; const r=await sb.from('companies').update(patch).eq('id',profile.company_id).select().single(); setBusy(false); if(r.error){setMsg('Error: '+r.error.message);} else {setMsg('Saved.'); applyBranding(r.data); setCo(r.data);} }
+return h('div',{className:'card',style:{marginBottom:16}},
+h('h3',{style:{marginTop:0}},'Company Profile — logo & info shown on estimates/invoices'),
+h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:12}},
+(co&&co.logo_url)?h('img',{src:co.logo_url,alt:'logo',style:{height:56,borderRadius:8,border:'1px solid #e5e7eb'}}):h('div',{style:{height:56,width:56,borderRadius:8,background:'#f1f5f9',display:'flex',alignItems:'center',justifyContent:'center',color:'#94a3b8',fontSize:11}},'No logo'),
+h('label',{className:'btn btn-ghost btn-sm',style:{cursor:'pointer'}},'Upload logo',h('input',{type:'file',accept:'image/*',onChange:onLogo,style:{display:'none'}})),
+(co&&co.logo_url)?h('button',{className:'btn btn-ghost btn-sm',onClick:()=>up('logo_url',null)},'Remove'):null
+),
+h('div',{className:'form-group'},h('label',{className:'label'},'Company name'),h('input',{className:'input',value:(co&&co.name)||'',onChange:e=>up('name',e.target.value)})),
+h('div',{className:'form-group'},h('label',{className:'label'},'Phone'),h('input',{className:'input',value:(co&&co.phone)||'',onChange:e=>up('phone',e.target.value),placeholder:'(214) 555-0123'})),
+h('div',{className:'form-group'},h('label',{className:'label'},'Email'),h('input',{className:'input',value:(co&&co.email)||'',onChange:e=>up('email',e.target.value),placeholder:'you@company.com'})),
+h('div',{className:'form-group'},h('label',{className:'label'},'Website'),h('input',{className:'input',value:(co&&co.website)||'',onChange:e=>up('website',e.target.value),placeholder:'www.company.com'})),
+h('div',{className:'form-group'},h('label',{className:'label'},'Accent color'),h('input',{className:'input',type:'color',value:(co&&co.accent)||'#2563eb',onChange:e=>up('accent',e.target.value),style:{height:44,padding:4}})),
+msg&&h('div',{className:'alert alert-info'},msg),
+h('button',{className:'btn btn-primary btn-block',onClick:save,disabled:busy},busy?'Saving...':'Save company profile')
+);
+}
 function Platform({profile}){
 const [cos,setCos]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -1611,6 +1666,7 @@ setBusy(false);
 }
 return h('div',{className:'content'},
 h('div',{className:'section-header'},h('h2',{className:'section-title'},'Platform — Companies')),
+h(CompanyProfile,{profile}),
 h('div',{className:'card',style:{marginBottom:16}},
 h('div',{className:'form-group'},h('label',{className:'label'},'Company name'),h('input',{className:'input',value:form.name,onChange:e=>setForm({...form,name:e.target.value}),placeholder:'Acme Mailbox Repair'})),
 h('div',{className:'form-group'},h('label',{className:'label'},'Accent color'),h('input',{className:'input',type:'color',value:form.accent,onChange:e=>setForm({...form,accent:e.target.value}),style:{height:44,padding:4}})),
