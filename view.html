@@ -140,7 +140,7 @@ init();
     return;
   }
   var token=gp('token'),type=gp('type')||'estimate';
-  if(type!=='invoice'||!token)return;
+  if(!token)return;
   var inv;
   try{var r=await db.rpc('get_shared_invoice',{tok:token}).single();inv=r&&r.data;}catch(e){return;}
   if(!inv)return;
