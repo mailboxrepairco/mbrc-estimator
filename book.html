@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Book a 15-min Demo · Contractors Loadout</title>
+<meta name="description" content="Watch a stranger's text become a paid, 5-star job. Book a free 15-minute demo."/>
+<style>
+  :root{
+    --brand:#ea6a1e; --brand-dark:#c4551296; --ink:#1f2937; --muted:#6b7280;
+    --bg:#fff7f1; --card:#ffffff; --line:#f0d9c8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:560px;margin:0 auto;padding:28px 18px 56px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--ink)}
+  .logo .mark{width:34px;height:34px;border-radius:9px;background:var(--brand);display:flex;
+    align-items:center;justify-content:center;color:#fff;font-size:18px}
+  .hero{margin:26px 0 6px;font-size:27px;font-weight:800;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:16px;margin:0 0 22px}
+  .pill{display:inline-block;background:#fff;border:1px solid var(--line);color:var(--brand);
+    font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px;margin-bottom:8px}
+  h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+    margin:30px 0 12px;font-weight:700}
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .slot{background:var(--card);border:1.5px solid var(--line);border-radius:13px;padding:14px 12px;
+    text-align:left;cursor:pointer;transition:.12s;font:inherit;color:var(--ink)}
+  .slot:hover,.slot:active{border-color:var(--brand);transform:translateY(-1px);
+    box-shadow:0 6px 16px rgba(234,106,30,.13)}
+  .slot .d{font-weight:800;font-size:15px}
+  .slot .t{color:var(--muted);font-size:14px;margin-top:2px}
+  .big{display:block;width:100%;background:var(--brand);color:#fff;border:0;border-radius:13px;
+    padding:16px;font-size:17px;font-weight:800;cursor:pointer;margin-top:10px;text-align:center;
+    text-decoration:none}
+  .big:active{filter:brightness(.95)}
+  .ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .row{display:flex;gap:10px;margin-top:10px}
+  .row>*{flex:1}
+  .note{color:var(--muted);font-size:13px;text-align:center;margin-top:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:14px}
+  .loop{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);margin:7px 0}
+  .loop b{color:var(--brand)}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:34px}
+  a{color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo"><span class="mark">&#128296;</span> Contractors Loadout</div>
+
+  <span class="pill" style="margin-top:22px">First 25 founders · $49/mo locked for life</span>
+  <div class="hero">Book a free 15-min demo</div>
+  <p class="sub">Watch a stranger's text turn into a paid, 5-star job &mdash; while you're on the truck. No card, free to try.</p>
+
+  <div class="card">
+    <div class="loop">&#9889; <span><b>Lead comes in</b> &rarr; texted back in under 60 seconds</span></div>
+    <div class="loop">&#128203; <span><b>Quote &amp; invoice</b> &rarr; sent from your phone in 30 seconds</span></div>
+    <div class="loop">&#11088; <span><b>Paid &amp; reviewed</b> &rarr; 5-star review asked for automatically</span></div>
+  </div>
+
+  <h2>Pick a time that works</h2>
+  <div class="slots" id="slots"></div>
+
+  <h2>Or reach me directly</h2>
+  <a class="big" id="textBtn" href="#">&#128172;&nbsp; Text me to book</a>
+  <div class="row">
+    <a class="big ghost" id="callBtn" href="#">&#128222;&nbsp; Call</a>
+    <a class="big ghost" id="emailBtn" href="#">&#9993;&nbsp; Email</a>
+  </div>
+
+  <p class="note">I run my own business on this exact system. Pick a slot and I'll show you the 90-second version on your own leads.</p>
+
+  <footer>Contractors Loadout &middot; DFW Metroplex</footer>
+</div>
+
+<script>
+/* =======================================================================
+   EDIT THESE 4 LINES — that's the whole setup.
+   ======================================================================= */
+var CONFIG = {
+  phone:   "8178795877",                         // your cell, digits only (no spaces/dashes)
+  email:   "Office@themailboxrepairco.com",      // where booking emails go
+  name:    "Jr",                                 // your name
+  business:"Contractors Loadout"                 // shown in the text/email
+};
+/* ======================================================================= */
+
+// Generates the next several weekday demo slots automatically — no calendar needed.
+var TIMES = ["10:00 AM", "1:00 PM", "4:00 PM"];   // times you offer each day
+var DAYS_TO_SHOW = 6;                              // how many upcoming slots to list
+
+function buildSlots(){
+  var out = [], d = new Date(), added = 0;
+  d.setDate(d.getDate() + 1); // start tomorrow
+  while(added < DAYS_TO_SHOW){
+    var dow = d.getDay();
+    if(dow !== 0 && dow !== 6){ // skip Sun/Sat
+      var label = d.toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"});
+      var t = TIMES[added % TIMES.length];
+      out.push({label:label, time:t});
+      added++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+
+function smsLink(body){
+  // iOS uses &body=, Android uses ?body= — this works for both in practice.
+  return "sms:" + CONFIG.phone + "?&body=" + encodeURIComponent(body);
+}
+
+var slots = buildSlots();
+var container = document.getElementById("slots");
+slots.forEach(function(s){
+  var btn = document.createElement("a");
+  btn.className = "slot";
+  btn.href = smsLink("Hi " + CONFIG.name + ", I'd like to book the " + s.label + " at " + s.time +
+                     " demo of " + CONFIG.business + ". My name is ___ and I do ___.");
+  btn.innerHTML = '<div class="d">'+s.label+'</div><div class="t">'+s.time+'</div>';
+  container.appendChild(btn);
+});
+
+document.getElementById("textBtn").href = smsLink(
+  "Hi " + CONFIG.name + ", I saw the Contractors Loadout demo and want to book a 15-min slot. My name is ___ and I do ___.");
+document.getElementById("callBtn").href = "tel:" + CONFIG.phone;
+document.getElementById("emailBtn").href = "mailto:" + CONFIG.email +
+  "?subject=" + encodeURIComponent("Demo request — Contractors Loadout") +
+  "&body=" + encodeURIComponent("Hi " + CONFIG.name + ", I'd like to book a 15-min demo. My name is ___ and I do ___. Best time: ___");
+</script>
+</body>
+</html>
