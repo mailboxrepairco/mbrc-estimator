@@ -53,7 +53,7 @@ function tot(d){return sub(d)+tax(d)}
 async function init(){
   const p=new URLSearchParams(location.search);
   const token=p.get("token");let type=p.get("type")||"estimate";
-  if(!token){show("err","Invalid link â no token found.");return}
+  if(!token){show("err","Invalid link — no token found.");return}
   let tbl=type==="invoice"?"invoices":"estimates";
   let _r=await db.rpc(tbl==="invoices"?"get_shared_invoice":"get_shared_estimate",{tok:token}).single();
   if(_r.error||!_r.data){tbl=tbl==="invoices"?"estimates":"invoices";type=type==="invoice"?"estimate":"invoice";_r=await db.rpc(tbl==="invoices"?"get_shared_invoice":"get_shared_estimate",{tok:token}).single();}
@@ -83,7 +83,7 @@ function render(d,type,token,brand){
       </div>
       <div class="g2">
         <div><div class="lbl">From</div><div class="val">The Mailbox Repair CO</div><div style="font-size:12px;color:#64748b">817-592-6678</div><div style="font-size:12px;color:#64748b">Office@themailboxrepairco.com</div></div>
-        <div><div class="lbl">Bill To</div><div class="val">${d.customer_name||"â"}</div>${d.customer_address?`<div style="font-size:12px;color:#64748b">${d.customer_address}</div>`:""} ${d.customer_phone?`<div style="font-size:12px;color:#64748b">${d.customer_phone}</div>`:""} ${d.customer_email?`<div style="font-size:12px;color:#64748b">${d.customer_email}</div>`:""}</div>
+        <div><div class="lbl">Bill To</div><div class="val">${d.customer_name||"—"}</div>${d.customer_address?`<div style="font-size:12px;color:#64748b">${d.customer_address}</div>`:""} ${d.customer_phone?`<div style="font-size:12px;color:#64748b">${d.customer_phone}</div>`:""} ${d.customer_email?`<div style="font-size:12px;color:#64748b">${d.customer_email}</div>`:""}</div>
       </div>
     </div>
     <div class="card">
@@ -97,15 +97,15 @@ function render(d,type,token,brand){
       </div>
     </div>
     ${d.notes?`<div class="card"><div class="lbl">Notes</div><div style="font-size:13px;margin-top:6px;color:#475569;white-space:pre-wrap">${d.notes}</div></div>`:""}
-    ${photos.length>0?`<div class="card"><div class="lbl">Job Photos (${photos.length})</div><div class="pgrid">${photos.map(p=>`<div><img src="${p.data}" alt="${p.label}"/><div class="plbl">${p.label}${p.caption?" â "+p.caption:""}</div></div>`).join("")}</div></div>`:""}
+    ${photos.length>0?`<div class="card"><div class="lbl">Job Photos (${photos.length})</div><div class="pgrid">${photos.map(p=>`<div><img src="${p.data}" alt="${p.label}"/><div class="plbl">${p.label}${p.caption?" — "+p.caption:""}</div></div>`).join("")}</div></div>`:""}
     ${d.signature?`<div class="card"><div class="lbl">Customer Signature</div><img src="${d.signature}" alt="Signature" style="max-width:100%;border:1px solid #e2e8f0;border-radius:6px;margin-top:8px"/>${d.signed_at?`<div style="font-size:11px;color:#64748b;margin-top:6px">Signed ${new Date(d.signed_at).toLocaleString()}</div>`:""}</div>`:""}
     ${d.contract_text&&isE?`<div class="card"><div class="lbl">Terms & Conditions</div><pre style="font-size:11px;color:#475569;white-space:pre-wrap;margin-top:8px;font-family:inherit;line-height:1.6">${d.contract_text}</pre></div>`:""}
     <div class="card noprint" id="actions">
-      ${isE&&d.status!=="Approved"?`<button class="approve" id="appBtn" onclick="approve('${token}')">â Approve This Estimate</button>`:""}
-      ${isE&&d.status==="Approved"?`<div style="text-align:center;padding:14px;background:#dcfce7;border-radius:10px;color:#15803d;font-weight:700;font-size:15px">â Estimate Approved â We will be in touch!</div>`:""}
-      <button class="prt" onclick="window.print()">ð¨ï¸ Print / Save as PDF</button>
+      ${isE&&d.status!=="Approved"?`<button class="approve" id="appBtn" onclick="approve('${token}')">✅ Approve This Estimate</button>`:""}
+      ${isE&&d.status==="Approved"?`<div style="text-align:center;padding:14px;background:#dcfce7;border-radius:10px;color:#15803d;font-weight:700;font-size:15px">✅ Estimate Approved — We will be in touch!</div>`:""}
+      <button class="prt" onclick="window.print()">🖨️ Print / Save as PDF</button>
     </div>
-    <div class="ft">The Mailbox Repair CO &nbsp;Â·&nbsp; 817-592-6678 &nbsp;Â·&nbsp; Office@themailboxrepairco.com<br/>DFW Metroplex &nbsp;Â·&nbsp; themailboxrepairco.com</div>
+    <div class="ft">The Mailbox Repair CO &nbsp;·&nbsp; 817-592-6678 &nbsp;·&nbsp; Office@themailboxrepairco.com<br/>DFW Metroplex &nbsp;·&nbsp; themailboxrepairco.com</div>
   `;
 }
 
@@ -113,9 +113,9 @@ async function approve(token){
   const btn=document.getElementById("appBtn");
   if(!btn)return;btn.disabled=true;btn.textContent="Approving...";
   await db.from("estimates").update({status:"Approved"}).eq("share_token",token);
-  await db.from("notifications").insert({id:crypto.randomUUID(),type:"approved",message:"Customer APPROVED the estimate! ð",timestamp:Date.now(),read:false});
-  btn.className="approve ok";btn.textContent="â Approved!";
-  setTimeout(()=>{const a=document.getElementById("actions");if(a)a.innerHTML='<div style="text-align:center;padding:16px;background:#dcfce7;border-radius:10px;color:#15803d;font-weight:700;font-size:15px">â Estimate Approved â We will be in touch soon!</div><button class="prt" onclick="window.print()">ð¨ï¸ Print / Save as PDF</button>';},1500);
+  await db.from("notifications").insert({id:crypto.randomUUID(),type:"approved",message:"Customer APPROVED the estimate! 🎉",timestamp:Date.now(),read:false});
+  btn.className="approve ok";btn.textContent="✅ Approved!";
+  setTimeout(()=>{const a=document.getElementById("actions");if(a)a.innerHTML='<div style="text-align:center;padding:16px;background:#dcfce7;border-radius:10px;color:#15803d;font-weight:700;font-size:15px">✅ Estimate Approved — We will be in touch soon!</div><button class="prt" onclick="window.print()">🖨️ Print / Save as PDF</button>';},1500);
 }
 
 init();
