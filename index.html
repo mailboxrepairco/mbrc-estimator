@@ -141,20 +141,20 @@ canvas{border:1px solid #d8e0ec;border-radius:10px;width:100%;touch-action:none;
 const {useState,useEffect,useRef,useCallback} = React;
 const h = React.createElement;
 
-// ââ SUPABASE (Estimator SaaS project â paste your project URL + anon key) ââ
+// Ã¢ÂÂÃ¢ÂÂ SUPABASE (Estimator SaaS project Ã¢ÂÂ paste your project URL + anon key) Ã¢ÂÂÃ¢ÂÂ
 // Leave these as-is to run the instant offline DEMO (no backend, no signup).
 // Paste a real project URL + anon key to switch to the live multi-tenant backend.
 const SB_URL = 'https://zzaiqaknjvueytymqeul.supabase.co';
 const SB_KEY = 'sb_publishable_pI7rLourJP2DCzX2oFzd8w__ncNr2ri';
 const DEMO_MODE = SB_URL.indexOf('YOUR-PROJECT-REF') !== -1;
 
-// ââ SPEED-TO-LEAD SMS âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ SPEED-TO-LEAD SMS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 // Paste your deployed lead-intake function URL here to send REAL texts.
 // Leave blank (or in demo mode) and the "Text back now" button just simulates,
 // showing the exact message it would send. See TWILIO-SETUP.md to go live.
 const LEAD_SMS_URL = '';
 
-// ââ OFFLINE DEMO CLIENT âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ OFFLINE DEMO CLIENT Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 // A localStorage-backed stand-in for the Supabase JS client. It supports the
 // exact chain the app uses (select/insert/update/delete/eq/order/single/
 // maybeSingle/then) plus auth + a stub storage bucket, so all ~56 sb.* call
@@ -230,7 +230,7 @@ function buildDemoClient(){
   return { from: t => new QB(t), auth, storage };
 }
 
-// ââ DEMO SEED: The Mailbox Repair Co. (the live leadâpaidâreview walkthrough) â
+// Ã¢ÂÂÃ¢ÂÂ DEMO SEED: The Mailbox Repair Co. (the live leadÃ¢ÂÂpaidÃ¢ÂÂreview walkthrough) Ã¢ÂÂ
 function seedDemo(){
   const SEED_VERSION='4';
   if(localStorage.getItem('cl_demo_seed_version')===SEED_VERSION) return;
@@ -261,14 +261,14 @@ function seedDemo(){
     {id:sid('p'),company_id:CO,description:'Concrete footing',unit:'ea',price:60}
   ]);
 
-  // Leads â the front of the funnel (speed-to-lead story)
+  // Leads Ã¢ÂÂ the front of the funnel (speed-to-lead story)
   put('leads', [
     {id:sid('l'),company_id:CO,name:'Marcus Reed',phone:'(469) 555-0188',email:'marcus.reed@gmail.com',address:'1820 Oak Bend Dr, Plano TX',lead_source:'Google',message:'HOA says my leaning mailbox has to go. Need a quote.',status:'New',created_at:dayAgo(0)},
     {id:sid('l'),company_id:CO,name:'Tanya Brooks',phone:'(214) 555-0162',email:'tbrooks@outlook.com',address:'905 Meadow Ln, Frisco TX',lead_source:'Facebook',message:'Car backed into my mailbox. Want a decorative one this time.',status:'Contacted',created_at:dayAgo(1)},
     {id:sid('l'),company_id:CO,name:'Derek Salas',phone:'(972) 555-0117',email:'dsalas@gmail.com',address:'3340 Birchwood Ct, McKinney TX',lead_source:'Nextdoor',message:'Door fell off the box, just needs a hinge fix.',status:'Qualified',created_at:dayAgo(2)}
   ]);
 
-  // Customers â converted leads + existing book
+  // Customers Ã¢ÂÂ converted leads + existing book
   const custWon=sid('c'), custInv=sid('c'), custEst=sid('c');
   put('customers', [
     {id:custWon,company_id:CO,name:'Linda Cho',phone:'(214) 555-0199',email:'lindacho@gmail.com',address:'77 Crestview Dr, Allen TX',lead_source:'Referral',stage:'Won',follow_up_date:null,created_at:dayAgo(20)},
@@ -276,7 +276,7 @@ function seedDemo(){
     {id:custEst,company_id:CO,name:'Tanya Brooks',phone:'(214) 555-0162',email:'tbrooks@outlook.com',address:'905 Meadow Ln, Frisco TX',lead_source:'Facebook',stage:'Quoted',follow_up_date:dateIn(2),created_at:dayAgo(1)}
   ]);
 
-  // Estimates â one Approved (became invoice), one Sent (open), one Draft
+  // Estimates Ã¢ÂÂ one Approved (became invoice), one Sent (open), one Draft
   const estWon=sid('e'), invPaid=sid('i'), invOpen=sid('i');
   put('estimates', [
     {id:estWon,company_id:CO,customer_name:'Linda Cho',customer_phone:'(214) 555-0199',customer_email:'lindacho@gmail.com',customer_address:'77 Crestview Dr, Allen TX',
@@ -287,7 +287,7 @@ function seedDemo(){
       items:[{description:'Standard Mailbox Replacement',qty:1,price:285}],tax_rate:8.25,status:'Draft',invoice_id:null,created_at:dayAgo(3)}
   ]);
 
-  // Invoices â one PAID (closes the loop), one open
+  // Invoices Ã¢ÂÂ one PAID (closes the loop), one open
   put('invoices', [
     {id:invPaid,company_id:CO,customer_name:'Linda Cho',customer_email:'lindacho@gmail.com',
       items:[{description:'Decorative / Cast-Aluminum Mailbox',qty:1,price:650},{description:'Concrete footing',qty:1,price:60}],tax_rate:8.25,status:'Paid',due_date:dateAgo(5),paid_at:dayAgo(7),created_at:dayAgo(16)},
@@ -295,7 +295,7 @@ function seedDemo(){
       items:[{description:'Standard Mailbox Replacement',qty:1,price:285}],tax_rate:8.25,status:'Unpaid',due_date:dateIn(7),paid_at:null,created_at:dayAgo(2)}
   ]);
 
-  // Jobs â one complete (with the paid job), feeds reviews
+  // Jobs Ã¢ÂÂ one complete (with the paid job), feeds reviews
   put('jobs', [
     {id:sid('j'),company_id:CO,customer_name:'Linda Cho',address:'77 Crestview Dr, Allen TX',invoice_id:invPaid,
       status:'complete',assigned_to:'demo-owner',assigned_to_name:'Jr',scheduled_date:dateAgo(8),deposit_paid:true,created_at:dayAgo(16)},
@@ -320,10 +320,10 @@ function resetDemo(){
 if(DEMO_MODE){ seedDemo(); }
 const sb = DEMO_MODE ? buildDemoClient() : supabase.createClient(SB_URL, SB_KEY);
 
-// ââ MULTI-TENANT STATE ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ MULTI-TENANT STATE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 // Every company shares one database; each row is stamped with company_id and
 // Row-Level Security guarantees a user only ever sees their own company's data.
-let CURRENT_CO = null;   // logged-in user's company_id â stamped on every insert
+let CURRENT_CO = null;   // logged-in user's company_id Ã¢ÂÂ stamped on every insert
 let COMPANY    = null;   // full company row: {id,name,accent,logo_url,jobs_enabled,...}
 function applyBranding(co){
   COMPANY = co || null;
@@ -336,7 +336,7 @@ function coName(){ return (COMPANY && COMPANY.name) || 'Your Company'; }
 function coContactLine(){ if(!COMPANY) return ''; return [COMPANY.phone,COMPANY.email,COMPANY.website].filter(Boolean).join('   \u2022   '); }
 function coPrintHeader(){ var logo=(COMPANY&&COMPANY.logo_url)||''; var line=coContactLine(); return (logo?('<img src="'+logo+'" alt="logo" style="max-height:70px;margin-bottom:8px"/><br/>'):'')+'<h1 style="margin:4px 0">'+coName()+'</h1>'+(line?('<div style="color:#555;font-size:13px;margin-bottom:6px">'+line+'</div>'):'')+'<hr/>'; }
 
-// ââ HELPERS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ HELPERS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 const fmt = n => '$' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 const today = () => new Date().toISOString().split('T')[0];
 const uid = () => Math.random().toString(36).slice(2,10);
@@ -395,7 +395,7 @@ if(rec.error) throw rec.error;
 return rec.data;
 }
 
-// ââ DEFAULT PRICE LIST ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ DEFAULT PRICE LIST Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 // Starter list shown only until a company adds its own services in Settings.
 const DEFAULT_PRICES = [
 {id:uid(),description:'Standard Service Call',unit:'job',price:150},
@@ -404,7 +404,7 @@ const DEFAULT_PRICES = [
 {id:uid(),description:'Emergency Service Fee',unit:'ea',price:75},
 ];
 
-// ââ DASHBOARD âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ DASHBOARD Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Dashboard({onNav}){
 const [stats,setStats]=useState({estimates:0,invoices:0,customers:0,revenue:0,pending:0,followups:[]});
 const [loading,setLoading]=useState(true);
@@ -430,7 +430,7 @@ if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'
 
 return h('div',{className:'content'},
 stats.followups.length>0 && h('div',null,
-stats.followups.map(f=>h('div',{key:f.id,className:'followup-alert'},'ð Follow-up due: '+f.name))
+stats.followups.map(f=>h('div',{key:f.id,className:'followup-alert'},'Ã°ÂÂÂ Follow-up due: '+f.name))
 ),
 h('div',{className:'stats-grid'},
 h('div',{className:'stat-box'},h('div',{className:'stat-num'},stats.estimates),h('div',{className:'stat-label'},'Estimates')),
@@ -456,7 +456,7 @@ h('div',{style:{fontSize:13,color:'#64748b',lineHeight:1.6}},
 );
 }
 
-// ââ ESTIMATE FORM âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ ESTIMATE FORM Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function EstimateForm({estimate,onSave,onBack}){
 const [form,setForm]=useState(estimate||{
 number:'EST-'+Date.now().toString().slice(-4),
@@ -516,7 +516,7 @@ setSaving(false);
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'Ã¢ÂÂ Back'),
 h('h2',{className:'section-title'},form.id?'Edit Estimate':'New Estimate')
 ),
 
@@ -556,7 +556,7 @@ h('input',{className:'input',placeholder:'Description',value:item.description,on
 h('input',{className:'input',placeholder:'Qty',type:'number',value:item.qty,onChange:e=>setItem(i,'qty',e.target.value)}),
 h('input',{className:'input',placeholder:'Unit',value:item.unit,onChange:e=>setItem(i,'unit',e.target.value)}),
 h('input',{className:'input',placeholder:'Price',type:'number',value:item.price,onChange:e=>setItem(i,'price',e.target.value)}),
-h('button',{className:'btn btn-danger btn-sm',onClick:()=>removeItem(i),style:{padding:'6px 8px'}},'Ã')
+h('button',{className:'btn btn-danger btn-sm',onClick:()=>removeItem(i),style:{padding:'6px 8px'}},'ÃÂ')
 ),
 h('textarea',{className:'input',placeholder:'Description',value:item.notes||'',onInput:e=>setItem(i,'notes',e.target.value),rows:3,style:{marginTop:4,fontSize:12,resize:'vertical'}})
 )),
@@ -600,7 +600,7 @@ h('div',{className:'list-item-amount'},fmt(p.price))
 );
 }
 
-// ââ ESTIMATE DETAIL âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ ESTIMATE DETAIL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function EstimateDetail({id,onBack,onEdit,onConvert}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
@@ -630,7 +630,7 @@ w.document.write('<h2>Estimate '+est.number+'</h2>');
 w.document.write('<p><strong>Date:</strong> '+est.date+'<br/><strong>Status:</strong> '+est.status+'</p>');
 w.document.write('<h3>Customer</h3><p>'+est.customer_name+'<br/>'+est.customer_phone+'<br/>'+est.customer_email+'<br/>'+est.customer_address+'</p>');
 w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>');
-(est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+'</td><td>'+i.qty+'</td><td>'+i.unit+'</td><td>'+fmt(i.price)+'</td><td>'+fmt((Number(i.qty)||1)*(Number(i.price)||0))+'</td></tr>'));
+(est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+(i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'')+'</td><td>'+i.qty+'</td><td>'+i.unit+'</td><td>'+fmt(i.price)+'</td><td>'+fmt((Number(i.qty)||1)*(Number(i.price)||0))+'</td></tr>'));
 w.document.write('</table>');
 w.document.write('<p class="total">Subtotal: '+fmt(sub)+'</p>');
 if(tax>0)w.document.write('<p>Tax ('+est.tax_rate+'%): '+fmt(tax)+'</p>');
@@ -642,10 +642,10 @@ w.document.close();w.print();
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'Ã¢ÂÂ Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
-h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'â Invoice')
+h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'Ã¢ÂÂ Invoice')
 )
 ),
 
@@ -676,7 +676,7 @@ h('div',{style:{display:'flex',justifyContent:'space-between'}},
 h('div',{style:{fontSize:14,fontWeight:500}},item.description),
 h('div',{style:{fontSize:14,color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
-h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' Ã '+fmt(item.price)),
+h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' ÃÂ '+fmt(item.price)),
 item.notes&&h('div',{style:{fontSize:11,color:'#94a3b8',marginTop:2}},item.notes)
 )),
 h('div',{style:{textAlign:'right'}},
@@ -690,20 +690,20 @@ est.notes&&h('div',{className:'card'},h('div',{className:'card-title'},'Notes'),
 
 tab==='send'&&h('div',null,
 h('div',{className:'alert alert-info'},'Send this estimate to your customer'),
-h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'ð¬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},est.customer_phone))),
-h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'ð§'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},est.customer_email))),
-h('div',{className:'send-option',onClick:sendWA},h('div',{className:'send-icon'},'ð±'),h('div',null,h('div',{className:'send-label'},'WhatsApp'),h('div',{className:'send-sub'},'Open WhatsApp'))),
-h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'ð'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},shareUrl.slice(0,40)+'...')))
+h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'Ã°ÂÂÂ¬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},est.customer_phone))),
+h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'Ã°ÂÂÂ§'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},est.customer_email))),
+h('div',{className:'send-option',onClick:sendWA},h('div',{className:'send-icon'},'Ã°ÂÂÂ±'),h('div',null,h('div',{className:'send-label'},'WhatsApp'),h('div',{className:'send-sub'},'Open WhatsApp'))),
+h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'Ã°ÂÂÂ'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},shareUrl.slice(0,40)+'...')))
 ),
 
 tab==='print'&&h('div',null,
-h('button',{className:'btn btn-primary btn-block',onClick:printEst},'ð¨ï¸ Open Print View'),
+h('button',{className:'btn btn-primary btn-block',onClick:printEst},'Ã°ÂÂÂ¨Ã¯Â¸Â Open Print View'),
 h('div',{className:'alert alert-info',style:{marginTop:12}},'Opens a clean printable version in a new tab')
 )
 );
 }
 
-// ââ ESTIMATES LIST ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ ESTIMATES LIST Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function EstimatesList({onNew,onSelect}){
 const [estimates,setEstimates]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -726,7 +726,7 @@ h('button',{className:'btn btn-primary btn-sm',onClick:onNew},'+ New')
 h('div',{style:{display:'flex',gap:4,overflowX:'auto',marginBottom:12,paddingBottom:2}},
 statuses.map(s=>h('button',{key:s,className:'btn btn-sm '+(filter===s?'btn-primary':'btn-ghost'),onClick:()=>setFilter(s),style:{flexShrink:0}},s))
 ),
-filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'ð'),h('div',null,'No estimates yet'),h('button',{className:'btn btn-primary',style:{marginTop:12},onClick:onNew},'Create First Estimate')):
+filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'Ã°ÂÂÂ'),h('div',null,'No estimates yet'),h('button',{className:'btn btn-primary',style:{marginTop:12},onClick:onNew},'Create First Estimate')):
 filtered.map(e=>h('div',{key:e.id,className:'list-item',onClick:()=>onSelect(e.id)},
 h('div',null,
 h('div',{className:'list-item-title'},e.number),
@@ -741,7 +741,7 @@ h('div',{style:{fontSize:11,color:'#64748b',marginTop:2}},e.date)
 );
 }
 
-// ââ INVOICE FORM ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ INVOICE FORM Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function InvoiceForm({invoice,estimate,onSave,onBack}){
 const base=estimate?{
 number:'INV-'+Date.now().toString().slice(-4),
@@ -787,7 +787,7 @@ await sb.from('jobs').insert({
 company_id:CURRENT_CO,
 estimate_id:estimate.id,
 invoice_id:result.data.id,
-title:(estimate.customer_name||'Job')+' â '+result.data.number,
+title:(estimate.customer_name||'Job')+' Ã¢ÂÂ '+result.data.number,
 customer_name:estimate.customer_name,
 customer_phone:estimate.customer_phone,
 customer_address:estimate.customer_address,
@@ -806,7 +806,7 @@ setSaving(false);
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'Ã¢ÂÂ Back'),
 h('h2',{className:'section-title'},form.id?'Edit Invoice':'New Invoice')
 ),
 estimate&&h('div',{className:'alert alert-info'},'Converting from estimate '+estimate.number),
@@ -833,7 +833,7 @@ h('input',{className:'input',placeholder:'Description',value:item.description,on
 h('input',{className:'input',placeholder:'Qty',type:'number',value:item.qty,onChange:e=>{const items=[...form.items];items[i]={...items[i],qty:e.target.value};setF('items',items)}}),
 h('input',{className:'input',placeholder:'Unit',value:item.unit,onChange:e=>{const items=[...form.items];items[i]={...items[i],unit:e.target.value};setF('items',items)}}),
 h('input',{className:'input',placeholder:'$',type:'number',value:item.price,onChange:e=>{const items=[...form.items];items[i]={...items[i],price:e.target.value};setF('items',items)}}),
-h('button',{className:'btn btn-danger btn-sm',onClick:()=>setF('items',form.items.filter((_,idx)=>idx!==i)),style:{padding:'6px 8px'}},'Ã')
+h('button',{className:'btn btn-danger btn-sm',onClick:()=>setF('items',form.items.filter((_,idx)=>idx!==i)),style:{padding:'6px 8px'}},'ÃÂ')
 )
 )),
 h('button',{className:'btn btn-ghost btn-sm btn-block',onClick:()=>setF('items',[...form.items,{id:uid(),description:'',qty:1,unit:'job',price:'',notes:''}])},'+Add Item'),
@@ -853,7 +853,7 @@ h('button',{className:'btn btn-primary btn-block',onClick:save,disabled:saving},
 );
 }
 
-// ââ INVOICES LIST âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ INVOICES LIST Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function InvoicesList({onNew,onSelect}){
 const [invoices,setInvoices]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -875,7 +875,7 @@ h('button',{className:'btn btn-primary btn-sm',onClick:onNew},'+ New')
 h('div',{style:{display:'flex',gap:4,overflowX:'auto',marginBottom:12}},
 ['All','Unpaid','Paid','Overdue'].map(s=>h('button',{key:s,className:'btn btn-sm '+(filter===s?'btn-primary':'btn-ghost'),onClick:()=>setFilter(s),style:{flexShrink:0}},s))
 ),
-filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'ð§¾'),h('div',null,'No invoices yet')):
+filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'Ã°ÂÂ§Â¾'),h('div',null,'No invoices yet')):
 filtered.map(inv=>h('div',{key:inv.id,className:'list-item',onClick:()=>onSelect(inv.id)},
 h('div',null,
 h('div',{className:'list-item-title'},inv.number),
@@ -890,7 +890,7 @@ h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:
 );
 }
 
-// ââ INVOICE DETAIL ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ INVOICE DETAIL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function InvoiceDetail({id,onBack,onEdit}){
 const [inv,setInv]=useState(null);
 const [tab,setTab]=useState('details');
@@ -919,10 +919,10 @@ setInv(v=>({...v,status:'Paid',paid_at:Date.now()}));
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'Ã¢ÂÂ Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
-inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'â Mark Paid')
+inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'Ã¢ÂÂ Mark Paid')
 )
 ),
 h('div',{className:'tab-bar'},
@@ -949,7 +949,7 @@ h('div',{style:{display:'flex',justifyContent:'space-between'}},
 h('div',{style:{fontSize:14}},item.description),
 h('div',{style:{color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
-h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' Ã '+fmt(item.price))
+h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' ÃÂ '+fmt(item.price))
 )),
 h('div',{style:{textAlign:'right'}},
 h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub)),
@@ -965,14 +965,14 @@ h('a',{href:inv.payment_link,target:'_blank',style:{color:'#2563eb',fontSize:14,
 
 tab==='send'&&h('div',null,
 h('div',{className:'alert alert-info'},'Send invoice to customer'),
-h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'ð¬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},inv.customer_phone))),
-h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'ð§'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},inv.customer_email))),
-h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'ð'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},'Share invoice link')))
+h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'Ã°ÂÂÂ¬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},inv.customer_phone))),
+h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'Ã°ÂÂÂ§'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},inv.customer_email))),
+h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'Ã°ÂÂÂ'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},'Share invoice link')))
 )
 );
 }
 
-// ââ CUSTOMERS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ CUSTOMERS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Customers(){
 const [customers,setCustomers]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -1002,7 +1002,7 @@ if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'
 
 if(showForm) return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:()=>setShowForm(false)},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:()=>setShowForm(false)},'Ã¢ÂÂ Back'),
 h('h2',{className:'section-title'},form.id?'Edit Customer':'New Customer')
 ),
 h('div',{className:'card'},
@@ -1024,7 +1024,7 @@ h('div',{className:'section-header'},
 h('h2',{className:'section-title'},'Customers ('+customers.length+')'),
 h('button',{className:'btn btn-primary btn-sm',onClick:()=>{setForm({name:'',phone:'',email:'',address:'',city:'',state:'TX',notes:'',stage:'Lead',lead_source:'',follow_up_date:''});setShowForm(true)}},'+ New')
 ),
-customers.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'ð¥'),h('div',null,'No customers yet')):
+customers.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'Ã°ÂÂÂ¥'),h('div',null,'No customers yet')):
 customers.map(c=>h('div',{key:c.id,className:'list-item',onClick:()=>{setForm(c);setShowForm(true)}},
 h('div',null,
 h('div',{className:'list-item-title'},c.name),
@@ -1036,7 +1036,7 @@ h('div',{style:{fontSize:12,color:'#64748b',textAlign:'right'}},c.lead_source||'
 );
 }
 
-// ââ REPORTS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ REPORTS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Reports(){
 const [data,setData]=useState(null);
 const [loading,setLoading]=useState(true);
@@ -1112,7 +1112,7 @@ h('div',{style:{fontSize:13,color:'#1d4ed8',fontWeight:600}},cnt+' leads')
 );
 }
 
-// ââ PRICE LIST MANAGER ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ PRICE LIST MANAGER Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function PriceListManager(){
 const [prices,setPrices]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -1145,7 +1145,7 @@ if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'
 
 if(showForm) return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:()=>setShowForm(false)},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:()=>setShowForm(false)},'Ã¢ÂÂ Back'),
 h('h2',{className:'section-title'},form.id?'Edit Item':'New Price Item')
 ),
 h('div',{className:'card'},
@@ -1166,13 +1166,13 @@ h('div',null,h('div',{className:'list-item-title'},p.description),h('div',{class
 h('div',{style:{display:'flex',gap:6,alignItems:'center'}},
 h('div',{className:'list-item-amount'},fmt(p.price)),
 h('button',{className:'btn btn-ghost btn-sm',onClick:()=>{setForm(p);setShowForm(true)}},'Edit'),
-h('button',{className:'btn btn-danger btn-sm',onClick:()=>del(p.id)},'Ã')
+h('button',{className:'btn btn-danger btn-sm',onClick:()=>del(p.id)},'ÃÂ')
 )
 ))
 );
 }
 
-// ââ LOGIN âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ LOGIN Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Login(){
 const [mode,setMode]=useState('signin');
 const [email,setEmail]=useState('');
@@ -1203,11 +1203,11 @@ setBusy(false);
 return h('div',{className:'login-wrap'},
 h('div',{className:'login-card'},
 h('div',{className:'login-logo'},'Estimator'),
-h('div',{className:'login-sub'},'Estimates Â· Invoices Â· Jobs'),
+h('div',{className:'login-sub'},'Estimates ÃÂ· Invoices ÃÂ· Jobs'),
 mode==='signup'&&h('div',{className:'form-group'},h('label',{className:'label'},'Name'),h('input',{className:'input',value:name,onChange:e=>setName(e.target.value),placeholder:'Your name'})),
 mode==='signup'&&h('div',{className:'form-group'},h('label',{className:'label'},'Company Code'),h('input',{className:'input',value:code,onChange:e=>setCode(e.target.value),placeholder:'e.g. ACME24',style:{textTransform:'uppercase'}})),
 h('div',{className:'form-group'},h('label',{className:'label'},'Email'),h('input',{className:'input',type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'you@example.com'})),
-h('div',{className:'form-group'},h('label',{className:'label'},'Password'),h('input',{className:'input',type:'password',value:pw,onChange:e=>setPw(e.target.value),placeholder:'â¢â¢â¢â¢â¢â¢â¢â¢',onKeyDown:e=>{if(e.key==='Enter')submit()}})),
+h('div',{className:'form-group'},h('label',{className:'label'},'Password'),h('input',{className:'input',type:'password',value:pw,onChange:e=>setPw(e.target.value),placeholder:'Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢Ã¢ÂÂ¢',onKeyDown:e=>{if(e.key==='Enter')submit()}})),
 msg&&h('div',{className:'alert alert-info'},msg),
 h('button',{className:'btn btn-primary btn-block',onClick:submit,disabled:busy},busy?'...':(mode==='signin'?'Sign In':'Create Account')),
 h('button',{className:'btn btn-ghost btn-block',style:{marginTop:8},onClick:()=>{setMode(mode==='signin'?'signup':'signin');setMsg('')}},mode==='signin'?'Need an account? Sign Up':'Have an account? Sign In')
@@ -1215,7 +1215,7 @@ h('button',{className:'btn btn-ghost btn-block',style:{marginTop:8},onClick:()=>
 );
 }
 
-// ââ JOBS LIST âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ JOBS LIST Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function JobsList({profile,onSelect}){
 const [jobs,setJobs]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -1236,12 +1236,12 @@ h('div',{className:'section-header'},h('h2',{className:'section-title'},'Jobs'))
 h('div',{style:{display:'flex',gap:4,overflowX:'auto',marginBottom:12,paddingBottom:2}},
 filters.map(s=>h('button',{key:s,className:'btn btn-sm '+(filter===s?'btn-primary':'btn-ghost'),onClick:()=>setFilter(s),style:{flexShrink:0}},flabel[s]))
 ),
-filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'ð§'),h('div',null,'No jobs here'),h('div',{style:{fontSize:12,marginTop:6}},'Jobs appear when an estimate is converted to an invoice.')):
+filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'Ã°ÂÂÂ§'),h('div',null,'No jobs here'),h('div',{style:{fontSize:12,marginTop:6}},'Jobs appear when an estimate is converted to an invoice.')):
 filtered.map(j=>h('div',{key:j.id,className:'list-item',onClick:()=>onSelect(j.id)},
 h('div',null,
 h('div',{className:'list-item-title'},j.title||j.customer_name||'Job'),
 h('div',{className:'list-item-sub'},j.customer_address||j.customer_phone||''),
-h('div',{style:{marginTop:4,display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}},jobStatusBadge(j.status),j.assigned_to_name&&h('span',{style:{fontSize:11,color:'#64748b'}},'â '+j.assigned_to_name))
+h('div',{style:{marginTop:4,display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}},jobStatusBadge(j.status),j.assigned_to_name&&h('span',{style:{fontSize:11,color:'#64748b'}},'Ã¢ÂÂ '+j.assigned_to_name))
 ),
 h('div',{style:{textAlign:'right'}},
 h('div',{className:'list-item-amount'},fmt(j.amount)),
@@ -1251,7 +1251,7 @@ j.scheduled_date&&h('div',{style:{fontSize:11,color:'#64748b',marginTop:2}},j.sc
 );
 }
 
-// ââ JOB DETAIL ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ JOB DETAIL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function JobDetail({id,profile,onBack}){
 const [job,setJob]=useState(null);
 const [photos,setPhotos]=useState([]);
@@ -1314,7 +1314,7 @@ const canUpload=isMgr||job.assigned_to===profile.id;
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
-h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'â Back'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'Ã¢ÂÂ Back'),
 jobStatusBadge(job.status)
 ),
 h('div',{className:'card'},
@@ -1329,12 +1329,12 @@ isMgr&&h('div',{className:'card'},
 h('div',{className:'card-title'},'Job Management'),
 h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}},
 h('div',{style:{fontSize:14}},'Deposit paid'),
-h('button',{className:'btn btn-sm '+(job.deposit_paid?'btn-success':'btn-ghost'),onClick:toggleDeposit},job.deposit_paid?'â Paid':'Mark Paid')
+h('button',{className:'btn btn-sm '+(job.deposit_paid?'btn-success':'btn-ghost'),onClick:toggleDeposit},job.deposit_paid?'Ã¢ÂÂ Paid':'Mark Paid')
 ),
 job.deposit_paid?h('div',{className:'form-group'},
 h('label',{className:'label'},'Assign to'),
 h('select',{className:'input',value:job.assigned_to||'',onChange:e=>assignTo(e.target.value)},
-h('option',{value:''},'â Select crew â'),
+h('option',{value:''},'Ã¢ÂÂ Select crew Ã¢ÂÂ'),
 crew.map(c=>h('option',{key:c.id,value:c.id},(c.name||'(no name)')+' ('+c.role+')'))
 )
 ):h('div',{className:'alert alert-warn'},'Mark the deposit paid to assign this job.'),
@@ -1366,15 +1366,15 @@ h('div',{style:{display:'flex',gap:4,marginBottom:8}},
 ),
 h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:8}}),
 h('input',{ref:fileRef,type:'file',accept:'image/*',capture:'environment',onChange:onFile,style:{display:'none'}}),
-h('button',{className:'btn btn-primary btn-block',onClick:()=>fileRef.current&&fileRef.current.click(),disabled:uploading},uploading?'Uploading...':'ð· Add Photo ('+phase+')')
+h('button',{className:'btn btn-primary btn-block',onClick:()=>fileRef.current&&fileRef.current.click(),disabled:uploading},uploading?'Uploading...':'Ã°ÂÂÂ· Add Photo ('+phase+')')
 ),
-photos.length===0?h('div',{className:'empty',style:{padding:'20px'}},h('div',{className:'empty-icon'},'ð·'),h('div',null,'No photos yet')):
+photos.length===0?h('div',{className:'empty',style:{padding:'20px'}},h('div',{className:'empty-icon'},'Ã°ÂÂÂ·'),h('div',null,'No photos yet')):
 h('div',{className:'photo-grid'},
 photos.map(p=>h('div',{key:p.id,className:'photo-card'},
 h('span',{className:'photo-phase'},p.phase),
 h('img',{src:p.url,alt:p.caption||'',loading:'lazy'}),
 h('div',{className:'photo-meta'},
-(p.caption?p.caption+' Â· ':'')+(p.uploaded_by_name||''),
+(p.caption?p.caption+' ÃÂ· ':'')+(p.uploaded_by_name||''),
 (isMgr||p.uploaded_by===profile.id)&&h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,padding:'2px 8px'},onClick:()=>delPhoto(p)},'Delete')
 )
 ))
@@ -1383,7 +1383,7 @@ h('div',{className:'photo-meta'},
 );
 }
 
-// ââ TEAM (owner only) âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ TEAM (owner only) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Team({profile}){
 const [people,setPeople]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -1412,7 +1412,7 @@ h('select',{className:'input',value:p.role,onChange:e=>setRole(p.id,e.target.val
 );
 }
 
-// ââ LEADS ââ front of the funnel: speed-to-lead â qualify â convert âââââââââ
+// Ã¢ÂÂÃ¢ÂÂ LEADS Ã¢ÂÂÃ¢ÂÂ front of the funnel: speed-to-lead Ã¢ÂÂ qualify Ã¢ÂÂ convert Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Leads(){
 const [leads,setLeads]=useState([]);
 const [loading,setLoading]=useState(true);
@@ -1426,7 +1426,7 @@ function smsBody(ld){
   const co=((COMPANY&&COMPANY.name)||'us').replace(/\.+$/,'');
   const first=(ld.name||'there').split(/\s+/)[0];
   return 'Hi '+first+', this is '+co+'. Thanks for reaching out'+(ld.message?(' about "'+ld.message+'"'):'')+
-    '. I can take a look â what time works best for a quick quote? Reply STOP to opt out.';
+    '. I can take a look Ã¢ÂÂ what time works best for a quick quote? Reply STOP to opt out.';
 }
 async function textBack(ld){
   if(!ld.phone){alert('No phone number on this lead.');return;}
@@ -1435,7 +1435,7 @@ async function textBack(ld){
   try{
     if(DEMO_MODE||!LEAD_SMS_URL){
       await sb.from('leads').update({status:'Contacted'}).eq('id',ld.id);
-      alert('â¡ Speed-to-lead (demo)\n\nWould text '+ld.phone+':\n\n'+body+'\n\nPaste your lead-intake URL + Twilio keys to send for real (see TWILIO-SETUP.md).');
+      alert('Ã¢ÂÂ¡ Speed-to-lead (demo)\n\nWould text '+ld.phone+':\n\n'+body+'\n\nPaste your lead-intake URL + Twilio keys to send for real (see TWILIO-SETUP.md).');
     } else {
       const res=await fetch(LEAD_SMS_URL,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({messages:[{kind:'lead',to:ld.phone,body}]})});
@@ -1443,7 +1443,7 @@ async function textBack(ld){
       const r=(out.results&&out.results[0])||{};
       if(r.status==='error') throw new Error(r.error||'send failed');
       await sb.from('leads').update({status:'Contacted'}).eq('id',ld.id);
-      alert(out.simulated?'Sent (simulated â Twilio keys not set on the server yet).':'â Texted '+ld.phone+' back.');
+      alert(out.simulated?'Sent (simulated Ã¢ÂÂ Twilio keys not set on the server yet).':'Ã¢ÂÂ Texted '+ld.phone+' back.');
     }
     load();
   }catch(e){alert('Could not send: '+e.message);}
@@ -1456,29 +1456,29 @@ load();
 }catch(e){alert(e.message);}setBusy('');}
 if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
 return h('div',{className:'content'},
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'ð¯ Leads'),
+h('div',{className:'section-header'},h('h2',{className:'section-title'},'Ã°ÂÂÂ¯ Leads'),
 h('span',{className:'list-item-sub'},leads.filter(l=>l.status!=='Converted').length+' open')),
 leads.length?leads.map(ld=>h('div',{key:ld.id,className:'card',style:{marginBottom:12}},
 h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8}},
 h('div',null,
 h('div',{className:'list-item-title'},ld.name),
-h('div',{className:'list-item-sub'},ld.phone+(ld.email?' Â· '+ld.email:'')),
+h('div',{className:'list-item-sub'},ld.phone+(ld.email?' ÃÂ· '+ld.email:'')),
 ld.address&&h('div',{className:'list-item-sub'},ld.address)
 ),
 h('div',{style:{textAlign:'right'}},badge(ld.status),ld.lead_source&&h('div',{className:'list-item-sub',style:{marginTop:4}},'via '+ld.lead_source))
 ),
-ld.message&&h('div',{style:{marginTop:8,fontSize:14,opacity:.85}},'â'+ld.message+'â'),
+ld.message&&h('div',{style:{marginTop:8,fontSize:14,opacity:.85}},'Ã¢ÂÂ'+ld.message+'Ã¢ÂÂ'),
 h('div',{style:{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}},
-ld.status==='New'&&h('button',{className:'btn btn-primary btn-sm',disabled:busy===ld.id,onClick:()=>textBack(ld)},busy===ld.id?'...':'â¡ Text back now'),
+ld.status==='New'&&h('button',{className:'btn btn-primary btn-sm',disabled:busy===ld.id,onClick:()=>textBack(ld)},busy===ld.id?'...':'Ã¢ÂÂ¡ Text back now'),
 ld.status==='New'&&h('button',{className:'btn btn-ghost btn-sm',disabled:busy===ld.id,onClick:()=>setStatus(ld.id,'Contacted')},'Mark Contacted'),
 (ld.status==='New'||ld.status==='Contacted')&&h('button',{className:'btn btn-ghost btn-sm',disabled:busy===ld.id,onClick:()=>setStatus(ld.id,'Qualified')},'Mark Qualified'),
-ld.status!=='Converted'&&h('button',{className:'btn btn-primary btn-sm',disabled:busy===ld.id,onClick:()=>convert(ld)},busy===ld.id?'...':'Convert to Customer â')
+ld.status!=='Converted'&&h('button',{className:'btn btn-primary btn-sm',disabled:busy===ld.id,onClick:()=>convert(ld)},busy===ld.id?'...':'Convert to Customer Ã¢ÂÂ')
 )
 )):h('div',{className:'card'},'No leads yet.')
 );
 }
 
-// ââ MAIN APP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ MAIN APP Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function App({profile,company,onLogout}){
 const isMgr=profile.role==='owner'||profile.role==='manager';
 const jobsOn=!company||company.jobs_enabled!==false;
@@ -1539,16 +1539,16 @@ h(JobDetail,{id:view.id,profile,onBack:()=>setView(null)})
 }
 
 const allTabs=[
-{id:'dashboard',label:'ð  Home',roles:['owner','manager'],show:true},
-{id:'leads',label:'ð¯ Leads',roles:['owner','manager'],show:true},
-{id:'estimates',label:'ð Estimates',roles:['owner','manager'],show:true},
-{id:'invoices',label:'ð§¾ Invoices',roles:['owner','manager'],show:true},
-{id:'customers',label:'ð¥ Customers',roles:['owner','manager'],show:true},
-{id:'jobs',label:'ð§ Jobs',roles:['owner','manager','crew'],show:jobsOn},
-{id:'reports',label:'ð Reports',roles:['owner','manager'],show:true},
-{id:'pricelist',label:'ð² Prices',roles:['owner','manager'],show:true},
-{id:'team',label:'ð¡ï¸ Team',roles:['owner'],show:true},
-{id:'platform',label:'ð¢ Platform',roles:['owner','manager','crew'],show:!!profile.is_platform},
+{id:'dashboard',label:'Ã°ÂÂÂ  Home',roles:['owner','manager'],show:true},
+{id:'leads',label:'Ã°ÂÂÂ¯ Leads',roles:['owner','manager'],show:true},
+{id:'estimates',label:'Ã°ÂÂÂ Estimates',roles:['owner','manager'],show:true},
+{id:'invoices',label:'Ã°ÂÂ§Â¾ Invoices',roles:['owner','manager'],show:true},
+{id:'customers',label:'Ã°ÂÂÂ¥ Customers',roles:['owner','manager'],show:true},
+{id:'jobs',label:'Ã°ÂÂÂ§ Jobs',roles:['owner','manager','crew'],show:jobsOn},
+{id:'reports',label:'Ã°ÂÂÂ Reports',roles:['owner','manager'],show:true},
+{id:'pricelist',label:'Ã°ÂÂÂ² Prices',roles:['owner','manager'],show:true},
+{id:'team',label:'Ã°ÂÂÂ¡Ã¯Â¸Â Team',roles:['owner'],show:true},
+{id:'platform',label:'Ã°ÂÂÂ¢ Platform',roles:['owner','manager','crew'],show:!!profile.is_platform},
 ];
 const tabs=allTabs.filter(t=>t.show&&t.roles.includes(profile.role));
 const coName=(company&&company.name)||'Estimator';
@@ -1571,8 +1571,8 @@ tabs.map(t=>h('button',{key:t.id,className:'nav-tab'+(tab===t.id?' active':''),o
 )
 ),
 DEMO_MODE&&h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,flexWrap:'wrap',padding:'8px 16px',background:'rgba(234,106,30,.12)',borderBottom:'1px solid rgba(234,106,30,.35)',fontSize:13}},
-h('span',null,'ð§° Demo mode â sample data for The Mailbox Repair Co. Nothing is saved to a server. Click around freely.'),
-h('button',{className:'btn btn-ghost btn-sm',onClick:resetDemo},'âº Reset demo')
+h('span',null,'Ã°ÂÂ§Â° Demo mode Ã¢ÂÂ sample data for The Mailbox Repair Co. Nothing is saved to a server. Click around freely.'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:resetDemo},'Ã¢ÂÂº Reset demo')
 ),
 tab==='dashboard'&&isMgr&&h(Dashboard,{onNav:navigate}),
 tab==='leads'&&isMgr&&h(Leads,null),
@@ -1587,7 +1587,7 @@ tab==='platform'&&profile.is_platform&&h(Platform,{profile})
 );
 }
 
-// ââ PLATFORM (reseller only) â create companies + see join codes âââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ PLATFORM (reseller only) Ã¢ÂÂ create companies + see join codes Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function StatusQuick({est}){
 const [st,setSt]=useState(est.status||'Draft');
 const [busy,setBusy]=useState(false);
@@ -1624,7 +1624,7 @@ function up(k,v){ setCo(c=>({...(c||{}),[k]:v})); }
 function onLogo(e){ const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=256; let w=img.width,hh=img.height; if(w>=hh){ if(w>max){hh=Math.round(hh*max/w);w=max;} } else { if(hh>max){w=Math.round(w*max/hh);hh=max;} } const cv=document.createElement('canvas'); cv.width=w;cv.height=hh; cv.getContext('2d').drawImage(img,0,0,w,hh); up('logo_url',cv.toDataURL('image/png')); }; img.src=rd.result; }; rd.readAsDataURL(f); }
 async function save(){ if(!co||!profile.company_id){setMsg('No company to save.');return;} setBusy(true);setMsg(''); const patch={name:co.name,accent:co.accent,logo_url:co.logo_url||null,phone:co.phone||null,email:co.email||null,website:co.website||null}; const r=await sb.from('companies').update(patch).eq('id',profile.company_id).select().single(); setBusy(false); if(r.error){setMsg('Error: '+r.error.message);} else {setMsg('Saved.'); applyBranding(r.data); setCo(r.data);} }
 return h('div',{className:'card',style:{marginBottom:16}},
-h('h3',{style:{marginTop:0}},'Company Profile â logo & info shown on estimates/invoices'),
+h('h3',{style:{marginTop:0}},'Company Profile Ã¢ÂÂ logo & info shown on estimates/invoices'),
 h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:12}},
 (co&&co.logo_url)?h('img',{src:co.logo_url,alt:'logo',style:{height:56,borderRadius:8,border:'1px solid #e5e7eb'}}):h('div',{style:{height:56,width:56,borderRadius:8,background:'#f1f5f9',display:'flex',alignItems:'center',justifyContent:'center',color:'#94a3b8',fontSize:11}},'No logo'),
 h('label',{className:'btn btn-ghost btn-sm',style:{cursor:'pointer'}},'Upload logo',h('input',{type:'file',accept:'image/*',onChange:onLogo,style:{display:'none'}})),
@@ -1658,14 +1658,14 @@ try{
 const code=genCode(form.name);
 const r=await sb.from('companies').insert({name:form.name.trim(),accent:form.accent,jobs_enabled:form.jobs_enabled,join_code:code}).select().single();
 if(r.error)throw r.error;
-setMsg('Created â'+form.name.trim()+'â. Company code: '+code+' â share it so their team can sign up.');
+setMsg('Created Ã¢ÂÂ'+form.name.trim()+'Ã¢ÂÂ. Company code: '+code+' Ã¢ÂÂ share it so their team can sign up.');
 setForm({name:'',accent:'#2563eb',jobs_enabled:true});
 load();
 }catch(e){setMsg('Error: '+e.message);}
 setBusy(false);
 }
 return h('div',{className:'content'},
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'Platform â Companies')),
+h('div',{className:'section-header'},h('h2',{className:'section-title'},'Platform Ã¢ÂÂ Companies')),
 h(CompanyProfile,{profile}),
 h('div',{className:'card',style:{marginBottom:16}},
 h('div',{className:'form-group'},h('label',{className:'label'},'Company name'),h('input',{className:'input',value:form.name,onChange:e=>setForm({...form,name:e.target.value}),placeholder:'Acme Mailbox Repair'})),
@@ -1677,13 +1677,13 @@ h('button',{className:'btn btn-primary btn-block',onClick:create,disabled:busy},
 h('div',{className:'section-header'},h('h2',{className:'section-title'},'Companies')),
 loading?h('div',{className:'loading'},'Loading...'):
 (cos.length?cos.map(c=>h('div',{key:c.id,className:'list-item'},
-h('div',null,h('div',{className:'list-item-title'},c.name),h('div',{className:'list-item-sub'},'Code: '+(c.join_code||'â')+' Â· '+(c.jobs_enabled!==false?'Full':'Estimates only'))),
+h('div',null,h('div',{className:'list-item-title'},c.name),h('div',{className:'list-item-sub'},'Code: '+(c.join_code||'Ã¢ÂÂ')+' ÃÂ· '+(c.jobs_enabled!==false?'Full':'Estimates only'))),
 h('span',{className:'badge',style:{background:c.accent||'#2563eb',color:'#fff'}},c.accent||'#2563eb')
 )):h('div',{className:'card'},'No companies yet.'))
 );
 }
 
-// ââ AUTH GATE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ AUTH GATE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function AuthGate(){
 const [session,setSession]=useState(null);
 const [profile,setProfile]=useState(null);
@@ -1727,13 +1727,13 @@ return ()=>{active=false;listener.subscription.unsubscribe();};
 
 if(loading) return h('div',{className:'loading'},'Loading...');
 if(!session) return h(Login,null);
-if(!profile) return h('div',{className:'loading'},'Setting up your profileâ¦');
+if(!profile) return h('div',{className:'loading'},'Setting up your profileÃ¢ÂÂ¦');
 // Signed in but not attached to a company (bad/blank company code at signup,
-// and not the platform owner) â block until an admin fixes it.
+// and not the platform owner) Ã¢ÂÂ block until an admin fixes it.
 if(!profile.company_id && !profile.is_platform)
 return h('div',{className:'login-wrap'},h('div',{className:'login-card'},
 h('div',{className:'login-logo'},'Estimator'),
-h('div',{className:'alert alert-info',style:{marginTop:12}},'Your account isnât linked to a company yet. Ask your admin for the correct company code, then sign up again â or have them add you.'),
+h('div',{className:'alert alert-info',style:{marginTop:12}},'Your account isnÃ¢ÂÂt linked to a company yet. Ask your admin for the correct company code, then sign up again Ã¢ÂÂ or have them add you.'),
 h('button',{className:'btn btn-ghost btn-block',style:{marginTop:8},onClick:()=>sb.auth.signOut()},'Sign Out')
 ));
 return h(App,{profile,company,onLogout:()=>sb.auth.signOut()});
