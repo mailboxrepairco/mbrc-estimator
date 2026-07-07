@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
+<meta charset="UTF-8"/><!-- v7 -->
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Estimator"/>
+<meta name="apple-mobile-web-app-title" content="MBRC Estimator"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#eef2f8"/>
-<title>Estimator</title>
+<title>MBRC Estimator | The Mailbox Repair CO</title>
 <link rel="manifest" href="manifest.json"/>
 <style>
-:root{--accent:#2563eb;--accent-dark:#1d4ed8}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#eef2f8;color:#0f1e36;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
 #root{min-height:100vh}
@@ -19,12 +18,12 @@ body{background:#eef2f8;color:#0f1e36;font-family:-apple-system,BlinkMacSystemFo
 /* NAV */
 .nav{background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid #e3e9f2;padding:0;position:sticky;top:0;z-index:100}
 .nav-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
-.nav-logo{font-size:18px;font-weight:800;color:var(--accent-dark);letter-spacing:-0.5px;display:flex;align-items:center;gap:8px}
+.nav-logo{font-size:18px;font-weight:800;color:#1d4ed8;letter-spacing:-0.5px}
 .nav-logo span{color:#64748b;font-size:11px;display:block;font-weight:500;letter-spacing:0}
 .nav-tabs{display:flex;overflow-x:auto;gap:0;border-top:1px solid #eef2f8;scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .nav-tab{flex:0 0 auto;padding:10px 14px;font-size:12px;font-weight:600;color:#64748b;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
-.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-tab.active{color:#2563eb;border-bottom-color:#2563eb}
 /* CONTENT */
 .content{flex:1;padding:16px;max-width:600px;margin:0 auto;width:100%}
 /* CARDS */
@@ -32,8 +31,8 @@ body{background:#eef2f8;color:#0f1e36;font-family:-apple-system,BlinkMacSystemFo
 .card-title{font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;min-height:40px}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25)}
-.btn-primary:active{background:var(--accent-dark);box-shadow:0 1px 4px rgba(37,99,235,.25)}
+.btn-primary{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25)}
+.btn-primary:active{background:#1d4ed8;box-shadow:0 1px 4px rgba(37,99,235,.25)}
 .btn-success{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.22)}
 .btn-danger{background:#ef4444;color:#fff}
 .btn-ghost{background:#fff;color:#475569;border:1px solid #d8e0ec}
@@ -63,7 +62,7 @@ body{background:#eef2f8;color:#0f1e36;font-family:-apple-system,BlinkMacSystemFo
 /* STATS */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .stat-box{background:#fff;border:1px solid #e6ecf5;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(15,30,54,.05)}
-.stat-num{font-size:24px;font-weight:800;color:var(--accent)}
+.stat-num{font-size:24px;font-weight:800;color:#2563eb}
 .stat-label{font-size:11px;color:#64748b;margin-top:2px;font-weight:500}
 /* LIST ITEMS */
 .list-item{background:#fff;border:1px solid #e6ecf5;border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:flex-start;box-shadow:0 1px 2px rgba(15,30,54,.04)}
@@ -125,13 +124,14 @@ canvas{border:1px solid #d8e0ec;border-radius:10px;width:100%;touch-action:none;
 .photo-phase{position:absolute;top:6px;left:6px;font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 6px;border-radius:6px;background:rgba(15,30,54,.7);color:#fff}
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#eef2f8 0%,#dde7f5 100%)}
 .login-card{background:#fff;border:1px solid #e6ecf5;border-radius:18px;padding:28px;width:100%;max-width:380px;box-shadow:0 12px 40px rgba(15,30,54,.1)}
-.login-logo{font-size:26px;font-weight:800;color:var(--accent-dark);text-align:center;margin-bottom:4px}
+.login-logo{font-size:26px;font-weight:800;color:#1d4ed8;text-align:center;margin-bottom:4px}
 .login-sub{text-align:center;color:#64748b;font-size:12px;margin-bottom:20px}
 </style>
 </head>
 <body>
-<div id="root"><div class="loading">Loading Estimator...</div></div>
+<div id="root"><div class="loading">Loading MBRC Estimator...</div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -141,200 +141,10 @@ canvas{border:1px solid #d8e0ec;border-radius:10px;width:100%;touch-action:none;
 const {useState,useEffect,useRef,useCallback} = React;
 const h = React.createElement;
 
-// ── SUPABASE (Estimator SaaS project — paste your project URL + anon key) ──
-// Leave these as-is to run the instant offline DEMO (no backend, no signup).
-// Paste a real project URL + anon key to switch to the live multi-tenant backend.
+// ── SUPABASE ──────────────────────────────────────────────────────────────
 const SB_URL = 'https://zzaiqaknjvueytymqeul.supabase.co';
 const SB_KEY = 'sb_publishable_pI7rLourJP2DCzX2oFzd8w__ncNr2ri';
-const DEMO_MODE = SB_URL.indexOf('YOUR-PROJECT-REF') !== -1;
-
-// ── SPEED-TO-LEAD SMS ───────────────────────────────────────────────────────
-// Paste your deployed lead-intake function URL here to send REAL texts.
-// Leave blank (or in demo mode) and the "Text back now" button just simulates,
-// showing the exact message it would send. See TWILIO-SETUP.md to go live.
-const LEAD_SMS_URL = '';
-
-// ── OFFLINE DEMO CLIENT ─────────────────────────────────────────────────────
-// A localStorage-backed stand-in for the Supabase JS client. It supports the
-// exact chain the app uses (select/insert/update/delete/eq/order/single/
-// maybeSingle/then) plus auth + a stub storage bucket, so all ~56 sb.* call
-// sites work unchanged with zero setup. The seed below loads The Mailbox
-// Repair Co. so a contractor can watch a lead become a paid, 5-star job.
-function buildDemoClient(){
-  const KEY = t => 'cl_demo_' + t;
-  const load = t => { try { return JSON.parse(localStorage.getItem(KEY(t)) || '[]'); } catch(e){ return []; } };
-  const save = (t,rows) => localStorage.setItem(KEY(t), JSON.stringify(rows));
-  const genId = () => 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-  const clone = r => JSON.parse(JSON.stringify(r));
-
-  class QB {
-    constructor(table){ this.table=table; this._op='select'; this._filters=[]; this._order=null; this._payload=null; this._single=false; this._maybe=false; }
-    select(){ if(this._op!=='insert'&&this._op!=='update'&&this._op!=='delete') this._op='select'; return this; }
-    insert(payload){ this._op='insert'; this._payload=payload; return this; }
-    update(payload){ this._op='update'; this._payload=payload; return this; }
-    delete(){ this._op='delete'; return this; }
-    eq(col,val){ this._filters.push([col,val]); return this; }
-    order(col,opts){ this._order=[col,(opts&&opts.ascending===false)?-1:1]; return this; }
-    single(){ this._single=true; return this; }
-    maybeSingle(){ this._maybe=true; return this; }
-    _match(row){ return this._filters.every(([c,v]) => row[c]===v); }
-    _run(){
-      let rows = load(this.table);
-      try {
-        if(this._op==='insert'){
-          const items = Array.isArray(this._payload)?this._payload:[this._payload];
-          const added = items.map(it => Object.assign({ id: it.id||genId(), created_at: new Date().toISOString() }, it));
-          rows = rows.concat(added); save(this.table, rows);
-          return { data: this._single? clone(added[0]) : added.map(clone), error:null };
-        }
-        if(this._op==='update'){
-          const out=[];
-          rows = rows.map(r => { if(this._match(r)){ const u=Object.assign({}, r, this._payload); out.push(u); return u; } return r; });
-          save(this.table, rows);
-          return { data: this._single? (out[0]?clone(out[0]):null) : out.map(clone), error:null };
-        }
-        if(this._op==='delete'){
-          rows = rows.filter(r => !this._match(r)); save(this.table, rows);
-          return { data:[], error:null };
-        }
-        // select
-        let res = rows.filter(r => this._match(r));
-        if(this._order){ const [c,dir]=this._order; res=res.slice().sort((a,b)=> (a[c]>b[c]?1:a[c]<b[c]?-1:0)*dir); }
-        if(this._single){ return res[0]? {data:clone(res[0]),error:null} : {data:null,error:{message:'no rows'}}; }
-        if(this._maybe){ return {data: res[0]?clone(res[0]):null, error:null}; }
-        return { data: res.map(clone), error:null };
-      } catch(e){ return { data:null, error:{ message: e.message } }; }
-    }
-    then(resolve,reject){ try { return Promise.resolve(this._run()).then(resolve,reject); } catch(e){ return Promise.reject(e).then(resolve,reject); } }
-  }
-
-  const SESSION_KEY='cl_demo_session';
-  const demoUser={ id:'demo-owner', email:'jr@mailboxrepairco.com' };
-  let authCb=null;
-  const auth = {
-    async getSession(){
-      const on = localStorage.getItem(SESSION_KEY)!=='out';
-      return { data:{ session: on? { user: demoUser } : null }, error:null };
-    },
-    onAuthStateChange(cb){ authCb=cb; return { data:{ subscription:{ unsubscribe(){ authCb=null; } } } }; },
-    async signInWithPassword(){ localStorage.setItem(SESSION_KEY,'in'); if(authCb) authCb('SIGNED_IN',{user:demoUser}); return { data:{ user:demoUser, session:{user:demoUser} }, error:null }; },
-    async signUp(){ localStorage.setItem(SESSION_KEY,'in'); if(authCb) authCb('SIGNED_IN',{user:demoUser}); return { data:{ user:demoUser, session:{user:demoUser} }, error:null }; },
-    async signOut(){ localStorage.setItem(SESSION_KEY,'out'); if(authCb) authCb('SIGNED_OUT',null); return { error:null }; }
-  };
-
-  const storage = { from(){ return {
-    async upload(){ return { data:{ path:'demo' }, error:null }; },
-    getPublicUrl(){ return { data:{ publicUrl:'https://placehold.co/600x400/ea6a1e/ffffff?text=Job+Photo' } }; }
-  }; } };
-
-  return { from: t => new QB(t), auth, storage };
-}
-
-// ── DEMO SEED: The Mailbox Repair Co. (the live lead→paid→review walkthrough) ─
-function seedDemo(){
-  const SEED_VERSION='4';
-  if(localStorage.getItem('cl_demo_seed_version')===SEED_VERSION) return;
-  // id generator local to seed (uid() is in the TDZ this early in the file)
-  const sid = p => p + Math.random().toString(36).slice(2,8);
-  const T = () => new Date().toISOString();
-  const dayAgo = n => new Date(Date.now()-n*86400000).toISOString();
-  const dateAgo = n => new Date(Date.now()-n*86400000).toISOString().split('T')[0];
-  const dateIn = n => new Date(Date.now()+n*86400000).toISOString().split('T')[0];
-  const put = (t,rows) => localStorage.setItem('cl_demo_'+t, JSON.stringify(rows));
-
-  const CO='co-mbrc';
-  put('companies', [{
-    id:CO, name:'The Mailbox Repair Co.', accent:'#ea6a1e',
-    logo_url:'', jobs_enabled:true, join_code:'MBRC25', tax_rate:8.25,
-    phone:'(214) 555-0143', email:'jr@mailboxrepairco.com', created_at:T()
-  }]);
-  put('profiles', [{
-    id:'demo-owner', company_id:CO, name:'Jr', role:'owner',
-    email:'jr@mailboxrepairco.com', created_at:T()
-  }]);
-  put('line_item_templates', [
-    {id:sid('p'),company_id:CO,description:'Standard Mailbox Replacement',unit:'job',price:285},
-    {id:sid('p'),company_id:CO,description:'Post + Mailbox Full Install',unit:'job',price:420},
-    {id:sid('p'),company_id:CO,description:'Mailbox Door / Hinge Repair',unit:'job',price:95},
-    {id:sid('p'),company_id:CO,description:'Decorative / Cast-Aluminum Mailbox',unit:'job',price:650},
-    {id:sid('p'),company_id:CO,description:'Labor (per hour)',unit:'hr',price:85},
-    {id:sid('p'),company_id:CO,description:'Concrete footing',unit:'ea',price:60}
-  ]);
-
-  // Leads — the front of the funnel (speed-to-lead story)
-  put('leads', [
-    {id:sid('l'),company_id:CO,name:'Marcus Reed',phone:'(469) 555-0188',email:'marcus.reed@gmail.com',address:'1820 Oak Bend Dr, Plano TX',lead_source:'Google',message:'HOA says my leaning mailbox has to go. Need a quote.',status:'New',created_at:dayAgo(0)},
-    {id:sid('l'),company_id:CO,name:'Tanya Brooks',phone:'(214) 555-0162',email:'tbrooks@outlook.com',address:'905 Meadow Ln, Frisco TX',lead_source:'Facebook',message:'Car backed into my mailbox. Want a decorative one this time.',status:'Contacted',created_at:dayAgo(1)},
-    {id:sid('l'),company_id:CO,name:'Derek Salas',phone:'(972) 555-0117',email:'dsalas@gmail.com',address:'3340 Birchwood Ct, McKinney TX',lead_source:'Nextdoor',message:'Door fell off the box, just needs a hinge fix.',status:'Qualified',created_at:dayAgo(2)}
-  ]);
-
-  // Customers — converted leads + existing book
-  const custWon=sid('c'), custInv=sid('c'), custEst=sid('c');
-  put('customers', [
-    {id:custWon,company_id:CO,name:'Linda Cho',phone:'(214) 555-0199',email:'lindacho@gmail.com',address:'77 Crestview Dr, Allen TX',lead_source:'Referral',stage:'Won',follow_up_date:null,created_at:dayAgo(20)},
-    {id:custInv,company_id:CO,name:'Robert Pruitt',phone:'(469) 555-0124',email:'rpruitt@gmail.com',address:'412 Stonegate Blvd, Plano TX',lead_source:'Google',stage:'Won',follow_up_date:null,created_at:dayAgo(10)},
-    {id:custEst,company_id:CO,name:'Tanya Brooks',phone:'(214) 555-0162',email:'tbrooks@outlook.com',address:'905 Meadow Ln, Frisco TX',lead_source:'Facebook',stage:'Quoted',follow_up_date:dateIn(2),created_at:dayAgo(1)}
-  ]);
-
-  // Estimates — one Approved (became invoice), one Sent (open), one Draft
-  const estWon=sid('e'), invPaid=sid('i'), invOpen=sid('i');
-  put('estimates', [
-    {id:estWon,company_id:CO,customer_name:'Linda Cho',customer_phone:'(214) 555-0199',customer_email:'lindacho@gmail.com',customer_address:'77 Crestview Dr, Allen TX',
-      items:[{description:'Decorative / Cast-Aluminum Mailbox',qty:1,price:650},{description:'Concrete footing',qty:1,price:60}],tax_rate:8.25,status:'Approved',invoice_id:invPaid,created_at:dayAgo(18)},
-    {id:sid('e'),company_id:CO,customer_name:'Tanya Brooks',customer_phone:'(214) 555-0162',customer_email:'tbrooks@outlook.com',customer_address:'905 Meadow Ln, Frisco TX',
-      items:[{description:'Decorative / Cast-Aluminum Mailbox',qty:1,price:650}],tax_rate:8.25,status:'Sent',invoice_id:null,created_at:dayAgo(1)},
-    {id:sid('e'),company_id:CO,customer_name:'Robert Pruitt',customer_phone:'(469) 555-0124',customer_email:'rpruitt@gmail.com',customer_address:'412 Stonegate Blvd, Plano TX',
-      items:[{description:'Standard Mailbox Replacement',qty:1,price:285}],tax_rate:8.25,status:'Draft',invoice_id:null,created_at:dayAgo(3)}
-  ]);
-
-  // Invoices — one PAID (closes the loop), one open
-  put('invoices', [
-    {id:invPaid,company_id:CO,customer_name:'Linda Cho',customer_email:'lindacho@gmail.com',
-      items:[{description:'Decorative / Cast-Aluminum Mailbox',qty:1,price:650},{description:'Concrete footing',qty:1,price:60}],tax_rate:8.25,status:'Paid',due_date:dateAgo(5),paid_at:dayAgo(7),created_at:dayAgo(16)},
-    {id:invOpen,company_id:CO,customer_name:'Robert Pruitt',customer_email:'rpruitt@gmail.com',
-      items:[{description:'Standard Mailbox Replacement',qty:1,price:285}],tax_rate:8.25,status:'Unpaid',due_date:dateIn(7),paid_at:null,created_at:dayAgo(2)}
-  ]);
-
-  // Jobs — one complete (with the paid job), feeds reviews
-  put('jobs', [
-    {id:sid('j'),company_id:CO,customer_name:'Linda Cho',address:'77 Crestview Dr, Allen TX',invoice_id:invPaid,
-      status:'complete',assigned_to:'demo-owner',assigned_to_name:'Jr',scheduled_date:dateAgo(8),deposit_paid:true,created_at:dayAgo(16)},
-    {id:sid('j'),company_id:CO,customer_name:'Robert Pruitt',address:'412 Stonegate Blvd, Plano TX',invoice_id:invOpen,
-      status:'assigned',assigned_to:'demo-owner',assigned_to_name:'Jr',scheduled_date:dateIn(2),deposit_paid:false,created_at:dayAgo(2)}
-  ]);
-
-  put('reviews', [
-    {id:sid('r'),company_id:CO,customer_name:'Linda Cho',rating:5,text:'Texted me back in under a minute and had a beautiful new mailbox in two days. Highly recommend!',created_at:dayAgo(6)}
-  ]);
-
-  localStorage.setItem('cl_demo_seed_version', SEED_VERSION);
-}
-
-function resetDemo(){
-  ['companies','profiles','price_list','leads','customers','estimates','invoices','jobs','reviews','job_photos'].forEach(t=>localStorage.removeItem('cl_demo_'+t));
-  localStorage.removeItem('cl_demo_seed_version');
-  localStorage.removeItem('cl_demo_session');
-  location.reload();
-}
-
-if(DEMO_MODE){ seedDemo(); }
-const sb = DEMO_MODE ? buildDemoClient() : supabase.createClient(SB_URL, SB_KEY);
-
-// ── MULTI-TENANT STATE ──────────────────────────────────────────────────────
-// Every company shares one database; each row is stamped with company_id and
-// Row-Level Security guarantees a user only ever sees their own company's data.
-let CURRENT_CO = null;   // logged-in user's company_id — stamped on every insert
-let COMPANY    = null;   // full company row: {id,name,accent,logo_url,jobs_enabled,...}
-function applyBranding(co){
-  COMPANY = co || null;
-  CURRENT_CO = co ? co.id : null;
-  const accent = (co && co.accent) || '#2563eb';
-  try{ document.documentElement.style.setProperty('--accent', accent); }catch(e){}
-  document.title = ((co && co.name) || 'Estimator') + ' | Estimator';
-}
-function coName(){ return (COMPANY && COMPANY.name) || 'Your Company'; }
-function coContactLine(){ if(!COMPANY) return ''; return [COMPANY.phone,COMPANY.email,COMPANY.website].filter(Boolean).join('   \u2022   '); }
-function coPrintHeader(){ var logo=(COMPANY&&COMPANY.logo_url)||''; var line=coContactLine(); return (logo?('<img src="'+logo+'" alt="logo" style="max-height:70px;margin-bottom:8px"/><br/>'):'')+'<h1 style="margin:4px 0">'+coName()+'</h1>'+(line?('<div style="color:#555;font-size:13px;margin-bottom:6px">'+line+'</div>'):'')+'<hr/>'; }
+const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
 const fmt = n => '$' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
@@ -350,6 +160,28 @@ function statusBadge(s){
 const cls={Draft:'badge-draft',Sent:'badge-sent',Approved:'badge-approved',Declined:'badge-declined',
 Unpaid:'badge-unpaid',Paid:'badge-paid',Overdue:'badge-overdue'}[s]||'badge-draft';
 return h('span',{className:'badge '+cls},s);
+}
+
+
+// ── CUSTOM MODALS (replaces browser alert/confirm) ───────────────────────
+function mbrcAlert(msg){
+return new Promise(r=>{
+const o=document.createElement('div');
+o.style.cssText='position:fixed;inset:0;background:rgba(15,30,54,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+o.innerHTML='<div style="background:#fff;border-radius:20px;padding:32px 24px;max-width:300px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(15,30,54,.22)"><div style="font-size:20px;font-weight:800;color:#0f1e36;line-height:1.3;margin-bottom:24px">'+msg+'</div><button style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:12px;padding:14px 0;font-size:16px;font-weight:700;cursor:pointer;width:100%">OK</button></div>';
+o.querySelector('button').onclick=()=>{document.body.removeChild(o);r(true);};
+document.body.appendChild(o);
+});
+}
+function mbrcConfirm(msg){
+return new Promise(r=>{
+const o=document.createElement('div');
+o.style.cssText='position:fixed;inset:0;background:rgba(15,30,54,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+o.innerHTML='<div style="background:#fff;border-radius:20px;padding:32px 24px;max-width:300px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(15,30,54,.22)"><div style="font-size:20px;font-weight:800;color:#0f1e36;line-height:1.3;margin-bottom:24px">'+msg+'</div><div style="display:flex;gap:10px"><button id="mc" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:14px 0;font-size:15px;font-weight:600;cursor:pointer">Cancel</button><button id="mo" style="flex:1;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:12px;padding:14px 0;font-size:15px;font-weight:700;cursor:pointer">OK</button></div></div>';
+o.querySelector('#mc').onclick=()=>{document.body.removeChild(o);r(false);};
+o.querySelector('#mo').onclick=()=>{document.body.removeChild(o);r(true);};
+document.body.appendChild(o);
+});
 }
 
 function jobStatusBadge(s){
@@ -382,12 +214,11 @@ reader.readAsDataURL(file);
 // Upload a job photo to Storage + record a row in job_photos.
 async function uploadPhoto(jobId,file,profile,phase,caption){
 const blob=await resizeImage(file,1600,0.8);
-const path=(CURRENT_CO||'co')+'/'+jobId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
-const up=await sb.storage.from('estimator-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
+const path=jobId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
+const up=await sb.storage.from('job-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
 if(up.error) throw up.error;
-const pub=sb.storage.from('estimator-photos').getPublicUrl(path);
+const pub=sb.storage.from('job-photos').getPublicUrl(path);
 const rec=await sb.from('job_photos').insert({
-company_id:CURRENT_CO,
 job_id:jobId,url:pub.data.publicUrl,storage_path:path,caption:caption||null,phase:phase||'progress',
 uploaded_by:profile.id,uploaded_by_name:profile.name,uploaded_by_role:profile.role
 }).select().single();
@@ -396,11 +227,14 @@ return rec.data;
 }
 
 // ── DEFAULT PRICE LIST ────────────────────────────────────────────────────
-// Starter list shown only until a company adds its own services in Settings.
 const DEFAULT_PRICES = [
-{id:uid(),description:'Standard Service Call',unit:'job',price:150},
-{id:uid(),description:'Labor (per hour)',unit:'hr',price:85},
-{id:uid(),description:'Materials',unit:'ea',price:100},
+{id:uid(),description:'Mailbox Post Repair',unit:'job',price:150},
+{id:uid(),description:'Mailbox Post Replacement',unit:'job',price:350},
+{id:uid(),description:'Mailbox Unit Replacement',unit:'ea',price:200},
+{id:uid(),description:'Full Mailbox System Replacement',unit:'job',price:550},
+{id:uid(),description:'Cluster Box Unit (CBU) Repair',unit:'job',price:450},
+{id:uid(),description:'Concrete Base Repair',unit:'job',price:250},
+{id:uid(),description:'Painting/Refinishing',unit:'job',price:125},
 {id:uid(),description:'Emergency Service Fee',unit:'ea',price:75},
 ];
 
@@ -448,9 +282,11 @@ h('button',{className:'btn btn-ghost',onClick:()=>onNav('customers')},'Customers
 )
 ),
 h('div',{className:'card'},
-h('div',{className:'card-title'},coName()),
+h('div',{className:'card-title'},'The Mailbox Repair CO'),
 h('div',{style:{fontSize:13,color:'#64748b',lineHeight:1.6}},
-'Estimates, invoices and jobs in one place.'
+'📍 DFW Metroplex, Texas',h('br',null),
+'🔧 Insurance Claim Specialists',h('br',null),
+'⭐ Mailbox Repair & Replacement'
 )
 )
 );
@@ -494,7 +330,7 @@ const data={...form};
 if(!data.customer_id){
 const exists=customers.find(c=>c.name===data.customer_name);
 if(!exists&&data.customer_name){
-const {data:nc}=await sb.from('customers').insert({company_id:CURRENT_CO,name:data.customer_name,phone:data.customer_phone,email:data.customer_email,address:data.customer_address}).select().single();
+const {data:nc}=await sb.from('customers').insert({name:data.customer_name,phone:data.customer_phone,email:data.customer_email,address:data.customer_address}).select().single();
 if(nc) data.customer_id=nc.id;
 } else if(exists){
 data.customer_id=exists.id;
@@ -504,7 +340,7 @@ let result;
 if(data.id){
 result=await sb.from('estimates').update(data).eq('id',data.id).select().single();
 } else {
-result=await sb.from('estimates').insert({...data,company_id:CURRENT_CO}).select().single();
+result=await sb.from('estimates').insert(data).select().single();
 }
 if(result.error) throw result.error;
 onSave(result.data);
@@ -558,7 +394,7 @@ h('input',{className:'input',placeholder:'Unit',value:item.unit,onChange:e=>setI
 h('input',{className:'input',placeholder:'Price',type:'number',value:item.price,onChange:e=>setItem(i,'price',e.target.value)}),
 h('button',{className:'btn btn-danger btn-sm',onClick:()=>removeItem(i),style:{padding:'6px 8px'}},'×')
 ),
-h('textarea',{className:'input',placeholder:'Description',value:item.notes||'',onInput:e=>setItem(i,'notes',e.target.value),rows:3,style:{marginTop:4,fontSize:12,resize:'vertical'}})
+h('input',{className:'input',placeholder:'Notes (optional)',value:item.notes||'',onChange:e=>setItem(i,'notes',e.target.value),style:{marginTop:4,fontSize:12}})
 )),
 h('div',{style:{textAlign:'right',fontSize:13,color:'#64748b'}},
 h('div',null,'Subtotal: ',h('strong',{style:{color:'#0f1e36'}},fmt(sub))),
@@ -605,6 +441,7 @@ function EstimateDetail({id,onBack,onEdit,onConvert}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
 const [loading,setLoading]=useState(true);
+const [moving,setMoving]=useState(false);
 
 useEffect(()=>{
 sb.from('estimates').select('*').eq('id',id).single().then(r=>{setEst(r.data);setLoading(false)});
@@ -615,22 +452,34 @@ if(loading||!est) return h('div',{className:'content'},h('div',{className:'loadi
 const sub=calcSub(est.items||[]);
 const tax=sub*(Number(est.tax_rate)||0)/100;
 const total=sub+tax;
-const shareUrl=location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+est.share_token+'&type=estimate';
+const shareUrl='https://mailboxrepairco.github.io/mbrc-estimator/view.html?id='+est.id;
 
-const sendSMS=()=>window.open('sms:'+est.customer_phone+'?body=Hi '+est.customer_name+', your estimate from '+coName()+' is ready. Total: '+fmt(total)+'. View here: '+shareUrl);
-const sendEmail=()=>window.open('mailto:'+est.customer_email+'?subject=Your Estimate '+est.number+' - '+coName()+'&body=Hi '+est.customer_name+',%0A%0AYour estimate is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+'%0A%0AThank you!%0A'+coName()+'');
-const sendWA=()=>window.open('https://wa.me/1'+est.customer_phone.replace(/\D/g,'')+'?text=Hi '+est.customer_name+', your estimate from '+coName()+' is ready. Total: '+fmt(total)+'. View: '+shareUrl);
-const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
+const sendSMS=()=>window.open('sms:'+est.customer_phone+'?body=Hi '+est.customer_name+', your estimate from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View here: '+shareUrl);
+const sendEmail=()=>window.open('mailto:'+est.customer_email+'?subject=Your Estimate '+est.number+' - The Mailbox Repair CO&body=Hi '+est.customer_name+',%0A%0AYour estimate is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+'%0A%0AThank you!%0AThe Mailbox Repair CO');
+const sendWA=()=>window.open('https://wa.me/1'+est.customer_phone.replace(/\D/g,'')+'?text=Hi '+est.customer_name+', your estimate from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View: '+shareUrl);
+const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);mbrcAlert('Link copied!')};
 
+async function moveToJob(){
+if(!await mbrcConfirm('Move this estimate to Jobs?'))return;
+setMoving(true);
+try{
+const chk=await sb.from('jobs').select('id').eq('estimate_id',est.id).maybeSingle();
+if(chk.data){await mbrcAlert('A job already exists for this estimate.');setMoving(false);return;}
+const res=await sb.from('jobs').insert({estimate_id:est.id,title:(est.customer_name||'Job')+' — '+est.number,customer_name:est.customer_name,customer_phone:est.customer_phone,customer_address:est.customer_address,amount:calcTotal(est.items||[],est.tax_rate),status:'unassigned',deposit_paid:false}).select().single();
+if(res.error)throw res.error;
+await mbrcAlert('Job created!');
+}catch(e){await mbrcAlert('Error: '+e.message);}
+setMoving(false);
+}
 function printEst(){
 const w=window.open('','_blank');
 w.document.write('<html><head><title>'+est.number+'</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}.total{font-size:20px;font-weight:bold;margin-top:16px}</style></head><body>');
-w.document.write(coPrintHeader());
+w.document.write('<h1>The Mailbox Repair CO</h1><p>DFW Metroplex, Texas</p><hr/>');
 w.document.write('<h2>Estimate '+est.number+'</h2>');
 w.document.write('<p><strong>Date:</strong> '+est.date+'<br/><strong>Status:</strong> '+est.status+'</p>');
 w.document.write('<h3>Customer</h3><p>'+est.customer_name+'<br/>'+est.customer_phone+'<br/>'+est.customer_email+'<br/>'+est.customer_address+'</p>');
 w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>');
-(est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+(i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'')+'</td><td>'+i.qty+'</td><td>'+i.unit+'</td><td>'+fmt(i.price)+'</td><td>'+fmt((Number(i.qty)||1)*(Number(i.price)||0))+'</td></tr>'));
+(est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+'</td><td>'+i.qty+'</td><td>'+i.unit+'</td><td>'+fmt(i.price)+'</td><td>'+fmt((Number(i.qty)||1)*(Number(i.price)||0))+'</td></tr>'));
 w.document.write('</table>');
 w.document.write('<p class="total">Subtotal: '+fmt(sub)+'</p>');
 if(tax>0)w.document.write('<p>Tax ('+est.tax_rate+'%): '+fmt(tax)+'</p>');
@@ -645,6 +494,7 @@ h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
+h('button',{className:'btn btn-sm',style:{background:'#7c3aed',color:'#fff'},onClick:moveToJob,disabled:moving},moving?'...':'→ Jobs'),
 h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'→ Invoice')
 )
 ),
@@ -660,7 +510,6 @@ h('h2',{style:{fontSize:20,fontWeight:700}},est.number),
 statusBadge(est.status)
 ),
 h('div',{style:{fontSize:13,color:'#64748b',marginTop:4}},est.date),
-h(StatusQuick,{est}),
 h('div',{className:'divider'}),
 h('div',{style:{fontSize:14}},
 h('div',{style:{fontWeight:600}},est.customer_name),
@@ -776,7 +625,7 @@ let result;
 if(form.id){
 result=await sb.from('invoices').update(form).eq('id',form.id).select().single();
 } else {
-result=await sb.from('invoices').insert({...form,company_id:CURRENT_CO}).select().single();
+result=await sb.from('invoices').insert(form).select().single();
 if(result.error) throw result.error;
 if(estimate){
 await sb.from('estimates').update({status:'Approved',invoice_id:result.data.id}).eq('id',estimate.id);
@@ -784,7 +633,6 @@ await sb.from('estimates').update({status:'Approved',invoice_id:result.data.id})
 const existing=await sb.from('jobs').select('id').eq('estimate_id',estimate.id).maybeSingle();
 if(!existing.data){
 await sb.from('jobs').insert({
-company_id:CURRENT_CO,
 estimate_id:estimate.id,
 invoice_id:result.data.id,
 title:(estimate.customer_name||'Job')+' — '+result.data.number,
@@ -859,9 +707,9 @@ const [invoices,setInvoices]=useState([]);
 const [loading,setLoading]=useState(true);
 const [filter,setFilter]=useState('All');
 
-useEffect(()=>{
-sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});
-},[]);
+function loadInvs(){sb.from('invoices').select('*').order('created_at',{ascending:false}).then(r=>{setInvoices(r.data||[]);setLoading(false)});}
+useEffect(()=>{loadInvs();},[]);
+async function delInv(e,id){e.stopPropagation();if(!await mbrcConfirm('Delete this invoice?'))return;await sb.from('invoices').delete().eq('id',id);loadInvs();}
 
 const filtered=filter==='All'?invoices:invoices.filter(i=>i.status===filter);
 
@@ -876,15 +724,16 @@ h('div',{style:{display:'flex',gap:4,overflowX:'auto',marginBottom:12}},
 ['All','Unpaid','Paid','Overdue'].map(s=>h('button',{key:s,className:'btn btn-sm '+(filter===s?'btn-primary':'btn-ghost'),onClick:()=>setFilter(s),style:{flexShrink:0}},s))
 ),
 filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'🧾'),h('div',null,'No invoices yet')):
-filtered.map(inv=>h('div',{key:inv.id,className:'list-item',onClick:()=>onSelect(inv.id)},
-h('div',null,
+filtered.map(inv=>h('div',{key:inv.id,className:'list-item'},
+h('div',{style:{flex:1},onClick:()=>onSelect(inv.id)},
 h('div',{className:'list-item-title'},inv.number),
 h('div',{className:'list-item-sub'},inv.customer_name),
 h('div',{style:{marginTop:4}},statusBadge(inv.status))
 ),
 h('div',{style:{textAlign:'right'}},
 h('div',{className:'list-item-amount'},fmt(calcTotal(inv.items||[],inv.tax_rate))),
-h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:'')
+h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:''),
+h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,fontSize:11},onClick:e=>delInv(e,inv.id)},'🗑 Delete')
 )
 ))
 );
@@ -905,16 +754,94 @@ if(loading||!inv) return h('div',{className:'content'},h('div',{className:'loadi
 const sub=calcSub(inv.items||[]);
 const tax=sub*(Number(inv.tax_rate)||0)/100;
 const total=sub+tax;
-const shareUrl=location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+inv.share_token+'&type=invoice';
+const shareUrl='https://mailboxrepairco.github.io/mbrc-estimator/view.html?inv='+inv.id;
 
 const payMsg=inv.payment_link?'%0A%0APay here: '+encodeURIComponent(inv.payment_link):'';
-const sendSMS=()=>window.open('sms:'+inv.customer_phone+'?body=Hi '+inv.customer_name+', your invoice '+inv.number+' from '+coName()+' is ready. Total: '+fmt(total)+'. View: '+shareUrl+payMsg);
-const sendEmail=()=>window.open('mailto:'+inv.customer_email+'?subject=Invoice '+inv.number+' - '+coName()+'&body=Hi '+inv.customer_name+',%0A%0AYour invoice is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+(inv.payment_link?'%0A%0APay here: '+inv.payment_link:'')+'%0A%0AThank you!');
-const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
+const sendSMS=()=>window.open('sms:'+inv.customer_phone+'?body=Hi '+inv.customer_name+', your invoice '+inv.number+' from The Mailbox Repair CO is ready. Total: '+fmt(total)+'. View: '+shareUrl+payMsg);
+const sendEmail=()=>window.open('mailto:'+inv.customer_email+'?subject=Invoice '+inv.number+' - The Mailbox Repair CO&body=Hi '+inv.customer_name+',%0A%0AYour invoice is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+(inv.payment_link?'%0A%0APay here: '+inv.payment_link:'')+'%0A%0AThank you!');
+const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);mbrcAlert('Link copied!')};
 
 async function markPaid(){
 await sb.from('invoices').update({status:'Paid',paid_at:Date.now()}).eq('id',id);
 setInv(v=>({...v,status:'Paid',paid_at:Date.now()}));
+}
+
+function printInv(){
+const sub=calcTotal(inv.items||[],0);
+const tax=calcTotal(inv.items||[],inv.tax_rate)-sub;
+const total=sub+tax;
+const rows=(inv.items||[]).map(it=>`
+<tr>
+<td style="padding:8px 4px;border-bottom:1px solid #e6ecf5">
+<strong>${it.description||''}</strong>
+${it.notes?`<div style="font-size:12px;color:#64748b;margin-top:2px">${it.notes}</div>`:''}
+</td>
+<td style="padding:8px 4px;border-bottom:1px solid #e6ecf5;text-align:center;color:#64748b">${it.qty||1} ${it.unit||'ea'}</td>
+<td style="padding:8px 4px;border-bottom:1px solid #e6ecf5;text-align:right;color:#64748b">${fmt(it.price)}</td>
+<td style="padding:8px 4px;border-bottom:1px solid #e6ecf5;text-align:right;font-weight:600;color:#047857">${fmt((Number(it.qty)||1)*(Number(it.price)||0))}</td>
+</tr>`).join('');
+const w=window.open('','_blank');
+w.document.write(`<!DOCTYPE html><html><head><title>Invoice ${inv.number}</title>
+<style>body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;color:#0f1e36}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px}
+.company{font-size:20px;font-weight:800;color:#0f1e36}
+.badge{background:#dcfce7;color:#166534;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
+table{width:100%;border-collapse:collapse;margin-bottom:16px}
+th{text-align:left;padding:10px 4px;border-bottom:2px solid #0f1e36;font-size:13px}
+.totals{text-align:right;margin-top:8px}
+.total{font-size:22px;font-weight:800;color:#047857}
+@media print{body{margin:0}}
+</style></head><body>
+<div class="header">
+<div>
+<div class="company">The Mailbox Repair CO</div>
+<div style="font-size:13px;color:#64748b;margin-top:4px">817-592-6678 · Office@themailboxrepairco.com</div>
+</div>
+<div style="text-align:right">
+<div style="font-size:22px;font-weight:800">INVOICE</div>
+<div style="font-size:15px;font-weight:600;color:#2563eb">${inv.number}</div>
+<div class="badge" style="margin-top:6px;display:inline-block">${inv.status||'Unpaid'}</div>
+</div>
+</div>
+<div style="display:flex;justify-content:space-between;margin-bottom:24px">
+<div>
+<div style="font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600">Bill To</div>
+<div style="font-weight:700;font-size:16px;margin-top:4px">${inv.customer_name||''}</div>
+<div style="color:#64748b;font-size:13px">${inv.customer_phone||''}</div>
+<div style="color:#64748b;font-size:13px">${inv.customer_email||''}</div>
+<div style="color:#64748b;font-size:13px">${inv.customer_address||''}</div>
+</div>
+<div style="text-align:right">
+<div style="font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600">Invoice Date</div>
+<div style="font-weight:600;margin-top:4px">${inv.date||''}</div>
+<div style="font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600;margin-top:8px">Due Date</div>
+<div style="font-weight:600;margin-top:4px">${inv.due_date||'Upon Receipt'}</div>
+</div>
+</div>
+<table>
+<thead><tr>
+<th>Description</th>
+<th style="text-align:center">Qty</th>
+<th style="text-align:right">Price</th>
+<th style="text-align:right">Total</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+<div class="totals">
+<div style="color:#64748b;font-size:14px">Subtotal: ${fmt(sub)}</div>
+${tax>0?`<div style="color:#64748b;font-size:14px">Tax: ${fmt(tax)}</div>`:''}
+<div class="total">Total: ${fmt(total)}</div>
+${inv.status==='Paid'?'<div style="color:#16a34a;font-weight:600;margin-top:6px">✓ PAID</div>':''}
+</div>
+${inv.payment_link?`<div style="margin-top:24px;padding:16px;background:#eff6ff;border-radius:8px;text-align:center">
+<div style="font-weight:600;margin-bottom:6px">Pay Online</div>
+<a href="${inv.payment_link}" style="color:#2563eb">${inv.payment_link}</a>
+</div>`:''}
+${inv.notes?`<div style="margin-top:24px;padding:16px;background:#f8fafc;border-radius:8px;font-size:13px"><strong>Notes:</strong><br>${inv.notes}</div>`:''}
+<div style="margin-top:40px;text-align:center;font-size:11px;color:#94a3b8">Thank you for your business — The Mailbox Repair CO</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`);
+w.document.close();
 }
 
 return h('div',{className:'content'},
@@ -922,11 +849,12 @@ h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
-inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Mark Paid')
+inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Paid'),
+h('button',{className:'btn btn-danger btn-sm',onClick:async()=>{if(!await mbrcConfirm('Delete this invoice?'))return;await sb.from('invoices').delete().eq('id',id);onBack();}},'🗑')
 )
 ),
 h('div',{className:'tab-bar'},
-['details','send'].map(t=>h('button',{key:t,className:'tab-btn'+(tab===t?' active':''),onClick:()=>setTab(t)},t.charAt(0).toUpperCase()+t.slice(1)))
+['details','send','print'].map(t=>h('button',{key:t,className:'tab-btn'+(tab===t?' active':''),onClick:()=>setTab(t)},t.charAt(0).toUpperCase()+t.slice(1)))
 ),
 
 tab==='details'&&h('div',null,
@@ -946,10 +874,11 @@ h('div',{style:{color:'#64748b',fontSize:13}},inv.customer_email)
 h('div',{className:'card'},
 (inv.items||[]).map((item,i)=>h('div',{key:i,style:{borderBottom:'1px solid #e6ecf5',paddingBottom:8,marginBottom:8}},
 h('div',{style:{display:'flex',justifyContent:'space-between'}},
-h('div',{style:{fontSize:14}},item.description),
+h('div',{style:{fontSize:14,fontWeight:600}},item.description),
 h('div',{style:{color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
-h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
+h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price)),
+item.notes&&h('div',{style:{fontSize:12,color:'#475569',marginTop:3,fontStyle:'italic'}},item.notes)
 )),
 h('div',{style:{textAlign:'right'}},
 h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub)),
@@ -968,6 +897,14 @@ h('div',{className:'alert alert-info'},'Send invoice to customer'),
 h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'💬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},inv.customer_phone))),
 h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'📧'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},inv.customer_email))),
 h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'🔗'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},'Share invoice link')))
+),
+
+tab==='print'&&h('div',null,
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Print Invoice'),
+h('div',{style:{color:'#64748b',fontSize:13,marginBottom:16}},'Opens a print-ready invoice with all line items, notes, totals and payment link.'),
+h('button',{className:'btn btn-primary btn-block',onClick:printInv},'🖨️ Open Print View')
+)
 )
 );
 }
@@ -990,7 +927,7 @@ try{
 if(form.id){
 await sb.from('customers').update(form).eq('id',form.id);
 } else {
-await sb.from('customers').insert({...form,company_id:CURRENT_CO});
+await sb.from('customers').insert(form);
 }
 setShowForm(false);setForm({name:'',phone:'',email:'',address:'',city:'',state:'TX',notes:'',stage:'Lead',lead_source:'',follow_up_date:''});
 load();
@@ -1129,7 +1066,7 @@ try{
 if(form.id){
 await sb.from('line_item_templates').update(form).eq('id',form.id);
 } else {
-await sb.from('line_item_templates').insert({...form,company_id:CURRENT_CO});
+await sb.from('line_item_templates').insert({...form,id:uid()});
 }
 setShowForm(false);setForm({description:'',unit:'job',price:''});load();
 }catch(e){alert(e.message);}
@@ -1178,20 +1115,18 @@ const [mode,setMode]=useState('signin');
 const [email,setEmail]=useState('');
 const [pw,setPw]=useState('');
 const [name,setName]=useState('');
-const [code,setCode]=useState('');
 const [busy,setBusy]=useState(false);
 const [msg,setMsg]=useState('');
 
 async function submit(){
 if(!email||!pw){setMsg('Enter email and password.');return;}
-if(mode==='signup'&&!code.trim()){setMsg('Enter the company code your admin gave you.');return;}
 setBusy(true);setMsg('');
 try{
 if(mode==='signin'){
 const r=await sb.auth.signInWithPassword({email:email.trim(),password:pw});
 if(r.error)throw r.error;
 } else {
-const r=await sb.auth.signUp({email:email.trim(),password:pw,options:{data:{name:name.trim(),company_code:code.trim().toUpperCase()}}});
+const r=await sb.auth.signUp({email:email.trim(),password:pw,options:{data:{name:name.trim()}}});
 if(r.error)throw r.error;
 if(r.data.session){ /* logged in immediately */ }
 else { setMsg('Account created. If email confirmation is on, check your inbox, then sign in.'); setMode('signin'); }
@@ -1202,10 +1137,9 @@ setBusy(false);
 
 return h('div',{className:'login-wrap'},
 h('div',{className:'login-card'},
-h('div',{className:'login-logo'},'Estimator'),
-h('div',{className:'login-sub'},'Estimates · Invoices · Jobs'),
+h('div',{className:'login-logo'},'MBRC'),
+h('div',{className:'login-sub'},'The Mailbox Repair CO'),
 mode==='signup'&&h('div',{className:'form-group'},h('label',{className:'label'},'Name'),h('input',{className:'input',value:name,onChange:e=>setName(e.target.value),placeholder:'Your name'})),
-mode==='signup'&&h('div',{className:'form-group'},h('label',{className:'label'},'Company Code'),h('input',{className:'input',value:code,onChange:e=>setCode(e.target.value),placeholder:'e.g. ACME24',style:{textTransform:'uppercase'}})),
 h('div',{className:'form-group'},h('label',{className:'label'},'Email'),h('input',{className:'input',type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'you@example.com'})),
 h('div',{className:'form-group'},h('label',{className:'label'},'Password'),h('input',{className:'input',type:'password',value:pw,onChange:e=>setPw(e.target.value),placeholder:'••••••••',onKeyDown:e=>{if(e.key==='Enter')submit()}})),
 msg&&h('div',{className:'alert alert-info'},msg),
@@ -1254,128 +1188,226 @@ j.scheduled_date&&h('div',{style:{fontSize:11,color:'#64748b',marginTop:2}},j.sc
 // ── JOB DETAIL ────────────────────────────────────────────────────────────
 function JobDetail({id,profile,onBack}){
 const [job,setJob]=useState(null);
-const [photos,setPhotos]=useState([]);
 const [crew,setCrew]=useState([]);
 const [loading,setLoading]=useState(true);
-const [phase,setPhase]=useState('progress');
-const [caption,setCaption]=useState('');
+const [tab,setTab]=useState('overview');
+const [saving,setSaving]=useState(false);
 const [uploading,setUploading]=useState(false);
-const fileRef=useRef(null);
+const [phase,setPhase]=useState('before');
+const [caption,setCaption]=useState('');
+const camRef=useRef(null);
+const galRef=useRef(null);
 const isMgr=profile.role==='owner'||profile.role==='manager';
 
-function refreshJob(){sb.from('jobs').select('*').eq('id',id).single().then(r=>setJob(r.data));}
-function refreshPhotos(){sb.from('job_photos').select('*').eq('job_id',id).order('created_at',{ascending:false}).then(r=>setPhotos(r.data||[]));}
-
+function refresh(){sb.from('jobs').select('*').eq('id',id).single().then(r=>{setJob(r.data);});}
 useEffect(()=>{
 sb.from('jobs').select('*').eq('id',id).single().then(r=>{setJob(r.data);setLoading(false)});
-refreshPhotos();
 if(isMgr) sb.from('profiles').select('*').order('name').then(r=>setCrew(r.data||[]));
 },[id]);
 
 if(loading||!job) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
 
-async function toggleDeposit(){
-const paid=!job.deposit_paid;
-const newStatus=paid?(job.status==='awaiting_deposit'?'unassigned':job.status):'awaiting_deposit';
-await sb.from('jobs').update({deposit_paid:paid,status:newStatus}).eq('id',id);
-refreshJob();
+async function save(updates){
+setSaving(true);
+try{
+const res=await sb.from('jobs').update(updates).eq('id',id).select().single();
+if(res.error)throw res.error;
+setJob(res.data);
+}catch(e){console.error('Save error:',e);}
+setSaving(false);
 }
+
 async function assignTo(personId){
 if(!personId)return;
 const person=crew.find(c=>c.id===personId);
-await sb.from('jobs').update({assigned_to:personId,assigned_to_name:person?person.name:null,assigned_by:profile.id,assigned_at:new Date().toISOString(),status:'assigned'}).eq('id',id);
-refreshJob();
+await save({assigned_to:personId,assigned_to_name:person?person.name:'',status:'assigned'});
 }
-async function setStatus(s){await sb.from('jobs').update({status:s}).eq('id',id);refreshJob();}
-async function setSchedule(d){await sb.from('jobs').update({scheduled_date:d||null}).eq('id',id);refreshJob();}
 
-async function onFile(e){
-const file=e.target.files&&e.target.files[0];
-if(!file)return;
+async function compressImage(file){
+try{
+// Step 1: Try to convert HEIC first (Android may not report correct type)
+let src=file;
+if(typeof heic2any!=='undefined'){
+// Always try heic2any if file type suggests it might be HEIC
+const t=file.type||'';
+const n=(file.name||'').toLowerCase();
+const maybeHeic=t.includes('heic')||t.includes('heif')||t===''||t==='application/octet-stream'||n.endsWith('.heic')||n.endsWith('.heif');
+if(maybeHeic){
+try{
+const blob=await heic2any({blob:file,toType:'image/jpeg',quality:0.85});
+src=Array.isArray(blob)?blob[0]:blob;
+}catch(he){
+// Not HEIC or conversion failed — use original
+src=file;
+}
+}
+}
+// Step 2: Compress via canvas
+const bm=await createImageBitmap(src);
+const MAX=700;
+const r=Math.min(MAX/bm.width,MAX/bm.height,1);
+const w=Math.round(bm.width*r)||1;
+const h=Math.round(bm.height*r)||1;
+const c=document.createElement('canvas');
+c.width=w;c.height=h;
+const ctx=c.getContext('2d');
+if(!ctx){bm.close();throw new Error('No canvas context');}
+ctx.drawImage(bm,0,0,w,h);
+bm.close();
+return c.toDataURL('image/jpeg',0.65);
+}catch(e){
+throw new Error(e.message||'Photo processing failed');
+}
+}
+
+async function addPhotos(files){
+if(!files||!files.length)return;
 setUploading(true);
+const fileArr=Array.from(files).filter(f=>f&&f.size>0);
+if(!fileArr.length){setUploading(false);return;}
+let current=Array.isArray(job.photos)?[...job.photos]:[];
+const errors=[];
+for(let i=0;i<fileArr.length;i++){
 try{
-await uploadPhoto(id,file,profile,phase,caption);
-setCaption('');
-refreshPhotos();
-}catch(err){alert('Upload failed: '+err.message);}
-setUploading(false);
-if(fileRef.current)fileRef.current.value='';
+const data=await compressImage(fileArr[i]);
+
+current.push({id:Date.now().toString(36)+i,data,phase,caption:caption||'',by:profile.name||profile.email||'',ts:new Date().toISOString()});
+}catch(e){errors.push('Photo '+(i+1)+': '+(e&&e.message||'unknown error'));}
 }
-async function delPhoto(p){
-if(!confirm('Delete this photo?'))return;
 try{
-if(p.storage_path) await sb.storage.from('estimator-photos').remove([p.storage_path]);
-await sb.from('job_photos').delete().eq('id',p.id);
-refreshPhotos();
-}catch(err){alert('Delete failed: '+err.message);}
+const res=await sb.from('jobs').update({photos:current}).eq('id',id).select().single();
+if(res.error)throw res.error;
+setJob(res.data);
+setCaption('');
+if(errors.length>0)await mbrcAlert(errors.length+' photo(s) failed.\n'+errors.join('\n'));
+}catch(e){await mbrcAlert('Save failed: '+(e.message||'Unknown error. Check photos column exists in jobs table.'));}
+setUploading(false);
+if(camRef.current)camRef.current.value='';
+if(galRef.current)galRef.current.value='';
 }
 
-const canUpload=isMgr||job.assigned_to===profile.id;
+async function delPhoto(photoId){
+if(!await mbrcConfirm('Delete this photo?'))return;
+const photos=(Array.isArray(job.photos)?job.photos:[]).filter(p=>p.id!==photoId);
+await save({photos});
+}
+
+const photos=Array.isArray(job.photos)?job.photos:[];
+const canEdit=isMgr||job.assigned_to===profile.id;
 
 return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 jobStatusBadge(job.status)
 ),
-h('div',{className:'card'},
-h('h2',{style:{fontSize:18,fontWeight:700}},job.title||job.customer_name||'Job'),
-job.customer_name&&h('div',{style:{fontSize:13,color:'#64748b',marginTop:4}},job.customer_name),
+
+h('div',{className:'card',style:{marginBottom:12}},
+h('div',{style:{fontWeight:700,fontSize:16,color:'#0f1e36'}},job.title||job.customer_name||'Job'),
+job.customer_address&&h('div',{style:{fontSize:13,color:'#64748b',marginTop:2}},job.customer_address),
 job.customer_phone&&h('div',{style:{fontSize:13,color:'#64748b'}},job.customer_phone),
-job.customer_address&&h('div',{style:{fontSize:13,color:'#64748b'}},job.customer_address),
-h('div',{style:{fontSize:18,fontWeight:700,color:'#047857',marginTop:8}},fmt(job.amount))
+h('div',{style:{fontSize:18,fontWeight:800,color:'#047857',marginTop:6}},fmt(job.amount))
 ),
 
-isMgr&&h('div',{className:'card'},
-h('div',{className:'card-title'},'Job Management'),
-h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}},
-h('div',{style:{fontSize:14}},'Deposit paid'),
-h('button',{className:'btn btn-sm '+(job.deposit_paid?'btn-success':'btn-ghost'),onClick:toggleDeposit},job.deposit_paid?'✓ Paid':'Mark Paid')
-),
-job.deposit_paid?h('div',{className:'form-group'},
-h('label',{className:'label'},'Assign to'),
-h('select',{className:'input',value:job.assigned_to||'',onChange:e=>assignTo(e.target.value)},
-h('option',{value:''},'— Select crew —'),
-crew.map(c=>h('option',{key:c.id,value:c.id},(c.name||'(no name)')+' ('+c.role+')'))
-)
-):h('div',{className:'alert alert-warn'},'Mark the deposit paid to assign this job.'),
-h('div',{className:'form-group'},
-h('label',{className:'label'},'Scheduled date'),
-h('input',{className:'input',type:'date',value:job.scheduled_date||'',onChange:e=>setSchedule(e.target.value)})
-),
-h('div',{className:'form-group'},
-h('label',{className:'label'},'Status'),
-h('select',{className:'input',value:job.status,onChange:e=>setStatus(e.target.value)},
-['awaiting_deposit','unassigned','assigned','in_progress','complete'].map(s=>h('option',{key:s,value:s},s))
-)
-)
+h('div',{className:'tab-bar'},
+['overview','assignment','photos'].map(t=>h('button',{key:t,className:'tab-btn'+(tab===t?' active':''),onClick:()=>setTab(t)},
+t==='overview'?'Overview':t==='assignment'?'Assignment':'Photos ('+photos.length+')'
+))
 ),
 
-!isMgr&&job.assigned_to===profile.id&&h('div',{className:'card'},
-h('div',{className:'card-title'},'Update Status'),
-h('div',{style:{display:'flex',gap:6}},
-h('button',{className:'btn btn-sm '+(job.status==='in_progress'?'btn-primary':'btn-ghost'),style:{flex:1},onClick:()=>setStatus('in_progress')},'Start'),
-h('button',{className:'btn btn-sm '+(job.status==='complete'?'btn-success':'btn-ghost'),style:{flex:1},onClick:()=>setStatus('complete')},'Complete')
-)
-),
-
+tab==='overview'&&h('div',null,
 h('div',{className:'card'},
-h('div',{className:'card-title'},'Photos ('+photos.length+')'),
-canUpload&&h('div',{style:{marginBottom:12}},
-h('div',{style:{display:'flex',gap:4,marginBottom:8}},
-['before','progress','after'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flex:1}},ph.charAt(0).toUpperCase()+ph.slice(1)))
+h('div',{className:'card-title'},'Job Info'),
+h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}},
+h('span',{style:{fontSize:14}},'Deposit'),
+h('button',{className:'btn btn-sm '+(job.deposit_paid?'btn-success':'btn-ghost'),onClick:async()=>{const paid=!job.deposit_paid;await save({deposit_paid:paid,status:paid&&job.status==='awaiting_deposit'?'unassigned':job.status});}},job.deposit_paid?'✓ Paid':'Mark Paid')
 ),
-h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:8}}),
-h('input',{ref:fileRef,type:'file',accept:'image/*',capture:'environment',onChange:onFile,style:{display:'none'}}),
-h('button',{className:'btn btn-primary btn-block',onClick:()=>fileRef.current&&fileRef.current.click(),disabled:uploading},uploading?'Uploading...':'📷 Add Photo ('+phase+')')
+job.assigned_to_name&&h('div',{style:{fontSize:13,color:'#64748b',marginBottom:4}},'Assigned to: '+job.assigned_to_name),
+job.scheduled_date&&h('div',{style:{fontSize:13,color:'#64748b',marginBottom:4}},'Date: '+job.scheduled_date),
+job.eta_time&&h('div',{style:{fontSize:13,color:'#64748b',marginBottom:4}},'ETA: '+job.eta_time),
+job.work_instructions&&h('div',{style:{marginTop:8,padding:10,background:'#f8fafc',borderRadius:8,fontSize:13,color:'#0f1e36',lineHeight:1.5}},job.work_instructions)
 ),
-photos.length===0?h('div',{className:'empty',style:{padding:'20px'}},h('div',{className:'empty-icon'},'📷'),h('div',null,'No photos yet')):
+canEdit&&h('div',{className:'card'},
+h('div',{className:'card-title'},'Update Status'),
+h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}},
+['in_progress','complete'].map(s=>h('button',{key:s,className:'btn btn-sm '+(job.status===s?'btn-primary':'btn-ghost'),onClick:()=>save({status:s})},s==='in_progress'?'▶ Start Work':'✓ Complete'))
+)
+)
+),
+
+tab==='assignment'&&isMgr&&h('div',null,
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Assign Personnel'),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Assign To'),
+h('select',{className:'input',value:job.assigned_to||'',onChange:e=>assignTo(e.target.value)},
+h('option',{value:''},'— Select crew member —'),
+crew.map(c=>h('option',{key:c.id,value:c.id},(c.name||c.email||'(no name)')+' · '+c.role))
+)
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Scheduled Date'),
+h('input',{className:'input',type:'date',value:job.scheduled_date||'',onChange:e=>save({scheduled_date:e.target.value})})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'ETA / Start Time'),
+h('input',{className:'input',type:'time',value:job.eta_time||'',onChange:e=>save({eta_time:e.target.value})})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Job Status'),
+h('select',{className:'input',value:job.status,onChange:e=>save({status:e.target.value})},
+['awaiting_deposit','unassigned','assigned','in_progress','complete'].map(s=>h('option',{key:s,value:s},{awaiting_deposit:'Awaiting Deposit',unassigned:'Unassigned',assigned:'Assigned',in_progress:'In Progress',complete:'Complete'}[s]))
+)
+)
+),
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Work Instructions for Crew'),
+h('textarea',{className:'input',rows:5,placeholder:'Describe exactly what needs to be done — scope of work, materials to bring, access instructions, special notes...',value:job.work_instructions||'',onChange:e=>save({work_instructions:e.target.value}),style:{resize:'vertical'}})
+),
+h('div',{className:'card'},
+h('div',{className:'card-title'},'PM Notes (Internal)'),
+h('textarea',{className:'input',rows:4,placeholder:'Internal notes — HOA approvals, permit status, customer special requests, issues to watch...',value:job.pm_notes||'',onChange:e=>save({pm_notes:e.target.value}),style:{resize:'vertical'}})
+),
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Job Address'),
+h('input',{className:'input',placeholder:'Job site address',value:job.customer_address||'',onChange:e=>save({customer_address:e.target.value}),style:{marginBottom:8}}),
+job.customer_address&&h('a',{href:'https://maps.google.com/?q='+encodeURIComponent(job.customer_address),target:'_blank',className:'btn btn-ghost btn-block',style:{marginTop:4}},'📍 Open in Maps')
+)
+),
+
+tab==='assignment'&&!isMgr&&h('div',{className:'card'},
+h('div',{className:'card-title'},'Your Assignment'),
+job.work_instructions?h('div',{style:{fontSize:14,color:'#0f1e36',lineHeight:1.6,padding:'8px 0'}},job.work_instructions):h('div',{style:{color:'#94a3b8',fontSize:13}},'No instructions yet.'),
+job.scheduled_date&&h('div',{style:{marginTop:12,padding:'10px 12px',background:'#eff6ff',borderRadius:10,fontSize:13}},
+h('span',{style:{fontWeight:600}},'Date: '),job.scheduled_date,
+job.eta_time&&h('span',null,' · ETA: '+job.eta_time)
+),
+h('div',{style:{marginTop:12,display:'flex',gap:8}},
+h('button',{className:'btn btn-sm '+(job.status==='in_progress'?'btn-primary':'btn-ghost'),style:{flex:1},onClick:()=>save({status:'in_progress'})},'▶ Start'),
+h('button',{className:'btn btn-sm '+(job.status==='complete'?'btn-success':'btn-ghost'),style:{flex:1},onClick:()=>save({status:'complete'})},'✓ Done')
+)
+),
+
+tab==='photos'&&h('div',null,
+canEdit&&h('div',{className:'card'},
+h('div',{style:{display:'flex',gap:4,marginBottom:10}},
+['before','progress','after','damage','complete'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flexShrink:0,fontSize:11}},ph.charAt(0).toUpperCase()+ph.slice(1)))
+),
+h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:10}}),
+h('input',{ref:camRef,type:'file',accept:'image/*',capture:'environment',onChange:e=>addPhotos(e.target.files),style:{display:'none'}}),
+h('input',{ref:galRef,type:'file',accept:'image/*',multiple:true,onChange:e=>addPhotos(e.target.files),style:{display:'none'}}),
+h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
+h('button',{className:'btn btn-primary',onClick:()=>camRef.current&&camRef.current.click(),disabled:uploading},uploading?'Uploading...':'📷 Camera'),
+h('button',{className:'btn btn-ghost',onClick:()=>galRef.current&&galRef.current.click(),disabled:uploading},'🖼️ Gallery')
+)
+),
+photos.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'📷'),h('div',null,'No photos yet')):
 h('div',{className:'photo-grid'},
 photos.map(p=>h('div',{key:p.id,className:'photo-card'},
 h('span',{className:'photo-phase'},p.phase),
-h('img',{src:p.url,alt:p.caption||'',loading:'lazy'}),
+h('img',{src:p.data,alt:p.caption||'',loading:'lazy'}),
 h('div',{className:'photo-meta'},
-(p.caption?p.caption+' · ':'')+(p.uploaded_by_name||''),
-(isMgr||p.uploaded_by===profile.id)&&h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,padding:'2px 8px'},onClick:()=>delPhoto(p)},'Delete')
+(p.caption?p.caption+' · ':'')+(p.by||''),
+canEdit&&h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,padding:'2px 8px',display:'block'},onClick:()=>delPhoto(p.id)},'Delete')
 )
 ))
 )
@@ -1383,105 +1415,126 @@ h('div',{className:'photo-meta'},
 );
 }
 
-// ── TEAM (owner only) ─────────────────────────────────────────────────────
+// ── TEAM ──────────────────────────────────────────────────────────────────
 function Team({profile}){
 const [people,setPeople]=useState([]);
 const [loading,setLoading]=useState(true);
+const [showInvite,setShowInvite]=useState(false);
+const [inviteEmail,setInviteEmail]=useState('');
+const [inviteName,setInviteName]=useState('');
+const [inviteRole,setInviteRole]=useState('crew');
+const [sending,setSending]=useState(false);
+const [msg,setMsg]=useState('');
 
-function load(){sb.from('profiles').select('*').order('name').then(r=>{setPeople(r.data||[]);setLoading(false)});}
-useEffect(()=>{load()},[]);
+const appUrl='https://mailboxrepairco.github.io/mbrc-estimator';
 
-async function setRole(pid,role){await sb.from('profiles').update({role}).eq('id',pid);load();}
+function load(){
+setLoading(true);
+sb.from('profiles').select('*').order('name').then(r=>{
+setPeople(r.data||[]);
+setLoading(false);
+});
+}
+useEffect(()=>{load();},[]);
+
+async function setRole(pid,role){
+await sb.from('profiles').update({role}).eq('id',pid);
+load();
+}
+
+async function sendInvite(){
+if(!inviteEmail){setMsg('Enter an email address.');return;}
+setSending(true);setMsg('');
+try{
+// Send invite via Supabase auth
+const {error}=await sb.auth.admin?sb.auth.admin.inviteUserByEmail(inviteEmail,{data:{name:inviteName,role:inviteRole}}):await sb.auth.signInWithOtp({email:inviteEmail,options:{emailRedirectTo:appUrl,data:{name:inviteName,role:inviteRole}}});
+if(error)throw error;
+setMsg('✅ Invite sent to '+inviteEmail+'! They will get an email to join.');
+setInviteEmail('');setInviteName('');
+}catch(e){
+// Fallback: generate a sharable link to send manually
+setMsg('');
+setShowInvite(false);
+const smsText='Hi '+inviteName+', you\'ve been invited to join The Mailbox Repair CO team app. Sign up here: '+appUrl+' — Use your email and create a password. Your role will be set to '+inviteRole+' once you sign in.';
+const smsUrl='sms:'+encodeURIComponent(inviteEmail.includes('@')?'':''+inviteEmail)+'?body='+encodeURIComponent(smsText);
+window.open('sms:?body='+encodeURIComponent(smsText));
+}
+setSending(false);
+}
+
+function shareLink(method){
+const text='You\'ve been invited to join The Mailbox Repair CO team app!\n\nSign up at: '+appUrl+'\n\nCreate an account with your email and password. Your role will be set once you log in.';
+if(method==='sms') window.open('sms:?body='+encodeURIComponent(text));
+if(method==='whatsapp') window.open('https://wa.me/?text='+encodeURIComponent(text));
+if(method==='copy'){navigator.clipboard&&navigator.clipboard.writeText(appUrl);mbrcAlert('App link copied! Share it with your team member.');}
+}
 
 if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
 
 return h('div',{className:'content'},
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'Team')),
-h('div',{className:'alert alert-info'},'New sign-ups start as Crew. Promote people to Manager or Owner here.'),
-people.map(p=>h('div',{key:p.id,className:'list-item',style:{cursor:'default'}},
-h('div',null,
-h('div',{className:'list-item-title'},p.name||'(no name)'),
-p.phone&&h('div',{className:'list-item-sub'},p.phone)
+h('div',{className:'section-header'},
+h('h2',{className:'section-title'},'Team ('+people.length+')'),
+h('button',{className:'btn btn-primary btn-sm',onClick:()=>{setShowInvite(!showInvite);setMsg('');}},'+ Invite')
 ),
-h('div',null,
-h('select',{className:'input',value:p.role,onChange:e=>setRole(p.id,e.target.value),style:{width:130}},
-['crew','manager','owner'].map(r=>h('option',{key:r,value:r},r))
+
+showInvite&&h('div',{className:'card',style:{marginBottom:16}},
+h('div',{className:'card-title'},'Invite Team Member'),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Their Name'),
+h('input',{className:'input',placeholder:'John Smith',value:inviteName,onChange:e=>setInviteName(e.target.value)})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Role'),
+h('select',{className:'input',value:inviteRole,onChange:e=>setInviteRole(e.target.value)},
+h('option',{value:'crew'},'Crew — Can view & update assigned jobs'),
+h('option',{value:'manager'},'Manager — Can create estimates, invoices, assign jobs'),
+h('option',{value:'owner'},'Owner — Full access')
 )
+),
+h('div',{className:'card-title',style:{marginTop:12}},'Send Invite Via'),
+h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:12}},
+h('button',{className:'btn btn-ghost',style:{flexDirection:'column',gap:4,padding:'12px 8px'},onClick:()=>shareLink('sms')},
+h('div',{style:{fontSize:22}},'💬'),h('div',{style:{fontSize:11}},'Text')
+),
+h('button',{className:'btn btn-ghost',style:{flexDirection:'column',gap:4,padding:'12px 8px'},onClick:()=>shareLink('whatsapp')},
+h('div',{style:{fontSize:22}},'📱'),h('div',{style:{fontSize:11}},'WhatsApp')
+),
+h('button',{className:'btn btn-ghost',style:{flexDirection:'column',gap:4,padding:'12px 8px'},onClick:()=>shareLink('copy')},
+h('div',{style:{fontSize:22}},'🔗'),h('div',{style:{fontSize:11}},'Copy Link')
+)
+),
+h('div',{className:'alert alert-info',style:{fontSize:12}},
+'They sign up at the app link with their email. Once they log in, set their role below.'
+),
+msg&&h('div',{className:'alert alert-success',style:{fontSize:13}},msg)
+),
+
+people.length===0?h('div',{className:'empty'},
+h('div',{className:'empty-icon'},'👥'),
+h('div',null,'No team members yet'),
+h('div',{style:{fontSize:12,color:'#94a3b8',marginTop:6}},'Invite your crew using the button above')
+):
+people.map(p=>h('div',{key:p.id,className:'card',style:{marginBottom:8}},
+h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+h('div',null,
+h('div',{style:{fontWeight:700,fontSize:15}},p.name||'(no name)'),
+h('div',{style:{fontSize:12,color:'#64748b',marginTop:2}},p.email||''),
+p.id===profile.id&&h('span',{style:{fontSize:10,color:'#2563eb',fontWeight:600}},' (You)')
+),
+p.id!==profile.id?h('select',{className:'input',value:p.role||'crew',onChange:e=>setRole(p.id,e.target.value),style:{width:110,fontSize:12}},
+h('option',{value:'crew'},'Crew'),
+h('option',{value:'manager'},'Manager'),
+h('option',{value:'owner'},'Owner')
+):h('span',{className:'badge badge-approved'},'Owner')
 )
 ))
 );
 }
 
-// ── LEADS ── front of the funnel: speed-to-lead → qualify → convert ─────────
-function Leads(){
-const [leads,setLeads]=useState([]);
-const [loading,setLoading]=useState(true);
-const [busy,setBusy]=useState('');
-useEffect(()=>{load()},[]);
-function load(){setLoading(true);sb.from('leads').select('*').order('created_at',{ascending:false}).then(r=>{setLeads(r.data||[]);setLoading(false)})}
-const badge=s=>{const cls={New:'badge-sent',Contacted:'badge-draft',Qualified:'badge-approved',Converted:'badge-paid'}[s]||'badge-draft';return h('span',{className:'badge '+cls},s);};
-async function setStatus(id,status){setBusy(id);try{await sb.from('leads').update({status}).eq('id',id);load();}catch(e){alert(e.message);}setBusy('');}
-// Speed-to-lead: text the homeowner back the second their request lands.
-function smsBody(ld){
-  const co=((COMPANY&&COMPANY.name)||'us').replace(/\.+$/,'');
-  const first=(ld.name||'there').split(/\s+/)[0];
-  return 'Hi '+first+', this is '+co+'. Thanks for reaching out'+(ld.message?(' about "'+ld.message+'"'):'')+
-    '. I can take a look — what time works best for a quick quote? Reply STOP to opt out.';
-}
-async function textBack(ld){
-  if(!ld.phone){alert('No phone number on this lead.');return;}
-  setBusy(ld.id);
-  const body=smsBody(ld);
-  try{
-    if(DEMO_MODE||!LEAD_SMS_URL){
-      await sb.from('leads').update({status:'Contacted'}).eq('id',ld.id);
-      alert('⚡ Speed-to-lead (demo)\n\nWould text '+ld.phone+':\n\n'+body+'\n\nPaste your lead-intake URL + Twilio keys to send for real (see TWILIO-SETUP.md).');
-    } else {
-      const res=await fetch(LEAD_SMS_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({messages:[{kind:'lead',to:ld.phone,body}]})});
-      const out=await res.json();
-      const r=(out.results&&out.results[0])||{};
-      if(r.status==='error') throw new Error(r.error||'send failed');
-      await sb.from('leads').update({status:'Contacted'}).eq('id',ld.id);
-      alert(out.simulated?'Sent (simulated — Twilio keys not set on the server yet).':'✅ Texted '+ld.phone+' back.');
-    }
-    load();
-  }catch(e){alert('Could not send: '+e.message);}
-  setBusy('');
-}
-async function convert(ld){setBusy(ld.id);try{
-await sb.from('customers').insert({company_id:CURRENT_CO,name:ld.name,phone:ld.phone,email:ld.email,address:ld.address,lead_source:ld.lead_source||'Lead',stage:'Lead',follow_up_date:null});
-await sb.from('leads').update({status:'Converted'}).eq('id',ld.id);
-load();
-}catch(e){alert(e.message);}setBusy('');}
-if(loading) return h('div',{className:'content'},h('div',{className:'loading'},'Loading...'));
-return h('div',{className:'content'},
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'🎯 Leads'),
-h('span',{className:'list-item-sub'},leads.filter(l=>l.status!=='Converted').length+' open')),
-leads.length?leads.map(ld=>h('div',{key:ld.id,className:'card',style:{marginBottom:12}},
-h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8}},
-h('div',null,
-h('div',{className:'list-item-title'},ld.name),
-h('div',{className:'list-item-sub'},ld.phone+(ld.email?' · '+ld.email:'')),
-ld.address&&h('div',{className:'list-item-sub'},ld.address)
-),
-h('div',{style:{textAlign:'right'}},badge(ld.status),ld.lead_source&&h('div',{className:'list-item-sub',style:{marginTop:4}},'via '+ld.lead_source))
-),
-ld.message&&h('div',{style:{marginTop:8,fontSize:14,opacity:.85}},'“'+ld.message+'”'),
-h('div',{style:{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}},
-ld.status==='New'&&h('button',{className:'btn btn-primary btn-sm',disabled:busy===ld.id,onClick:()=>textBack(ld)},busy===ld.id?'...':'⚡ Text back now'),
-ld.status==='New'&&h('button',{className:'btn btn-ghost btn-sm',disabled:busy===ld.id,onClick:()=>setStatus(ld.id,'Contacted')},'Mark Contacted'),
-(ld.status==='New'||ld.status==='Contacted')&&h('button',{className:'btn btn-ghost btn-sm',disabled:busy===ld.id,onClick:()=>setStatus(ld.id,'Qualified')},'Mark Qualified'),
-ld.status!=='Converted'&&h('button',{className:'btn btn-primary btn-sm',disabled:busy===ld.id,onClick:()=>convert(ld)},busy===ld.id?'...':'Convert to Customer →')
-)
-)):h('div',{className:'card'},'No leads yet.')
-);
-}
 
 // ── MAIN APP ──────────────────────────────────────────────────────────────
-function App({profile,company,onLogout}){
+function App({profile,onLogout}){
 const isMgr=profile.role==='owner'||profile.role==='manager';
-const jobsOn=!company||company.jobs_enabled!==false;
 const [tab,setTab]=useState(isMgr?'dashboard':'jobs');
 const [view,setView]=useState(null);
 
@@ -1539,30 +1592,23 @@ h(JobDetail,{id:view.id,profile,onBack:()=>setView(null)})
 }
 
 const allTabs=[
-{id:'dashboard',label:'🏠 Home',roles:['owner','manager'],show:true},
-{id:'leads',label:'🎯 Leads',roles:['owner','manager'],show:true},
-{id:'estimates',label:'📋 Estimates',roles:['owner','manager'],show:true},
-{id:'invoices',label:'🧾 Invoices',roles:['owner','manager'],show:true},
-{id:'customers',label:'👥 Customers',roles:['owner','manager'],show:true},
-{id:'jobs',label:'🔧 Jobs',roles:['owner','manager','crew'],show:jobsOn},
-{id:'reports',label:'📊 Reports',roles:['owner','manager'],show:true},
-{id:'pricelist',label:'💲 Prices',roles:['owner','manager'],show:true},
-{id:'team',label:'🛡️ Team',roles:['owner'],show:true},
-{id:'platform',label:'🏢 Platform',roles:['owner','manager','crew'],show:!!profile.is_platform},
+{id:'dashboard',label:'🏠 Home',roles:['owner','manager']},
+{id:'estimates',label:'📋 Estimates',roles:['owner','manager']},
+{id:'invoices',label:'🧾 Invoices',roles:['owner','manager']},
+{id:'customers',label:'👥 Customers',roles:['owner','manager']},
+{id:'jobs',label:'🔧 Jobs',roles:['owner','manager','crew']},
+{id:'reports',label:'📊 Reports',roles:['owner','manager']},
+{id:'pricelist',label:'💲 Prices',roles:['owner','manager']},
+{id:'team',label:'🛡️ Team',roles:['owner']},
 ];
-const tabs=allTabs.filter(t=>t.show&&t.roles.includes(profile.role));
-const coName=(company&&company.name)||'Estimator';
-const coInit=coName.split(/\s+/).map(w=>w[0]).join('').slice(0,4).toUpperCase()||'EST';
+const tabs=allTabs.filter(t=>t.roles.includes(profile.role));
 
 return h('div',{className:'app'},
 h('nav',{className:'nav'},
 h('div',{className:'nav-top'},
-h('div',{className:'nav-logo'},
-(company&&company.logo_url)?h('img',{src:company.logo_url,alt:coName,style:{height:28,borderRadius:6}}):coInit,
-h('span',null,coName)),
+h('div',{className:'nav-logo'},'MBRC',h('span',null,'The Mailbox Repair CO')),
 h('div',{style:{display:'flex',alignItems:'center',gap:8}},
-h(NotifBell,{profile}),
-h('span',{className:'role-pill'},profile.is_platform?'platform':profile.role),
+h('span',{className:'role-pill'},profile.role),
 h('button',{className:'btn btn-ghost btn-sm',onClick:onLogout},'Logout')
 )
 ),
@@ -1570,116 +1616,14 @@ h('div',{className:'nav-tabs'},
 tabs.map(t=>h('button',{key:t.id,className:'nav-tab'+(tab===t.id?' active':''),onClick:()=>{setTab(t.id);setView(null)}},t.label))
 )
 ),
-DEMO_MODE&&h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,flexWrap:'wrap',padding:'8px 16px',background:'rgba(234,106,30,.12)',borderBottom:'1px solid rgba(234,106,30,.35)',fontSize:13}},
-h('span',null,'🧰 Demo mode — sample data for The Mailbox Repair Co. Nothing is saved to a server. Click around freely.'),
-h('button',{className:'btn btn-ghost btn-sm',onClick:resetDemo},'↺ Reset demo')
-),
 tab==='dashboard'&&isMgr&&h(Dashboard,{onNav:navigate}),
-tab==='leads'&&isMgr&&h(Leads,null),
 tab==='estimates'&&isMgr&&h(EstimatesList,{onNew:()=>setView({type:'new-estimate'}),onSelect:(id)=>setView({type:'estimate-detail',id})}),
 tab==='invoices'&&isMgr&&h(InvoicesList,{onNew:()=>setView({type:'new-invoice',data:null}),onSelect:(id)=>setView({type:'invoice-detail',id})}),
 tab==='customers'&&isMgr&&h(Customers,null),
-tab==='jobs'&&jobsOn&&h(JobsList,{profile,onSelect:(id)=>setView({type:'job-detail',id})}),
+tab==='jobs'&&h(JobsList,{profile,onSelect:(id)=>setView({type:'job-detail',id})}),
 tab==='reports'&&isMgr&&h(Reports,null),
 tab==='pricelist'&&isMgr&&h(PriceListManager,null),
-tab==='team'&&profile.role==='owner'&&h(Team,{profile}),
-tab==='platform'&&profile.is_platform&&h(Platform,{profile})
-);
-}
-
-// ── PLATFORM (reseller only) — create companies + see join codes ───────────
-function StatusQuick({est}){
-const [st,setSt]=useState(est.status||'Draft');
-const [busy,setBusy]=useState(false);
-async function ch(v){ setBusy(true); setSt(v); est.status=v; await sb.from('estimates').update({status:v}).eq('id',est.id); setBusy(false); }
-return h('div',{style:{display:'flex',alignItems:'center',gap:8,marginTop:8}},
-h('span',{style:{fontSize:13,color:'#64748b'}},'Status:'),
-h('select',{className:'input',style:{width:'auto',padding:'4px 8px'},value:st,disabled:busy,onChange:e=>ch(e.target.value)},
-['Draft','Sent','Approved','Declined'].map(s=>h('option',{key:s,value:s},s)))
-);
-}
-function NotifBell({profile}){
-const [open,setOpen]=useState(false);
-const [items,setItems]=useState([]);
-function load(){ sb.from('notifications').select('*').order('timestamp',{ascending:false}).limit(20).then(r=>{ let d=r.data||[]; if(profile&&profile.company_id){ d=d.filter(n=>!n.company_id||n.company_id===profile.company_id); } setItems(d); }); }
-useEffect(()=>{ load(); const t=setInterval(load,60000); return ()=>clearInterval(t); },[]);
-const unread=items.filter(n=>!n.read).length;
-async function markAll(){ const ids=items.filter(n=>!n.read).map(n=>n.id); if(ids.length){ await sb.from('notifications').update({read:true}).in('id',ids); load(); } }
-return h('div',{style:{position:'relative'}},
-h('button',{className:'btn btn-ghost btn-sm',onClick:()=>{const willOpen=!open; setOpen(willOpen); if(willOpen)setTimeout(markAll,1500);}},unread?('\uD83D\uDD14 '+unread):'\uD83D\uDD14'),
-open?h('div',{style:{position:'absolute',right:0,top:36,width:300,maxHeight:380,overflowY:'auto',background:'#fff',border:'1px solid #e5e7eb',borderRadius:10,boxShadow:'0 8px 24px rgba(0,0,0,.12)',zIndex:50,padding:8}},
-items.length?items.map(n=>h('div',{key:n.id,style:{padding:'8px 10px',borderBottom:'1px solid #f1f5f9',background:n.read?'#fff':'#f0f7ff',borderRadius:6,marginBottom:4}},
-h('div',{style:{fontSize:13,color:'#0f172a'}},n.message||n.type||'Notification'),
-h('div',{style:{fontSize:11,color:'#94a3b8',marginTop:2}},n.timestamp?new Date(n.timestamp).toLocaleString():'')
-)):h('div',{style:{padding:12,color:'#94a3b8',fontSize:13}},'No notifications yet.')
-):null
-);
-}
-function CompanyProfile({profile}){
-const [co,setCo]=useState(COMPANY||null);
-const [busy,setBusy]=useState(false);
-const [msg,setMsg]=useState('');
-useEffect(()=>{ if(profile&&profile.company_id){ sb.from('companies').select('*').eq('id',profile.company_id).single().then(r=>{ if(r.data){setCo(r.data); applyBranding(r.data);} }); } },[]);
-function up(k,v){ setCo(c=>({...(c||{}),[k]:v})); }
-function onLogo(e){ const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=256; let w=img.width,hh=img.height; if(w>=hh){ if(w>max){hh=Math.round(hh*max/w);w=max;} } else { if(hh>max){w=Math.round(w*max/hh);hh=max;} } const cv=document.createElement('canvas'); cv.width=w;cv.height=hh; cv.getContext('2d').drawImage(img,0,0,w,hh); up('logo_url',cv.toDataURL('image/png')); }; img.src=rd.result; }; rd.readAsDataURL(f); }
-async function save(){ if(!co||!profile.company_id){setMsg('No company to save.');return;} setBusy(true);setMsg(''); const patch={name:co.name,accent:co.accent,logo_url:co.logo_url||null,phone:co.phone||null,email:co.email||null,website:co.website||null}; const r=await sb.from('companies').update(patch).eq('id',profile.company_id).select().single(); setBusy(false); if(r.error){setMsg('Error: '+r.error.message);} else {setMsg('Saved.'); applyBranding(r.data); setCo(r.data);} }
-return h('div',{className:'card',style:{marginBottom:16}},
-h('h3',{style:{marginTop:0}},'Company Profile — logo & info shown on estimates/invoices'),
-h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:12}},
-(co&&co.logo_url)?h('img',{src:co.logo_url,alt:'logo',style:{height:56,borderRadius:8,border:'1px solid #e5e7eb'}}):h('div',{style:{height:56,width:56,borderRadius:8,background:'#f1f5f9',display:'flex',alignItems:'center',justifyContent:'center',color:'#94a3b8',fontSize:11}},'No logo'),
-h('label',{className:'btn btn-ghost btn-sm',style:{cursor:'pointer'}},'Upload logo',h('input',{type:'file',accept:'image/*',onChange:onLogo,style:{display:'none'}})),
-(co&&co.logo_url)?h('button',{className:'btn btn-ghost btn-sm',onClick:()=>up('logo_url',null)},'Remove'):null
-),
-h('div',{className:'form-group'},h('label',{className:'label'},'Company name'),h('input',{className:'input',value:(co&&co.name)||'',onChange:e=>up('name',e.target.value)})),
-h('div',{className:'form-group'},h('label',{className:'label'},'Phone'),h('input',{className:'input',value:(co&&co.phone)||'',onChange:e=>up('phone',e.target.value),placeholder:'(214) 555-0123'})),
-h('div',{className:'form-group'},h('label',{className:'label'},'Email'),h('input',{className:'input',value:(co&&co.email)||'',onChange:e=>up('email',e.target.value),placeholder:'you@company.com'})),
-h('div',{className:'form-group'},h('label',{className:'label'},'Website'),h('input',{className:'input',value:(co&&co.website)||'',onChange:e=>up('website',e.target.value),placeholder:'www.company.com'})),
-h('div',{className:'form-group'},h('label',{className:'label'},'Accent color'),h('input',{className:'input',type:'color',value:(co&&co.accent)||'#2563eb',onChange:e=>up('accent',e.target.value),style:{height:44,padding:4}})),
-msg&&h('div',{className:'alert alert-info'},msg),
-h('button',{className:'btn btn-primary btn-block',onClick:save,disabled:busy},busy?'Saving...':'Save company profile')
-);
-}
-function Platform({profile}){
-const [cos,setCos]=useState([]);
-const [loading,setLoading]=useState(true);
-const [form,setForm]=useState({name:'',accent:'#2563eb',jobs_enabled:true});
-const [busy,setBusy]=useState(false);
-const [msg,setMsg]=useState('');
-function genCode(name){
-const base=(name||'CO').replace(/[^a-zA-Z]/g,'').slice(0,4).toUpperCase()||'CO';
-return base+Math.floor(10+Math.random()*90);
-}
-function load(){setLoading(true);sb.from('companies').select('*').order('created_at',{ascending:false}).then(r=>{setCos(r.data||[]);setLoading(false)})}
-useEffect(()=>{load()},[]);
-async function create(){
-if(!form.name.trim()){setMsg('Enter a company name.');return;}
-setBusy(true);setMsg('');
-try{
-const code=genCode(form.name);
-const r=await sb.from('companies').insert({name:form.name.trim(),accent:form.accent,jobs_enabled:form.jobs_enabled,join_code:code}).select().single();
-if(r.error)throw r.error;
-setMsg('Created “'+form.name.trim()+'”. Company code: '+code+' — share it so their team can sign up.');
-setForm({name:'',accent:'#2563eb',jobs_enabled:true});
-load();
-}catch(e){setMsg('Error: '+e.message);}
-setBusy(false);
-}
-return h('div',{className:'content'},
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'Platform — Companies')),
-h(CompanyProfile,{profile}),
-h('div',{className:'card',style:{marginBottom:16}},
-h('div',{className:'form-group'},h('label',{className:'label'},'Company name'),h('input',{className:'input',value:form.name,onChange:e=>setForm({...form,name:e.target.value}),placeholder:'Acme Mailbox Repair'})),
-h('div',{className:'form-group'},h('label',{className:'label'},'Accent color'),h('input',{className:'input',type:'color',value:form.accent,onChange:e=>setForm({...form,accent:e.target.value}),style:{height:44,padding:4}})),
-h('label',{style:{display:'flex',alignItems:'center',gap:8,margin:'8px 0'}},h('input',{type:'checkbox',checked:form.jobs_enabled,onChange:e=>setForm({...form,jobs_enabled:e.target.checked})}),'Enable Jobs / crew / photos (off = estimates & invoices only)'),
-msg&&h('div',{className:'alert alert-info'},msg),
-h('button',{className:'btn btn-primary btn-block',onClick:create,disabled:busy},busy?'...':'Create company')
-),
-h('div',{className:'section-header'},h('h2',{className:'section-title'},'Companies')),
-loading?h('div',{className:'loading'},'Loading...'):
-(cos.length?cos.map(c=>h('div',{key:c.id,className:'list-item'},
-h('div',null,h('div',{className:'list-item-title'},c.name),h('div',{className:'list-item-sub'},'Code: '+(c.join_code||'—')+' · '+(c.jobs_enabled!==false?'Full':'Estimates only'))),
-h('span',{className:'badge',style:{background:c.accent||'#2563eb',color:'#fff'}},c.accent||'#2563eb')
-)):h('div',{className:'card'},'No companies yet.'))
+tab==='team'&&profile.role==='owner'&&h(Team,{profile})
 );
 }
 
@@ -1687,39 +1631,30 @@ h('span',{className:'badge',style:{background:c.accent||'#2563eb',color:'#fff'}}
 function AuthGate(){
 const [session,setSession]=useState(null);
 const [profile,setProfile]=useState(null);
-const [company,setCompany]=useState(null);
 const [loading,setLoading]=useState(true);
-
-async function loadProfile(userId){
-const r=await sb.from('profiles').select('*').eq('id',userId).single();
-const p=r.data;
-let co=null;
-if(p&&p.company_id){
-const cr=await sb.from('companies').select('*').eq('id',p.company_id).single();
-co=cr.data;
-}
-applyBranding(co);
-return {p,co};
-}
 
 useEffect(()=>{
 let active=true;
+async function loadProfile(user){
+try{const r=await sb.from('profiles').select('*').eq('id',user.id).single();if(r.data)return r.data;}catch(e){}
+return {id:user.id,name:(user.email||'User').split('@')[0],email:user.email||'',role:'owner',company:'The Mailbox Repair CO'};
+}
 sb.auth.getSession().then(async ({data})=>{
 if(!active)return;
 if(data.session){
 setSession(data.session);
-const {p,co}=await loadProfile(data.session.user.id);
-if(active){setProfile(p);setCompany(co);}
+const p=await loadProfile(data.session.user);
+if(active)setProfile(p);
 }
 if(active)setLoading(false);
 });
 const {data:listener}=sb.auth.onAuthStateChange(async (_e,sess)=>{
 setSession(sess);
 if(sess){
-const {p,co}=await loadProfile(sess.user.id);
-setProfile(p);setCompany(co);
+const p=await loadProfile(sess.user);
+setProfile(p);
 } else {
-setProfile(null);setCompany(null);applyBranding(null);
+setProfile(null);
 }
 });
 return ()=>{active=false;listener.subscription.unsubscribe();};
@@ -1728,15 +1663,7 @@ return ()=>{active=false;listener.subscription.unsubscribe();};
 if(loading) return h('div',{className:'loading'},'Loading...');
 if(!session) return h(Login,null);
 if(!profile) return h('div',{className:'loading'},'Setting up your profile…');
-// Signed in but not attached to a company (bad/blank company code at signup,
-// and not the platform owner) — block until an admin fixes it.
-if(!profile.company_id && !profile.is_platform)
-return h('div',{className:'login-wrap'},h('div',{className:'login-card'},
-h('div',{className:'login-logo'},'Estimator'),
-h('div',{className:'alert alert-info',style:{marginTop:12}},'Your account isn’t linked to a company yet. Ask your admin for the correct company code, then sign up again — or have them add you.'),
-h('button',{className:'btn btn-ghost btn-block',style:{marginTop:8},onClick:()=>sb.auth.signOut()},'Sign Out')
-));
-return h(App,{profile,company,onLogout:()=>sb.auth.signOut()});
+return h(App,{profile,onLogout:()=>sb.auth.signOut()});
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(h(AuthGate,null));
