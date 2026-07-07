@@ -698,8 +698,7 @@ h('div',{style:{display:'flex',justifyContent:'space-between'}},
 h('div',{style:{fontSize:14,fontWeight:500}},item.description,item.notes?h('div',{style:{fontSize:12,fontWeight:400,color:'#64748b',whiteSpace:'pre-line',marginTop:2}},item.notes):null),
 h('div',{style:{fontSize:14,color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
-h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price)),
-item.notes&&h('div',{style:{fontSize:11,color:'#94a3b8',marginTop:2}},item.notes)
+h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
 )),
 h('div',{style:{textAlign:'right'}},
 h('div',{style:{fontSize:13,color:'#64748b'}},'Subtotal: '+fmt(sub)),
