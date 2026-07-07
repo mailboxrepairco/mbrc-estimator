@@ -601,6 +601,28 @@ h('div',{className:'list-item-amount'},fmt(p.price))
 }
 
 // ── ESTIMATE DETAIL ───────────────────────────────────────────────────────
+function printInv(inv){
+  var money=function(n){return '$'+((Number(n)||0)).toFixed(2);};
+  var items=(inv.items||[]);
+  var sub=0; items.forEach(function(i){sub+=(Number(i.qty)||1)*(Number(i.price)||0);});
+  var tr=Number(inv.tax_rate)||0; var tax=sub*tr/100; var total=sub+tax;
+  var rows=items.map(function(i){
+    var lt=(Number(i.qty)||1)*(Number(i.price)||0);
+    var n=i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'';
+    return '<tr><td>'+(i.description||'')+n+'</td><td>'+(i.qty||'')+'</td><td>'+(i.unit||'')+'</td><td>'+money(i.price)+'</td><td>'+money(lt)+'</td></tr>';
+  }).join('');
+  var w=window.open('','_blank');
+  w.document.write('<html><head><title>Invoice '+(inv.number||'')+'</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:0 auto}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}.tot{text-align:right;margin-top:12px;font-size:14px}h2{margin:12px 0}</style></head><body>');
+  try{w.document.write(coPrintHeader());}catch(e){}
+  w.document.write('<h2>Invoice '+(inv.number||'')+'</h2>');
+  w.document.write('<p><b>Bill To:</b><br>'+(inv.customer_name||'')+'<br>'+(inv.customer_address||'')+'<br>'+[(inv.customer_phone||''),(inv.customer_email||'')].filter(Boolean).join(' | ')+'</p>');
+  w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>'+rows+'</table>');
+  w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');
+  if(inv.notes){w.document.write('<p style="margin-top:16px;white-space:pre-line"><b>Notes:</b><br>'+inv.notes+'</p>');}
+  w.document.write('</body></html>');
+  w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
+}
+
 function EstimateDetail({id,onBack,onEdit,onConvert}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
@@ -673,7 +695,7 @@ h('div',{className:'card'},
 h('div',{className:'card-title'},'Line Items'),
 (est.items||[]).map((item,i)=>h('div',{key:i,style:{borderBottom:'1px solid #e6ecf5',paddingBottom:8,marginBottom:8}},
 h('div',{style:{display:'flex',justifyContent:'space-between'}},
-h('div',{style:{fontSize:14,fontWeight:500}},item.description),
+h('div',{style:{fontSize:14,fontWeight:500}},item.description,item.notes?h('div',{style:{fontSize:12,fontWeight:400,color:'#64748b',whiteSpace:'pre-line',marginTop:2}},item.notes):null),
 h('div',{style:{fontSize:14,color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
 h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price)),
@@ -921,7 +943,7 @@ return h('div',{className:'content'},
 h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
-h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),h('button',{className:'btn btn-ghost btn-sm',onClick:function(){printInv(inv);}},'Print / PDF'),
 inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Mark Paid')
 )
 ),
@@ -946,7 +968,7 @@ h('div',{style:{color:'#64748b',fontSize:13}},inv.customer_email)
 h('div',{className:'card'},
 (inv.items||[]).map((item,i)=>h('div',{key:i,style:{borderBottom:'1px solid #e6ecf5',paddingBottom:8,marginBottom:8}},
 h('div',{style:{display:'flex',justifyContent:'space-between'}},
-h('div',{style:{fontSize:14}},item.description),
+h('div',{style:{fontSize:14}},item.description,item.notes?h('div',{style:{fontSize:12,fontWeight:400,color:'#64748b',whiteSpace:'pre-line',marginTop:2}},item.notes):null),
 h('div',{style:{color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
 h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
