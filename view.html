@@ -51,13 +51,7 @@ function tax(d){return sub(d)*(parseFloat(d.tax_rate)||0)/100}
 function tot(d){return sub(d)+tax(d)}
 
 async function init(){
-  const p=new URLSearchParams(location.search);
-  const token=p.get("token");let type=p.get("type")||"estimate";
-  if(!token){show("err","Invalid link — no token found.");return}
-  let tbl=type==="invoice"?"invoices":"estimates";
-  let _r=await db.rpc(tbl==="invoices"?"get_shared_invoice":"get_shared_estimate",{tok:token}).single();
-  if(_r.error||!_r.data){tbl=tbl==="invoices"?"estimates":"invoices";type=type==="invoice"?"estimate":"invoice";_r=await db.rpc(tbl==="invoices"?"get_shared_invoice":"get_shared_estimate",{tok:token}).single();}
-  let data=_r.data,error=_r.error;
+  const p=new URLSearchParams(location.search);let data,error,type,token,tbl;const __ps=(location.pathname.match(/\/q\/([^\/?#]+)/)||[])[1];if(__ps){const _s=await db.rpc('get_shared_by_slug',{p_slug:decodeURIComponent(__ps)});data=_s.data;error=_s.error;if(data){type=data.record_type||'estimate';token=data.share_token;tbl=type==='invoice'?'invoices':'estimates';}}else{token=p.get('token');type=p.get('type')||'estimate';if(!token){show('err','Invalid link — no token found.');return}tbl=type==='invoice'?'invoices':'estimates';let _r=await db.rpc(tbl==='invoices'?'get_shared_invoice':'get_shared_estimate',{tok:token}).single();if(_r.error||!_r.data){tbl=tbl==='invoices'?'estimates':'invoices';type=type==='invoice'?'estimate':'invoice';_r=await db.rpc(tbl==='invoices'?'get_shared_invoice':'get_shared_estimate',{tok:token}).single();}data=_r.data;error=_r.error;}
   if(error||!data){show("err","Document not found or link expired.");return}
   try{
     await db.from(tbl).update({viewed_at:Date.now(),view_count:(data.view_count||0)+1}).eq("share_token",token);
