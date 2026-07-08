@@ -637,7 +637,7 @@ if(loading||!est) return h('div',{className:'content'},h('div',{className:'loadi
 const sub=calcSub(est.items||[]);
 const tax=sub*(Number(est.tax_rate)||0)/100;
 const total=sub+tax;
-const shareUrl=location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+est.share_token+'&type=estimate';
+const shareUrl=(est.slug?'https://themailboxrepairco.com/q/'+est.slug:location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+est.share_token+'&type=estimate');
 
 const sendSMS=()=>window.open('sms:'+est.customer_phone+'?body=Hi '+est.customer_name+', your estimate from '+coName()+' is ready. Total: '+fmt(total)+'. View here: '+shareUrl);
 const sendEmail=()=>window.open('mailto:'+est.customer_email+'?subject=Your Estimate '+est.number+' - '+coName()+'&body=Hi '+est.customer_name+',%0A%0AYour estimate is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+'%0A%0AThank you!%0A'+coName()+'');
@@ -926,7 +926,7 @@ if(loading||!inv) return h('div',{className:'content'},h('div',{className:'loadi
 const sub=calcSub(inv.items||[]);
 const tax=sub*(Number(inv.tax_rate)||0)/100;
 const total=sub+tax;
-const shareUrl=location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+inv.share_token+'&type=invoice';
+const shareUrl=(inv.slug?'https://themailboxrepairco.com/q/'+inv.slug:location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+inv.share_token+'&type=invoice');
 
 const payMsg=inv.payment_link?'%0A%0APay here: '+encodeURIComponent(inv.payment_link):'';
 const sendSMS=()=>window.open('sms:'+inv.customer_phone+'?body=Hi '+inv.customer_name+', your invoice '+inv.number+' from '+coName()+' is ready. Total: '+fmt(total)+'. View: '+shareUrl+payMsg);
