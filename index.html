@@ -558,7 +558,7 @@ h('input',{className:'input',placeholder:'Unit',value:item.unit,onChange:e=>setI
 h('input',{className:'input',placeholder:'Price',type:'number',value:item.price,onChange:e=>setItem(i,'price',e.target.value)}),
 h('button',{className:'btn btn-danger btn-sm',onClick:()=>removeItem(i),style:{padding:'6px 8px'}},'×')
 ),
-h('textarea',{className:'input',placeholder:'Description',value:item.notes||'',onInput:e=>setItem(i,'notes',e.target.value),rows:3,style:{marginTop:4,fontSize:12,resize:'vertical'}})
+h('textarea',{className:'input',placeholder:'Description',value:item.notes||'',onInput:e=>{setItem(i,'notes',e.target.value);e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';},ref:el=>{if(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}},rows:2,style:{marginTop:4,fontSize:12,resize:'none',overflow:'hidden',minHeight:38,lineHeight:1.4}})
 )),
 h('div',{style:{textAlign:'right',fontSize:13,color:'#64748b'}},
 h('div',null,'Subtotal: ',h('strong',{style:{color:'#0f1e36'}},fmt(sub))),
