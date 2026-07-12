@@ -640,7 +640,7 @@ const total=sub+tax;
 const shareUrl=(est.slug?'https://themailboxrepairco.com/q/'+est.slug:location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+est.share_token+'&type=estimate');
 
 const sendSMS=()=>window.open('sms:'+est.customer_phone+'?body=Hi '+est.customer_name+', your estimate from '+coName()+' is ready. Total: '+fmt(total)+'. View here: '+shareUrl);
-const sendEmail=()=>window.open('mailto:'+est.customer_email+'?subject=Your Estimate '+est.number+' - '+coName()+'&body=Hi '+est.customer_name+',%0A%0AYour estimate is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+'%0A%0AThank you!%0A'+coName()+'');
+const sendEmail=()=>{var _b='Hi '+est.customer_name+',\n\nYour estimate is ready. Total: '+fmt(total)+'\n\nView here: '+shareUrl+'\n\nThank you!\n'+coName();var _s='Your Estimate '+est.number+' - '+coName();window.location.href='mailto:'+(est.customer_email||'')+'?subject='+encodeURIComponent(_s)+'&body='+encodeURIComponent(_b);};
 const sendWA=()=>window.open('https://wa.me/1'+est.customer_phone.replace(/\D/g,'')+'?text=Hi '+est.customer_name+', your estimate from '+coName()+' is ready. Total: '+fmt(total)+'. View: '+shareUrl);
 const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
 
@@ -930,7 +930,7 @@ const shareUrl=(inv.slug?'https://themailboxrepairco.com/q/'+inv.slug:location.o
 
 const payMsg=inv.payment_link?'%0A%0APay here: '+encodeURIComponent(inv.payment_link):'';
 const sendSMS=()=>window.open('sms:'+inv.customer_phone+'?body=Hi '+inv.customer_name+', your invoice '+inv.number+' from '+coName()+' is ready. Total: '+fmt(total)+'. View: '+shareUrl+payMsg);
-const sendEmail=()=>window.open('mailto:'+inv.customer_email+'?subject=Invoice '+inv.number+' - '+coName()+'&body=Hi '+inv.customer_name+',%0A%0AYour invoice is ready. Total: '+fmt(total)+'%0A%0AView here: '+shareUrl+(inv.payment_link?'%0A%0APay here: '+inv.payment_link:'')+'%0A%0AThank you!');
+const sendEmail=()=>{var _b='Hi '+inv.customer_name+',\n\nYour invoice is ready. Total: '+fmt(total)+'\n\nView here: '+shareUrl+(inv.payment_link?'\n\nPay here: '+inv.payment_link:'')+'\n\nThank you!';var _s='Invoice '+inv.number+' - '+coName();window.location.href='mailto:'+(inv.customer_email||'')+'?subject='+encodeURIComponent(_s)+'&body='+encodeURIComponent(_b);};
 const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
 
 async function markPaid(){
