@@ -132,6 +132,7 @@ canvas{border:1px solid #d8e0ec;border-radius:10px;width:100%;touch-action:none;
 <body>
 <div id="root"><div class="loading">Loading Estimator...</div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -381,7 +382,19 @@ reader.readAsDataURL(file);
 
 // Upload a job photo to Storage + record a row in job_photos.
 async function uploadPhoto(jobId,file,profile,phase,caption){
-const blob=await resizeImage(file,1600,0.8);
+// Auto-convert HEIC/HEIF before processing (Android phones often produce these)
+let srcFile=file;
+if(typeof heic2any!=='undefined'){
+const t=file.type||'';
+const n=(file.name||'').toLowerCase();
+if(t.includes('heic')||t.includes('heif')||t===''||t==='application/octet-stream'||n.endsWith('.heic')||n.endsWith('.heif')){
+try{
+const converted=await heic2any({blob:file,toType:'image/jpeg',quality:0.9});
+srcFile=Array.isArray(converted)?converted[0]:converted;
+}catch(e){ srcFile=file; } // not HEIC or failed — use original
+}
+}
+const blob=await resizeImage(srcFile,1600,0.8);
 const path=(CURRENT_CO||'co')+'/'+jobId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
 const up=await sb.storage.from('estimator-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
 if(up.error) throw up.error;
@@ -393,6 +406,65 @@ uploaded_by:profile.id,uploaded_by_name:profile.name,uploaded_by_role:profile.ro
 }).select().single();
 if(rec.error) throw rec.error;
 return rec.data;
+}
+
+// Upload a photo attached to an estimate/invoice (stored in Storage, referenced
+// in the doc's photos jsonb column). Reuses HEIC conversion + resize.
+async function uploadDocPhoto(table,docId,file,caption){
+let srcFile=file;
+if(typeof heic2any!=='undefined'){
+const t=file.type||'';const n=(file.name||'').toLowerCase();
+if(t.includes('heic')||t.includes('heif')||t===''||t==='application/octet-stream'||n.endsWith('.heic')||n.endsWith('.heif')){
+try{const c=await heic2any({blob:file,toType:'image/jpeg',quality:0.9});srcFile=Array.isArray(c)?c[0]:c;}catch(e){srcFile=file;}
+}
+}
+const blob=await resizeImage(srcFile,1600,0.8);
+const path=(CURRENT_CO||'co')+'/'+table+'/'+docId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';
+const up=await sb.storage.from('estimator-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
+if(up.error) throw up.error;
+const pub=sb.storage.from('estimator-photos').getPublicUrl(path);
+return {url:pub.data.publicUrl,storage_path:path,caption:caption||null};
+}
+
+// Reusable photo attachments panel for estimates & invoices.
+function DocPhotos({table,doc}){
+const [photos,setPhotos]=useState(doc.photos||[]);
+const [uploading,setUploading]=useState(false);
+const [caption,setCaption]=useState('');
+const fileRef=useRef(null);
+async function persist(next){setPhotos(next);await sb.from(table).update({photos:next}).eq('id',doc.id);}
+async function onFile(e){
+const file=e.target.files&&e.target.files[0];
+if(!file)return;
+setUploading(true);
+try{const p=await uploadDocPhoto(table,doc.id,file,caption);await persist(photos.concat([p]));setCaption('');}
+catch(err){alert('Upload failed: '+err.message);}
+setUploading(false);
+if(fileRef.current)fileRef.current.value='';
+}
+async function del(idx){
+if(!confirm('Delete this photo?'))return;
+const p=photos[idx];
+try{if(p&&p.storage_path)await sb.storage.from('estimator-photos').remove([p.storage_path]);}catch(e){}
+await persist(photos.filter((_,i)=>i!==idx));
+}
+return h('div',{className:'card'},
+h('div',{className:'card-title'},'Photos ('+photos.length+')'),
+h('div',{style:{marginBottom:10}},
+h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:8}}),
+h('input',{ref:fileRef,type:'file',accept:'image/*',onChange:onFile,style:{display:'none'}}),
+h('button',{className:'btn btn-primary btn-block',onClick:()=>fileRef.current&&fileRef.current.click(),disabled:uploading},uploading?'Uploading...':'📷 Add Photo')
+),
+photos.length===0?h('div',{className:'empty',style:{padding:'16px'}},h('div',null,'No photos attached')):
+h('div',{className:'photo-grid'},
+photos.map((p,i)=>h('div',{key:i,className:'photo-card'},
+h('img',{src:p.url||p.data,alt:p.caption||'',loading:'lazy'}),
+h('div',{className:'photo-meta'},(p.caption||''),
+h('button',{className:'btn btn-danger btn-sm',style:{marginTop:4,padding:'2px 8px'},onClick:()=>del(i)},'Delete')
+)
+))
+)
+);
 }
 
 // ── DEFAULT PRICE LIST ────────────────────────────────────────────────────
@@ -463,7 +535,7 @@ number:'EST-'+Date.now().toString().slice(-4),
 date:today(),status:'Draft',
 customer_name:'',customer_phone:'',customer_email:'',customer_address:'',
 items:[{id:uid(),description:'',qty:1,unit:'job',price:'',notes:''}],
-notes:'',tax_rate:0,
+notes:'',tax_rate:0,contract_text:'',
 });
 const [saving,setSaving]=useState(false);
 const [showPriceList,setShowPriceList]=useState(false);
@@ -576,6 +648,11 @@ h('div',{className:'card-title'},'Notes'),
 h('textarea',{className:'input',rows:3,value:form.notes,onChange:e=>setF('notes',e.target.value),placeholder:'Job notes, special instructions...'})
 ),
 
+h('div',{className:'card'},
+h('div',{className:'card-title'},'Terms & Conditions (optional)'),
+h('textarea',{className:'input',rows:4,value:form.contract_text||'',onChange:e=>setF('contract_text',e.target.value),placeholder:'Payment terms, warranty, cancellation policy — shown to the customer on the estimate.'})
+),
+
 h('button',{className:'btn btn-primary btn-block',onClick:save,disabled:saving},saving?'Saving...':'Save Estimate'),
 h('div',{style:{height:20}}),
 
@@ -619,6 +696,7 @@ function printInv(inv){
   w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>'+rows+'</table>');
   w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');
   if(inv.notes){w.document.write('<p style="margin-top:16px;white-space:pre-line"><b>Notes:</b><br>'+inv.notes+'</p>');}
+  if(inv.photos&&inv.photos.length){w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+inv.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');}
   w.document.write('</body></html>');
   w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
 }
@@ -658,6 +736,8 @@ w.document.write('<p class="total">Subtotal: '+fmt(sub)+'</p>');
 if(tax>0)w.document.write('<p>Tax ('+est.tax_rate+'%): '+fmt(tax)+'</p>');
 w.document.write('<p class="total">TOTAL: '+fmt(total)+'</p>');
 if(est.notes)w.document.write('<h3>Notes</h3><p>'+est.notes+'</p>');
+if(est.photos&&est.photos.length)w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+est.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');
+if(est.contract_text)w.document.write('<h3>Terms &amp; Conditions</h3><p style="white-space:pre-line;font-size:12px;color:#444">'+est.contract_text+'</p>');
 w.document.write('<br/><hr/><p>Thank you for your business!</p></body></html>');
 w.document.close();w.print();
 }
@@ -706,7 +786,9 @@ tax>0&&h('div',{style:{fontSize:13,color:'#64748b'}},'Tax ('+est.tax_rate+'%): '
 h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total))
 )
 ),
-est.notes&&h('div',{className:'card'},h('div',{className:'card-title'},'Notes'),h('div',{style:{fontSize:14}},est.notes))
+est.notes&&h('div',{className:'card'},h('div',{className:'card-title'},'Notes'),h('div',{style:{fontSize:14}},est.notes)),
+est.contract_text&&h('div',{className:'card'},h('div',{className:'card-title'},'Terms & Conditions'),h('div',{style:{fontSize:13,whiteSpace:'pre-line',color:'#475569'}},est.contract_text)),
+h(DocPhotos,{table:'estimates',doc:est})
 ),
 
 tab==='send'&&h('div',null,
@@ -947,7 +1029,7 @@ inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:mark
 )
 ),
 h('div',{className:'tab-bar'},
-['details','send'].map(t=>h('button',{key:t,className:'tab-btn'+(tab===t?' active':''),onClick:()=>setTab(t)},t.charAt(0).toUpperCase()+t.slice(1)))
+['details','send','print'].map(t=>h('button',{key:t,className:'tab-btn'+(tab===t?' active':''),onClick:()=>setTab(t)},t.charAt(0).toUpperCase()+t.slice(1)))
 ),
 
 tab==='details'&&h('div',null,
@@ -981,7 +1063,8 @@ h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total
 inv.payment_link&&h('div',{className:'card'},
 h('div',{className:'card-title'},'Payment Link'),
 h('a',{href:inv.payment_link,target:'_blank',style:{color:'#2563eb',fontSize:14,wordBreak:'break-all'}},inv.payment_link)
-)
+),
+h(DocPhotos,{table:'invoices',doc:inv})
 ),
 
 tab==='send'&&h('div',null,
@@ -989,6 +1072,11 @@ h('div',{className:'alert alert-info'},'Send invoice to customer'),
 h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'💬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},inv.customer_phone))),
 h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'📧'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},inv.customer_email))),
 h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'🔗'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},'Share invoice link')))
+),
+
+tab==='print'&&h('div',null,
+h('button',{className:'btn btn-primary btn-block',onClick:function(){printInv(inv);}},'🖨️ Open Print View'),
+h('div',{className:'alert alert-info',style:{marginTop:12}},'Opens a clean printable invoice in a new tab')
 )
 );
 }
@@ -1309,6 +1397,8 @@ refreshJob();
 }
 async function setStatus(s){await sb.from('jobs').update({status:s}).eq('id',id);refreshJob();}
 async function setSchedule(d){await sb.from('jobs').update({scheduled_date:d||null}).eq('id',id);refreshJob();}
+async function setJobField(k,v){await sb.from('jobs').update({[k]:v}).eq('id',id);refreshJob();}
+const mapsUrl=job.customer_address?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(job.customer_address):null;
 
 async function onFile(e){
 const file=e.target.files&&e.target.files[0];
@@ -1368,7 +1458,20 @@ h('label',{className:'label'},'Status'),
 h('select',{className:'input',value:job.status,onChange:e=>setStatus(e.target.value)},
 ['awaiting_deposit','unassigned','assigned','in_progress','complete'].map(s=>h('option',{key:s,value:s},s))
 )
-)
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'ETA / arrival time'),
+h('input',{className:'input',type:'time',defaultValue:job.eta_time||'',onBlur:e=>setJobField('eta_time',e.target.value)})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'Work instructions (crew sees this)'),
+h('textarea',{className:'input',rows:3,defaultValue:job.work_instructions||'',onBlur:e=>setJobField('work_instructions',e.target.value),placeholder:'What to do on site, materials, gate codes...'})
+),
+h('div',{className:'form-group'},
+h('label',{className:'label'},'PM notes (internal only)'),
+h('textarea',{className:'input',rows:2,defaultValue:job.pm_notes||'',onBlur:e=>setJobField('pm_notes',e.target.value),placeholder:'Private notes — not shown to crew'})
+),
+mapsUrl&&h('a',{className:'btn btn-ghost btn-block',href:mapsUrl,target:'_blank'},'📍 Open in Maps')
 ),
 
 !isMgr&&job.assigned_to===profile.id&&h('div',{className:'card'},
@@ -1376,14 +1479,20 @@ h('div',{className:'card-title'},'Update Status'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-sm '+(job.status==='in_progress'?'btn-primary':'btn-ghost'),style:{flex:1},onClick:()=>setStatus('in_progress')},'Start'),
 h('button',{className:'btn btn-sm '+(job.status==='complete'?'btn-success':'btn-ghost'),style:{flex:1},onClick:()=>setStatus('complete')},'Complete')
-)
+),
+job.eta_time&&h('div',{style:{fontSize:13,color:'#64748b',marginTop:10}},'ETA: '+job.eta_time),
+job.work_instructions&&h('div',{style:{marginTop:10}},
+h('div',{className:'label'},'Instructions'),
+h('div',{style:{fontSize:13,whiteSpace:'pre-line',color:'#334155'}},job.work_instructions)
+),
+mapsUrl&&h('a',{className:'btn btn-ghost btn-block',style:{marginTop:10},href:mapsUrl,target:'_blank'},'📍 Open in Maps')
 ),
 
 h('div',{className:'card'},
 h('div',{className:'card-title'},'Photos ('+photos.length+')'),
 canUpload&&h('div',{style:{marginBottom:12}},
-h('div',{style:{display:'flex',gap:4,marginBottom:8}},
-['before','progress','after'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flex:1}},ph.charAt(0).toUpperCase()+ph.slice(1)))
+h('div',{style:{display:'flex',flexWrap:'wrap',gap:4,marginBottom:8}},
+['before','progress','after','damage','complete'].map(ph=>h('button',{key:ph,className:'btn btn-sm '+(phase===ph?'btn-primary':'btn-ghost'),onClick:()=>setPhase(ph),style:{flex:'1 0 30%'}},ph.charAt(0).toUpperCase()+ph.slice(1)))
 ),
 h('input',{className:'input',placeholder:'Caption (optional)',value:caption,onChange:e=>setCaption(e.target.value),style:{marginBottom:8}}),
 h('input',{ref:fileRef,type:'file',accept:'image/*',capture:'environment',onChange:onFile,style:{display:'none'}}),
