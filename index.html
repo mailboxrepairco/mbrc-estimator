@@ -697,6 +697,7 @@ function printInv(inv){
   w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');
   if(inv.notes){w.document.write('<p style="margin-top:16px;white-space:pre-line"><b>Notes:</b><br>'+inv.notes+'</p>');}
   if(inv.photos&&inv.photos.length){w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+inv.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');}
+  if(inv.signature){w.document.write('<h3>Customer Signature</h3><img src="'+inv.signature+'" style="max-width:320px;border:1px solid #ddd;border-radius:6px"/><p style="font-size:12px;color:#555">'+((inv.signed_by?'Signed by '+inv.signed_by:'')+(inv.signed_at?(inv.signed_by?' &middot; ':'')+new Date(inv.signed_at).toLocaleString():''))+'</p>');}
   w.document.write('</body></html>');
   w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
 }
@@ -738,6 +739,7 @@ w.document.write('<p class="total">TOTAL: '+fmt(total)+'</p>');
 if(est.notes)w.document.write('<h3>Notes</h3><p>'+est.notes+'</p>');
 if(est.photos&&est.photos.length)w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+est.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');
 if(est.contract_text)w.document.write('<h3>Terms &amp; Conditions</h3><p style="white-space:pre-line;font-size:12px;color:#444">'+est.contract_text+'</p>');
+if(est.signature)w.document.write('<h3>Customer Signature</h3><img src="'+est.signature+'" style="max-width:320px;border:1px solid #ddd;border-radius:6px"/><p style="font-size:12px;color:#555">'+((est.signed_by?'Signed by '+est.signed_by:'')+(est.signed_at?(est.signed_by?' &middot; ':'')+new Date(est.signed_at).toLocaleString():''))+'</p>');
 w.document.write('<br/><hr/><p>Thank you for your business!</p></body></html>');
 w.document.close();w.print();
 }
@@ -788,6 +790,7 @@ h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total
 ),
 est.notes&&h('div',{className:'card'},h('div',{className:'card-title'},'Notes'),h('div',{style:{fontSize:14}},est.notes)),
 est.contract_text&&h('div',{className:'card'},h('div',{className:'card-title'},'Terms & Conditions'),h('div',{style:{fontSize:13,whiteSpace:'pre-line',color:'#475569'}},est.contract_text)),
+est.signature&&h('div',{className:'card'},h('div',{className:'card-title'},'Customer Signature'),h('img',{src:est.signature,style:{maxWidth:'100%',border:'1px solid #e2e8f0',borderRadius:6,marginTop:4}}),h('div',{style:{fontSize:12,color:'#64748b',marginTop:6}},(est.signed_by?'Signed by '+est.signed_by:'')+(est.signed_at?(est.signed_by?' · ':'')+new Date(est.signed_at).toLocaleString():''))),
 h(DocPhotos,{table:'estimates',doc:est})
 ),
 
@@ -1064,6 +1067,7 @@ inv.payment_link&&h('div',{className:'card'},
 h('div',{className:'card-title'},'Payment Link'),
 h('a',{href:inv.payment_link,target:'_blank',style:{color:'#2563eb',fontSize:14,wordBreak:'break-all'}},inv.payment_link)
 ),
+inv.signature&&h('div',{className:'card'},h('div',{className:'card-title'},'Customer Signature'),h('img',{src:inv.signature,style:{maxWidth:'100%',border:'1px solid #e2e8f0',borderRadius:6,marginTop:4}}),h('div',{style:{fontSize:12,color:'#64748b',marginTop:6}},(inv.signed_by?'Signed by '+inv.signed_by:'')+(inv.signed_at?(inv.signed_by?' · ':'')+new Date(inv.signed_at).toLocaleString():''))),
 h(DocPhotos,{table:'invoices',doc:inv})
 ),
 
