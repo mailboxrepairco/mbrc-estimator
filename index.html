@@ -644,6 +644,13 @@ h('div',{style:{marginTop:6,fontSize:18,color:'#047857',fontWeight:700}},'Total:
 ),
 
 h('div',{className:'card'},
+h('label',{style:{display:'flex',alignItems:'center',gap:10,cursor:'pointer',fontSize:14}},
+h('input',{type:'checkbox',checked:!!form.hide_pricing,onChange:e=>setF('hide_pricing',e.target.checked),style:{width:18,height:18}}),
+h('span',null,h('strong',null,'Hide line-item pricing'),h('div',{style:{fontSize:12,color:'#64748b',marginTop:2}},'Customer sees only the descriptions and the grand total — no Qty, Price, or per-line Total.'))
+)
+),
+
+h('div',{className:'card'},
 h('div',{className:'card-title'},'Notes'),
 h('textarea',{className:'input',rows:3,value:form.notes,onChange:e=>setF('notes',e.target.value),placeholder:'Job notes, special instructions...'})
 ),
@@ -683,9 +690,11 @@ function printInv(inv){
   var items=(inv.items||[]);
   var sub=0; items.forEach(function(i){sub+=(Number(i.qty)||1)*(Number(i.price)||0);});
   var tr=Number(inv.tax_rate)||0; var tax=sub*tr/100; var total=sub+tax;
+  var hp=inv.hide_pricing;
   var rows=items.map(function(i){
-    var lt=(Number(i.qty)||1)*(Number(i.price)||0);
     var n=i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'';
+    if(hp){return '<tr><td>'+(i.description||'')+n+'</td></tr>';}
+    var lt=(Number(i.qty)||1)*(Number(i.price)||0);
     return '<tr><td>'+(i.description||'')+n+'</td><td>'+(i.qty||'')+'</td><td>'+(i.unit||'')+'</td><td>'+money(i.price)+'</td><td>'+money(lt)+'</td></tr>';
   }).join('');
   var w=window.open('','_blank');
@@ -693,8 +702,13 @@ function printInv(inv){
   try{w.document.write(coPrintHeader());}catch(e){}
   w.document.write('<h2>Invoice '+(inv.number||'')+'</h2>');
   w.document.write('<p><b>Bill To:</b><br>'+(inv.customer_name||'')+'<br>'+(inv.customer_address||'')+'<br>'+[(inv.customer_phone||''),(inv.customer_email||'')].filter(Boolean).join(' | ')+'</p>');
-  w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>'+rows+'</table>');
-  w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');
+  if(hp){
+    w.document.write('<table><tr><th>Description</th></tr>'+rows+'</table>');
+    w.document.write('<div class="tot"><b>Total: '+money(total)+'</b></div>');
+  }else{
+    w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>'+rows+'</table>');
+    w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');
+  }
   if(inv.notes){w.document.write('<p style="margin-top:16px;white-space:pre-line"><b>Notes:</b><br>'+inv.notes+'</p>');}
   if(inv.photos&&inv.photos.length){w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+inv.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');}
   if(inv.signature){w.document.write('<h3>Customer Signature</h3><img src="'+inv.signature+'" style="max-width:320px;border:1px solid #ddd;border-radius:6px"/><p style="font-size:12px;color:#555">'+((inv.signed_by?'Signed by '+inv.signed_by:'')+(inv.signed_at?(inv.signed_by?' &middot; ':'')+new Date(inv.signed_at).toLocaleString():''))+'</p>');}
@@ -730,11 +744,18 @@ w.document.write(coPrintHeader());
 w.document.write('<h2>Estimate '+est.number+'</h2>');
 w.document.write('<p><strong>Date:</strong> '+est.date+'<br/><strong>Status:</strong> '+est.status+'</p>');
 w.document.write('<h3>Customer</h3><p>'+est.customer_name+'<br/>'+est.customer_phone+'<br/>'+est.customer_email+'<br/>'+est.customer_address+'</p>');
+var hp=est.hide_pricing;
+if(hp){
+w.document.write('<table><tr><th>Description</th></tr>');
+(est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+(i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'')+'</td></tr>'));
+w.document.write('</table>');
+}else{
 w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>');
 (est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+(i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'')+'</td><td>'+i.qty+'</td><td>'+i.unit+'</td><td>'+fmt(i.price)+'</td><td>'+fmt((Number(i.qty)||1)*(Number(i.price)||0))+'</td></tr>'));
 w.document.write('</table>');
 w.document.write('<p class="total">Subtotal: '+fmt(sub)+'</p>');
 if(tax>0)w.document.write('<p>Tax ('+est.tax_rate+'%): '+fmt(tax)+'</p>');
+}
 w.document.write('<p class="total">TOTAL: '+fmt(total)+'</p>');
 if(est.notes)w.document.write('<h3>Notes</h3><p>'+est.notes+'</p>');
 if(est.photos&&est.photos.length)w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+est.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');
@@ -778,13 +799,13 @@ h('div',{className:'card-title'},'Line Items'),
 (est.items||[]).map((item,i)=>h('div',{key:i,style:{borderBottom:'1px solid #e6ecf5',paddingBottom:8,marginBottom:8}},
 h('div',{style:{display:'flex',justifyContent:'space-between'}},
 h('div',{style:{fontSize:14,fontWeight:500}},item.description,item.notes?h('div',{style:{fontSize:12,fontWeight:400,color:'#64748b',whiteSpace:'pre-line',marginTop:2}},item.notes):null),
-h('div',{style:{fontSize:14,color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
+est.hide_pricing?null:h('div',{style:{fontSize:14,color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
-h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
+est.hide_pricing?null:h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
 )),
 h('div',{style:{textAlign:'right'}},
-h('div',{style:{fontSize:13,color:'#64748b'}},'Subtotal: '+fmt(sub)),
-tax>0&&h('div',{style:{fontSize:13,color:'#64748b'}},'Tax ('+est.tax_rate+'%): '+fmt(tax)),
+est.hide_pricing?null:h('div',{style:{fontSize:13,color:'#64748b'}},'Subtotal: '+fmt(sub)),
+!est.hide_pricing&&tax>0&&h('div',{style:{fontSize:13,color:'#64748b'}},'Tax ('+est.tax_rate+'%): '+fmt(tax)),
 h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total))
 )
 ),
@@ -951,6 +972,13 @@ h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total
 ),
 
 h('div',{className:'card'},
+h('label',{style:{display:'flex',alignItems:'center',gap:10,cursor:'pointer',fontSize:14}},
+h('input',{type:'checkbox',checked:!!form.hide_pricing,onChange:e=>setF('hide_pricing',e.target.checked),style:{width:18,height:18}}),
+h('span',null,h('strong',null,'Hide line-item pricing'),h('div',{style:{fontSize:12,color:'#64748b',marginTop:2}},'Customer sees only the descriptions and the amount due — no Qty, Price, or per-line Total.'))
+)
+),
+
+h('div',{className:'card'},
 h('div',{className:'card-title'},'Notes'),
 h('textarea',{className:'input',rows:3,value:form.notes||'',onChange:e=>setF('notes',e.target.value)})
 ),
@@ -1053,13 +1081,13 @@ h('div',{className:'card'},
 (inv.items||[]).map((item,i)=>h('div',{key:i,style:{borderBottom:'1px solid #e6ecf5',paddingBottom:8,marginBottom:8}},
 h('div',{style:{display:'flex',justifyContent:'space-between'}},
 h('div',{style:{fontSize:14}},item.description,item.notes?h('div',{style:{fontSize:12,fontWeight:400,color:'#64748b',whiteSpace:'pre-line',marginTop:2}},item.notes):null),
-h('div',{style:{color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
+inv.hide_pricing?null:h('div',{style:{color:'#047857',fontWeight:600}},fmt((Number(item.qty)||1)*(Number(item.price)||0)))
 ),
-h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
+inv.hide_pricing?null:h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
 )),
 h('div',{style:{textAlign:'right'}},
-h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub)),
-tax>0&&h('div',{style:{color:'#64748b',fontSize:13}},'Tax: '+fmt(tax)),
+inv.hide_pricing?null:h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub)),
+!inv.hide_pricing&&tax>0&&h('div',{style:{color:'#64748b',fontSize:13}},'Tax: '+fmt(tax)),
 h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total))
 )
 ),
