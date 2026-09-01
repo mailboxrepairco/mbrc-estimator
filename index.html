@@ -651,6 +651,13 @@ h('span',null,h('strong',null,'Hide line-item pricing'),h('div',{style:{fontSize
 ),
 
 h('div',{className:'card'},
+h('label',{style:{display:'flex',alignItems:'center',gap:10,cursor:'pointer',fontSize:14}},
+h('input',{type:'checkbox',checked:!!form.lock_until_signed,onChange:e=>setF('lock_until_signed',e.target.checked),style:{width:18,height:18}}),
+h('span',null,h('strong',null,'Lock line items until signed'),h('div',{style:{fontSize:12,color:'#64748b',marginTop:2}},'Customer sees the grand total with the line items blurred out and a note to sign. The full itemized estimate is released the moment they sign the work agreement.'))
+)
+),
+
+h('div',{className:'card'},
 h('div',{className:'card-title'},'Notes'),
 h('textarea',{className:'input',rows:3,value:form.notes,onChange:e=>setF('notes',e.target.value),placeholder:'Job notes, special instructions...'})
 ),

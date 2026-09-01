@@ -88,6 +88,7 @@ function brandHeader(b){ if(!b) return ""; var logo=b.logo_url||""; var parts=[b
 function render(d,type,token,brand){
   const isE=type==="estimate";
   const items=d.items||[];const photos=d.photos||[];
+  const locked=isE&&d.lock_until_signed&&!d.signature;
   document.getElementById("app").innerHTML=`
     ${brand?brandHeader(brand):""}
     <div class="card">
@@ -102,11 +103,22 @@ function render(d,type,token,brand){
     </div>
     <div class="card">
       <div class="lbl" style="margin-bottom:12px">Services</div>
-      ${d.hide_pricing
-        ? `<table><thead><tr><th>Description</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}${i.notes ? "<div style='font-size:11px;color:#555;margin-top:4px;white-space:pre-line'>" + i.notes + "</div>" : ""}</td></tr>`).join("")}</tbody></table>`
-        : `<table><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}${i.notes ? "<div style='font-size:11px;color:#555;margin-top:4px;white-space:pre-line'>" + i.notes + "</div>" : ""}</td><td>${i.qty||1}</td><td>${money(i.price)}</td><td style="text-align:right;font-weight:700">${money((parseFloat(i.qty)||0)*(parseFloat(i.price)||0))}</td></tr>`).join("")}</tbody></table>`}
+      ${locked
+        ? `<div style="position:relative">
+             <div style="filter:blur(6px);user-select:none;pointer-events:none" aria-hidden="true"><table><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}</td><td>${i.qty||1}</td><td>${money(i.price)}</td><td style="text-align:right;font-weight:700">${money((parseFloat(i.qty)||0)*(parseFloat(i.price)||0))}</td></tr>`).join("")}</tbody></table></div>
+             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center">
+               <div style="background:rgba(255,255,255,.92);border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;box-shadow:0 4px 16px #00000022;max-width:340px">
+                 <div style="font-size:28px">🔒</div>
+                 <div style="font-size:14px;font-weight:800;color:#0f172a;margin-top:6px">Full line-item estimate locked</div>
+                 <div style="font-size:13px;color:#475569;margin-top:5px;line-height:1.5">Please sign the work agreement below to release the full line-item estimate.</div>
+               </div>
+             </div>
+           </div>`
+        : d.hide_pricing
+          ? `<table><thead><tr><th>Description</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}${i.notes ? "<div style='font-size:11px;color:#555;margin-top:4px;white-space:pre-line'>" + i.notes + "</div>" : ""}</td></tr>`).join("")}</tbody></table>`
+          : `<table><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}${i.notes ? "<div style='font-size:11px;color:#555;margin-top:4px;white-space:pre-line'>" + i.notes + "</div>" : ""}</td><td>${i.qty||1}</td><td>${money(i.price)}</td><td style="text-align:right;font-weight:700">${money((parseFloat(i.qty)||0)*(parseFloat(i.price)||0))}</td></tr>`).join("")}</tbody></table>`}
       <div style="margin-top:14px">
-        ${d.hide_pricing ? "" : `<div class="tr"><span>Subtotal</span><span>${money(sub(d))}</span></div>
+        ${(locked||d.hide_pricing) ? "" : `<div class="tr"><span>Subtotal</span><span>${money(sub(d))}</span></div>
         <div class="tr"><span>Tax (${d.tax_rate||0}%)</span><span>${money(tax(d))}</span></div>`}
         <div class="tr gt"><span>${isE?"ESTIMATE TOTAL":"AMOUNT DUE"}</span><span>${money(tot(d))}</span></div>
       </div>
