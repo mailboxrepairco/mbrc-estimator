@@ -723,7 +723,7 @@ function printInv(inv){
   w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
 }
 
-function EstimateDetail({id,onBack,onEdit,onConvert}){
+function EstimateDetail({id,onBack,onEdit,onConvert,onDuplicate}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
 const [loading,setLoading]=useState(true);
@@ -777,6 +777,7 @@ h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
+h('button',{className:'btn btn-ghost btn-sm',onClick:()=>onDuplicate(est)},'Duplicate'),
 h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'→ Invoice')
 )
 ),
@@ -1678,7 +1679,16 @@ sb.from('estimates').select('*').eq('id',view.id).single().then(r=>{
 if(r.data)setView({type:'edit-estimate',data:r.data});
 });
 },
-onConvert:(est)=>setView({type:'new-invoice',data:est})
+onConvert:(est)=>setView({type:'new-invoice',data:est}),
+onDuplicate:(est)=>{
+const c={...est};
+delete c.id;delete c.share_token;delete c.slug;delete c.signature;delete c.signed_at;delete c.signed_by;delete c.viewed_at;delete c.view_count;delete c.invoice_id;delete c.created_at;delete c.updated_at;delete c.customer_id;
+c.status='Draft';
+c.number='EST-'+Date.now().toString().slice(-4);
+c.date=today();
+c.items=(est.items||[]).map(it=>({...it,id:uid()}));
+setView({type:'edit-estimate',data:c});
+}
 })
 );
 if(view.type==='new-invoice')
