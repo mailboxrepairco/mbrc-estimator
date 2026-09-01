@@ -346,6 +346,8 @@ const sub = items.reduce((a,i)=>(a+(Number(i.qty)||1)*(Number(i.price)||0)),0);
 return sub*(1+(Number(tax)||0)/100);
 };
 const calcSub = items => items.reduce((a,i)=>(a+(Number(i.qty)||1)*(Number(i.price)||0)),0);
+const hasOverride = r => r && r.total_override!=null && r.total_override!=='' && !isNaN(Number(r.total_override));
+const recTotal = r => hasOverride(r) ? Number(r.total_override) : calcTotal(r.items||[], r.tax_rate);
 
 function statusBadge(s){
 const cls={Draft:'badge-draft',Sent:'badge-sent',Approved:'badge-approved',Declined:'badge-declined',
@@ -484,12 +486,12 @@ const [loading,setLoading]=useState(true);
 useEffect(()=>{
 async function load(){
 const [ests,invs,custs]=await Promise.all([
-sb.from('estimates').select('id,status,items,tax_rate'),
-sb.from('invoices').select('id,status,items,tax_rate,due_date'),
+sb.from('estimates').select('id,status,items,tax_rate,total_override'),
+sb.from('invoices').select('id,status,items,tax_rate,due_date,total_override'),
 sb.from('customers').select('id,follow_up_date,name')
 ]);
-const revenue=(invs.data||[]).filter(i=>i.status==='Paid').reduce((a,i)=>a+calcTotal(i.items||[],i.tax_rate),0);
-const pending=(invs.data||[]).filter(i=>i.status==='Unpaid'||i.status==='Overdue').reduce((a,i)=>a+calcTotal(i.items||[],i.tax_rate),0);
+const revenue=(invs.data||[]).filter(i=>i.status==='Paid').reduce((a,i)=>a+recTotal(i),0);
+const pending=(invs.data||[]).filter(i=>i.status==='Unpaid'||i.status==='Overdue').reduce((a,i)=>a+recTotal(i),0);
 const todayStr=today();
 const followups=(custs.data||[]).filter(c=>c.follow_up_date&&c.follow_up_date<=todayStr);
 setStats({estimates:(ests.data||[]).length,invoices:(invs.data||[]).length,customers:(custs.data||[]).length,revenue,pending,followups});
@@ -557,12 +559,14 @@ const pickCustomer=c=>{setF('customer_name',c.name);setF('customer_phone',c.phon
 
 const sub=calcSub(form.items);
 const tax=sub*(Number(form.tax_rate)||0)/100;
-const total=sub+tax;
+const ov=hasOverride(form);
+const total=ov?Number(form.total_override):sub+tax;
 
 async function save(){
 setSaving(true);
 try{
 const data={...form};
+if(data.total_override===''||data.total_override==null||isNaN(Number(data.total_override))) data.total_override=null;
 if(!data.customer_id){
 const exists=customers.find(c=>c.name===data.customer_name);
 if(!exists&&data.customer_name){
@@ -636,9 +640,14 @@ h('div',{style:{textAlign:'right',fontSize:13,color:'#64748b'}},
 h('div',null,'Subtotal: ',h('strong',{style:{color:'#0f1e36'}},fmt(sub))),
 h('div',{style:{display:'flex',alignItems:'center',justifyContent:'flex-end',gap:8,marginTop:4}},
 'Tax: ',
-h('input',{className:'input',type:'number',value:form.tax_rate,onChange:e=>setF('tax_rate',e.target.value),style:{width:60,textAlign:'center'}}),
+h('input',{className:'input',type:'number',value:form.tax_rate,onChange:e=>setF('tax_rate',e.target.value),style:{width:60,textAlign:'center'},disabled:ov}),
 '%'
 ),
+h('div',{style:{display:'flex',alignItems:'center',justifyContent:'flex-end',gap:8,marginTop:8}},
+'Total price: $',
+h('input',{className:'input',type:'number',placeholder:'auto',value:form.total_override==null?'':form.total_override,onChange:e=>setF('total_override',e.target.value),style:{width:110,textAlign:'right'}})
+),
+h('div',{style:{fontSize:11,color:'#94a3b8',marginTop:2}},ov?'Manual total — tax ignored, customer sees this one price':'Leave blank to total the line items automatically'),
 h('div',{style:{marginTop:6,fontSize:18,color:'#047857',fontWeight:700}},'Total: '+fmt(total))
 )
 ),
@@ -696,7 +705,8 @@ function printInv(inv){
   var money=function(n){return '$'+((Number(n)||0)).toFixed(2);};
   var items=(inv.items||[]);
   var sub=0; items.forEach(function(i){sub+=(Number(i.qty)||1)*(Number(i.price)||0);});
-  var tr=Number(inv.tax_rate)||0; var tax=sub*tr/100; var total=sub+tax;
+  var tr=Number(inv.tax_rate)||0; var tax=sub*tr/100;
+  var ov=hasOverride(inv); var total=ov?Number(inv.total_override):sub+tax;
   var hp=inv.hide_pricing;
   var rows=items.map(function(i){
     var n=i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'';
@@ -714,7 +724,8 @@ function printInv(inv){
     w.document.write('<div class="tot"><b>Total: '+money(total)+'</b></div>');
   }else{
     w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>'+rows+'</table>');
-    w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');
+    if(ov){w.document.write('<div class="tot"><b>Total: '+money(total)+'</b></div>');}
+    else{w.document.write('<div class="tot">Subtotal: '+money(sub)+'<br>Tax ('+tr+'%): '+money(tax)+'<br><b>Total: '+money(total)+'</b></div>');}
   }
   if(inv.notes){w.document.write('<p style="margin-top:16px;white-space:pre-line"><b>Notes:</b><br>'+inv.notes+'</p>');}
   if(inv.photos&&inv.photos.length){w.document.write('<h3>Photos</h3><div style="display:flex;flex-wrap:wrap;gap:8px">'+inv.photos.map(function(p){return '<img src="'+(p.url||p.data)+'" style="width:200px;height:auto;border:1px solid #ddd;border-radius:6px"/>';}).join('')+'</div>');}
@@ -736,7 +747,8 @@ if(loading||!est) return h('div',{className:'content'},h('div',{className:'loadi
 
 const sub=calcSub(est.items||[]);
 const tax=sub*(Number(est.tax_rate)||0)/100;
-const total=sub+tax;
+const ov=hasOverride(est);
+const total=ov?Number(est.total_override):sub+tax;
 const shareUrl=(est.slug?'https://themailboxrepairco.com/q/'+est.slug:location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+est.share_token+'&type=estimate');
 
 const sendSMS=()=>window.open('sms:'+est.customer_phone+'?body=Hi '+est.customer_name+', your estimate from '+coName()+' is ready. Total: '+fmt(total)+'. View here: '+shareUrl);
@@ -760,8 +772,10 @@ w.document.write('</table>');
 w.document.write('<table><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Price</th><th>Total</th></tr>');
 (est.items||[]).forEach(i=>w.document.write('<tr><td>'+i.description+(i.notes?'<div style="font-size:11px;color:#555;margin-top:4px;white-space:pre-line">'+i.notes+'</div>':'')+'</td><td>'+i.qty+'</td><td>'+i.unit+'</td><td>'+fmt(i.price)+'</td><td>'+fmt((Number(i.qty)||1)*(Number(i.price)||0))+'</td></tr>'));
 w.document.write('</table>');
+if(!ov){
 w.document.write('<p class="total">Subtotal: '+fmt(sub)+'</p>');
 if(tax>0)w.document.write('<p>Tax ('+est.tax_rate+'%): '+fmt(tax)+'</p>');
+}
 }
 w.document.write('<p class="total">TOTAL: '+fmt(total)+'</p>');
 if(est.notes)w.document.write('<h3>Notes</h3><p>'+est.notes+'</p>');
@@ -812,8 +826,8 @@ est.hide_pricing?null:h('div',{style:{fontSize:14,color:'#047857',fontWeight:600
 est.hide_pricing?null:h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
 )),
 h('div',{style:{textAlign:'right'}},
-est.hide_pricing?null:h('div',{style:{fontSize:13,color:'#64748b'}},'Subtotal: '+fmt(sub)),
-!est.hide_pricing&&tax>0&&h('div',{style:{fontSize:13,color:'#64748b'}},'Tax ('+est.tax_rate+'%): '+fmt(tax)),
+(ov||est.hide_pricing)?null:h('div',{style:{fontSize:13,color:'#64748b'}},'Subtotal: '+fmt(sub)),
+!ov&&!est.hide_pricing&&tax>0&&h('div',{style:{fontSize:13,color:'#64748b'}},'Tax ('+est.tax_rate+'%): '+fmt(tax)),
 h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total))
 )
 ),
@@ -869,7 +883,7 @@ h('div',{className:'list-item-sub'},e.customer_name||'No customer'),
 h('div',{style:{marginTop:4}},statusBadge(e.status))
 ),
 h('div',{style:{textAlign:'right'}},
-h('div',{className:'list-item-amount'},fmt(calcTotal(e.items||[],e.tax_rate))),
+h('div',{className:'list-item-amount'},fmt(recTotal(e))),
 h('div',{style:{fontSize:11,color:'#64748b',marginTop:2}},e.date)
 )
 ))
@@ -887,6 +901,7 @@ customer_name:estimate.customer_name,customer_phone:estimate.customer_phone,
 customer_email:estimate.customer_email,customer_address:estimate.customer_address,
 customer_id:estimate.customer_id,
 items:estimate.items,notes:estimate.notes,tax_rate:estimate.tax_rate,
+total_override:estimate.total_override,hide_pricing:estimate.hide_pricing,
 estimate_id:estimate.id,estimate_number:estimate.number,
 payment_link:''
 }:invoice;
@@ -902,16 +917,19 @@ const [saving,setSaving]=useState(false);
 const setF=(k,v)=>setForm(f=>({...f,[k]:v}));
 const sub=calcSub(form.items);
 const tax=sub*(Number(form.tax_rate)||0)/100;
-const total=sub+tax;
+const ov=hasOverride(form);
+const total=ov?Number(form.total_override):sub+tax;
 
 async function save(){
 setSaving(true);
 try{
+const data={...form};
+if(data.total_override===''||data.total_override==null||isNaN(Number(data.total_override))) data.total_override=null;
 let result;
-if(form.id){
-result=await sb.from('invoices').update(form).eq('id',form.id).select().single();
+if(data.id){
+result=await sb.from('invoices').update(data).eq('id',data.id).select().single();
 } else {
-result=await sb.from('invoices').insert({...form,company_id:CURRENT_CO}).select().single();
+result=await sb.from('invoices').insert({...data,company_id:CURRENT_CO}).select().single();
 if(result.error) throw result.error;
 if(estimate){
 await sb.from('estimates').update({status:'Approved',invoice_id:result.data.id}).eq('id',estimate.id);
@@ -926,7 +944,7 @@ title:(estimate.customer_name||'Job')+' — '+result.data.number,
 customer_name:estimate.customer_name,
 customer_phone:estimate.customer_phone,
 customer_address:estimate.customer_address,
-amount:calcTotal(estimate.items||[],estimate.tax_rate),
+amount:recTotal(estimate),
 status:'awaiting_deposit',
 deposit_paid:false
 });
@@ -972,9 +990,14 @@ h('button',{className:'btn btn-danger btn-sm',onClick:()=>setF('items',form.item
 )
 )),
 h('button',{className:'btn btn-ghost btn-sm btn-block',onClick:()=>setF('items',[...form.items,{id:uid(),description:'',qty:1,unit:'job',price:'',notes:''}])},'+Add Item'),
-h('div',{style:{textAlign:'right',marginTop:8},fontSize:13},
-h('div',{style:{color:'#64748b'}},'Subtotal: '+fmt(sub)),
-tax>0&&h('div',{style:{color:'#64748b'}},'Tax ('+form.tax_rate+'%): '+fmt(tax)),
+h('div',{style:{display:'flex',alignItems:'center',justifyContent:'flex-end',gap:8,marginTop:8}},
+'Total price: $',
+h('input',{className:'input',type:'number',placeholder:'auto',value:form.total_override==null?'':form.total_override,onChange:e=>setF('total_override',e.target.value),style:{width:110,textAlign:'right'}})
+),
+h('div',{style:{fontSize:11,color:'#94a3b8',marginTop:2,textAlign:'right'}},ov?'Manual total — tax ignored, customer sees this one price':'Leave blank to total the line items automatically'),
+h('div',{style:{textAlign:'right',marginTop:8}},
+(ov?null:h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub))),
+(!ov&&tax>0)&&h('div',{style:{color:'#64748b',fontSize:13}},'Tax ('+form.tax_rate+'%): '+fmt(tax)),
 h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total))
 )
 ),
@@ -1025,7 +1048,7 @@ h('div',{className:'list-item-sub'},inv.customer_name),
 h('div',{style:{marginTop:4}},statusBadge(inv.status))
 ),
 h('div',{style:{textAlign:'right'}},
-h('div',{className:'list-item-amount'},fmt(calcTotal(inv.items||[],inv.tax_rate))),
+h('div',{className:'list-item-amount'},fmt(recTotal(inv))),
 h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:'')
 )
 ))
@@ -1046,7 +1069,8 @@ if(loading||!inv) return h('div',{className:'content'},h('div',{className:'loadi
 
 const sub=calcSub(inv.items||[]);
 const tax=sub*(Number(inv.tax_rate)||0)/100;
-const total=sub+tax;
+const ov=hasOverride(inv);
+const total=ov?Number(inv.total_override):sub+tax;
 const shareUrl=(inv.slug?'https://themailboxrepairco.com/q/'+inv.slug:location.origin+location.pathname.replace(/index\.html$/,'')+'view.html?token='+inv.share_token+'&type=invoice');
 
 const payMsg=inv.payment_link?'%0A%0APay here: '+encodeURIComponent(inv.payment_link):'';
@@ -1094,8 +1118,8 @@ inv.hide_pricing?null:h('div',{style:{color:'#047857',fontWeight:600}},fmt((Numb
 inv.hide_pricing?null:h('div',{style:{fontSize:12,color:'#64748b'}},item.qty+' '+item.unit+' × '+fmt(item.price))
 )),
 h('div',{style:{textAlign:'right'}},
-inv.hide_pricing?null:h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub)),
-!inv.hide_pricing&&tax>0&&h('div',{style:{color:'#64748b',fontSize:13}},'Tax: '+fmt(tax)),
+(ov||inv.hide_pricing)?null:h('div',{style:{color:'#64748b',fontSize:13}},'Subtotal: '+fmt(sub)),
+!ov&&!inv.hide_pricing&&tax>0&&h('div',{style:{color:'#64748b',fontSize:13}},'Tax: '+fmt(tax)),
 h('div',{style:{fontSize:20,fontWeight:700,color:'#047857'}},'Total: '+fmt(total))
 )
 ),
@@ -1199,18 +1223,18 @@ sb.from('customers').select('*')
 ]);
 const paidInvs=(invs.data||[]).filter(i=>i.status==='Paid');
 const unpaidInvs=(invs.data||[]).filter(i=>i.status!=='Paid');
-const revenue=paidInvs.reduce((a,i)=>a+calcTotal(i.items||[],i.tax_rate),0);
-const pending=unpaidInvs.reduce((a,i)=>a+calcTotal(i.items||[],i.tax_rate),0);
+const revenue=paidInvs.reduce((a,i)=>a+recTotal(i),0);
+const pending=unpaidInvs.reduce((a,i)=>a+recTotal(i),0);
 const months=[];
 for(let i=5;i>=0;i--){
 const d=new Date();d.setMonth(d.getMonth()-i);
 const m=d.toISOString().slice(0,7);
 const label=d.toLocaleString('default',{month:'short'});
-const amt=paidInvs.filter(inv=>inv.created_at&&inv.created_at.startsWith(m)).reduce((a,inv)=>a+calcTotal(inv.items||[],inv.tax_rate),0);
+const amt=paidInvs.filter(inv=>inv.created_at&&inv.created_at.startsWith(m)).reduce((a,inv)=>a+recTotal(inv),0);
 months.push({label,amt});
 }
 const custRev={};
-paidInvs.forEach(i=>{if(i.customer_name)custRev[i.customer_name]=(custRev[i.customer_name]||0)+calcTotal(i.items||[],i.tax_rate)});
+paidInvs.forEach(i=>{if(i.customer_name)custRev[i.customer_name]=(custRev[i.customer_name]||0)+recTotal(i)});
 const topCustomers=Object.entries(custRev).sort((a,b)=>b[1]-a[1]).slice(0,5);
 const srcMap={};
 (custs.data||[]).forEach(c=>{if(c.lead_source)srcMap[c.lead_source]=(srcMap[c.lead_source]||0)+1});
