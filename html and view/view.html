@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Mailbox Repair CO</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto;padding:20px 14px 40px}
+.hdr{text-align:center;margin-bottom:22px;padding:22px 20px;background:#1a2f4a;border-radius:14px}
+.hdr img{width:200px;max-width:100%;border-radius:8px;margin-bottom:8px}
+.hdr p{color:#94a3b8;font-size:12px}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 1px 6px #00000012}
+.lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:4px}
+.val{font-size:14px;color:#1e293b;font-weight:500}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:8px 10px;background:#f1f5f9;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b}
+td{padding:10px;border-bottom:1px solid #f1f5f9;font-size:13px}
+.tr{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#64748b}
+.gt{font-size:18px;font-weight:800;color:#0369a1;padding-top:10px;border-top:2px solid #e2e8f0;margin-top:6px}
+.bdg{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.Draft,.Sent{background:#dbeafe;color:#1d4ed8}
+.Approved,.Paid,.Completed{background:#dcfce7;color:#15803d}
+.Declined,.Overdue{background:#fee2e2;color:#b91c1c}
+.Unpaid{background:#fef3c7;color:#92400e}
+.approve{background:#0369a1;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.approve:disabled{opacity:.7;cursor:not-allowed}
+.approve.ok{background:#15803d}
+.prt{background:#f1f5f9;color:#475569;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-top:10px}
+.pgrid img{width:100%;height:120px;object-fit:cover;border-radius:8px;display:block}
+.plbl{font-size:11px;font-weight:700;margin-top:4px;color:#475569}
+.spin{text-align:center;padding:60px 20px;color:#64748b;font-size:14px}
+.err{text-align:center;padding:60px 20px;color:#ef4444}
+.ft{text-align:center;padding:24px 0;color:#94a3b8;font-size:11px;line-height:1.8}
+@media print{.noprint{display:none!important}body{background:#fff}}
+.sign{background:#0369a1;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.ovl{position:fixed;inset:0;background:#00000099;display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999}
+.modal{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:22px;max-height:94vh;overflow:auto;box-shadow:0 12px 40px #00000040}
+.mtitle{font-size:19px;font-weight:800;color:#0f172a}
+.msub{font-size:13px;color:#64748b;margin:4px 0 14px}
+.stab{display:flex;gap:8px;margin-bottom:12px}
+.stab button{flex:1;padding:9px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;color:#475569}
+.stab button.on{background:#0369a1;color:#fff;border-color:#0369a1}
+.sigpad{border:2px dashed #cbd5e1;border-radius:10px;background:#fff;touch-action:none;width:100%;height:180px;display:block}
+.typrev{border:2px dashed #cbd5e1;border-radius:10px;height:130px;display:flex;align-items:center;justify-content:center;font-family:'Dancing Script',cursive;font-size:46px;color:#0f172a;overflow:hidden;text-align:center;padding:0 10px}
+.tinp{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}
+.mclear{background:#fef3c7;color:#92400e;border:none;padding:7px 12px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer}
+.mrow{display:flex;gap:8px;margin-top:14px}
+.mrow button{flex:1;padding:13px;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;border:none}
+.mcancel{background:#f1f5f9;color:#475569}
+.msave{background:#15803d;color:#fff}
+.msave:disabled{opacity:.7;cursor:not-allowed}
+.mlbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:12px 0 4px}
+.merr{color:#ef4444;font-size:13px;min-height:16px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><div class="spin">Loading your document...</div></div>
+</div>
+<script>
+const db=supabase.createClient("https://zzaiqaknjvueytymqeul.supabase.co","sb_publishable_pI7rLourJP2DCzX2oFzd8w__ncNr2ri");
+function money(n){return"$"+parseFloat(n||0).toFixed(2)}
+function sub(d){return(d.items||[]).reduce((s,i)=>s+(parseFloat(i.qty)||0)*(parseFloat(i.price)||0),0)}
+function tax(d){return sub(d)*(parseFloat(d.tax_rate)||0)/100}
+function tot(d){return sub(d)+tax(d)}
+
+async function init(){
+  const p=new URLSearchParams(location.search);let data,error,type,token,tbl;const __ps=(location.pathname.match(/\/q\/([^\/?#]+)/)||[])[1];if(__ps){const _s=await db.rpc('get_shared_by_slug',{p_slug:decodeURIComponent(__ps)});data=_s.data;error=_s.error;if(data){type=data.record_type||'estimate';token=data.share_token;tbl=type==='invoice'?'invoices':'estimates';}}else{token=p.get('token');type=p.get('type')||'estimate';if(!token){show('err','Invalid link — no token found.');return}tbl=type==='invoice'?'invoices':'estimates';let _r=await db.rpc(tbl==='invoices'?'get_shared_invoice':'get_shared_estimate',{tok:token}).single();if(_r.error||!_r.data){tbl=tbl==='invoices'?'estimates':'invoices';type=type==='invoice'?'estimate':'invoice';_r=await db.rpc(tbl==='invoices'?'get_shared_invoice':'get_shared_estimate',{tok:token}).single();}data=_r.data;error=_r.error;}
+  if(error||!data){show("err","Document not found or link expired.");return}
+  try{
+    await db.from(tbl).update({viewed_at:Date.now(),view_count:(data.view_count||0)+1}).eq("share_token",token);
+    await db.from("notifications").insert({id:crypto.randomUUID(),type:"viewed",message:`${data.customer_name||"Customer"} viewed ${type} #${data.number}`,timestamp:Date.now(),read:false});
+  }catch(e){}
+  try{ await db.rpc("record_share_open",{tok:token,doc_type:type}); }catch(e){}
+  let __brand=null; try{ const __br=await db.rpc("get_share_branding",{tok:token,doc_type:type}); if(__br&&__br.data&&__br.data[0])__brand=__br.data[0]; }catch(e){}
+  render(data,type,token,__brand);
+}
+
+function show(cls,msg){document.getElementById("app").innerHTML=`<div class="${cls}">${msg}</div>`}
+
+function brandHeader(b){ if(!b) return ""; var logo=b.logo_url||""; var parts=[b.phone,b.email,b.website].filter(Boolean).join("   \u2022   "); var img=logo?('<img src="'+logo+'" alt="logo" style="width:100%;max-width:460px;height:auto;border-radius:12px;margin-bottom:10px"/><br/>'):""; var sub=parts?('<div style="font-size:13px;color:#64748b;margin-top:2px">'+parts+'</div>'):""; return '<div style="text-align:center;margin-bottom:16px">'+img+'<div style="font-size:20px;font-weight:700;color:#0f172a">'+(b.name||"")+'</div>'+sub+'</div>'; }
+function render(d,type,token,brand){
+  const isE=type==="estimate";
+  const items=d.items||[];const photos=d.photos||[];
+  const locked=isE&&d.lock_until_signed&&!d.signature;
+  document.getElementById("app").innerHTML=`
+    ${brand?brandHeader(brand):""}
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+        <div><div class="lbl">${isE?"Estimate":"Invoice"}</div><div style="font-size:24px;font-weight:800;color:#0369a1">#${d.number}</div></div>
+        <div style="text-align:right"><span class="bdg ${d.status}">${d.status}</span><div style="font-size:11px;color:#64748b;margin-top:4px">${d.date||""}</div>${!isE?`<div style="font-size:11px;color:#ef4444">Due: ${d.due_date||""}</div>`:""}</div>
+      </div>
+      <div class="g2">
+        <div><div class="lbl">From</div><div class="val">The Mailbox Repair CO</div><div style="font-size:12px;color:#64748b">817-592-6678</div><div style="font-size:12px;color:#64748b">Office@themailboxrepairco.com</div></div>
+        <div><div class="lbl">Bill To</div><div class="val">${d.customer_name||"—"}</div>${d.customer_address?`<div style="font-size:12px;color:#64748b">${d.customer_address}</div>`:""} ${d.customer_phone?`<div style="font-size:12px;color:#64748b">${d.customer_phone}</div>`:""} ${d.customer_email?`<div style="font-size:12px;color:#64748b">${d.customer_email}</div>`:""}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lbl" style="margin-bottom:12px">Services</div>
+      ${locked
+        ? `<div style="position:relative">
+             <div style="filter:blur(6px);user-select:none;pointer-events:none" aria-hidden="true"><table><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}</td><td>${i.qty||1}</td><td>${money(i.price)}</td><td style="text-align:right;font-weight:700">${money((parseFloat(i.qty)||0)*(parseFloat(i.price)||0))}</td></tr>`).join("")}</tbody></table></div>
+             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;text-align:center">
+               <div style="background:rgba(255,255,255,.92);border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;box-shadow:0 4px 16px #00000022;max-width:340px">
+                 <div style="font-size:28px">🔒</div>
+                 <div style="font-size:14px;font-weight:800;color:#0f172a;margin-top:6px">Full line-item estimate locked</div>
+                 <div style="font-size:13px;color:#475569;margin-top:5px;line-height:1.5">Please sign the work agreement below to release the full line-item estimate.</div>
+               </div>
+             </div>
+           </div>`
+        : d.hide_pricing
+          ? `<table><thead><tr><th>Description</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}${i.notes ? "<div style='font-size:11px;color:#555;margin-top:4px;white-space:pre-line'>" + i.notes + "</div>" : ""}</td></tr>`).join("")}</tbody></table>`
+          : `<table><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.description||""}${i.notes ? "<div style='font-size:11px;color:#555;margin-top:4px;white-space:pre-line'>" + i.notes + "</div>" : ""}</td><td>${i.qty||1}</td><td>${money(i.price)}</td><td style="text-align:right;font-weight:700">${money((parseFloat(i.qty)||0)*(parseFloat(i.price)||0))}</td></tr>`).join("")}</tbody></table>`}
+      <div style="margin-top:14px">
+        ${(locked||d.hide_pricing) ? "" : `<div class="tr"><span>Subtotal</span><span>${money(sub(d))}</span></div>
+        <div class="tr"><span>Tax (${d.tax_rate||0}%)</span><span>${money(tax(d))}</span></div>`}
+        <div class="tr gt"><span>${isE?"ESTIMATE TOTAL":"AMOUNT DUE"}</span><span>${money(tot(d))}</span></div>
+      </div>
+    </div>
+    ${d.notes?`<div class="card"><div class="lbl">Notes</div><div style="font-size:13px;margin-top:6px;color:#475569;white-space:pre-wrap">${d.notes}</div></div>`:""}
+    ${photos.length>0?`<div class="card"><div class="lbl">Photos (${photos.length})</div><div class="pgrid">${photos.map(p=>`<div><img src="${p.url||p.data}" alt="${p.caption||p.label||""}"/>${(p.label||p.caption)?`<div class="plbl">${p.label||""}${p.caption?(p.label?" — ":"")+p.caption:""}</div>`:""}</div>`).join("")}</div></div>`:""}
+    ${d.signature?`<div class="card"><div class="lbl">Customer Signature</div><img src="${d.signature}" alt="Signature" style="max-width:100%;border:1px solid #e2e8f0;border-radius:6px;margin-top:8px"/>${d.signed_at?`<div style="font-size:11px;color:#64748b;margin-top:6px">Signed ${new Date(d.signed_at).toLocaleString()}</div>`:""}</div>`:""}
+    ${d.contract_text&&isE?`<div class="card"><div class="lbl">Terms & Conditions</div><pre style="font-size:11px;color:#475569;white-space:pre-wrap;margin-top:8px;font-family:inherit;line-height:1.6">${d.contract_text}</pre></div>`:""}
+    <div class="card noprint" id="actions">
+      ${isE&&d.status!=="Approved"?`<button class="sign" id="appBtn" onclick="openSign('estimates','${token}',true)">✍️ Sign & Approve Estimate</button>`:""}
+      ${isE&&d.status==="Approved"?`<div style="text-align:center;padding:14px;background:#dcfce7;border-radius:10px;color:#15803d;font-weight:700;font-size:15px">✅ Estimate Approved${d.signed_by?` — signed by ${d.signed_by}`:""}. We will be in touch!</div>`:""}
+      <button class="prt" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    </div>
+    <div class="ft">The Mailbox Repair CO &nbsp;·&nbsp; 817-592-6678 &nbsp;·&nbsp; Office@themailboxrepairco.com<br/>DFW Metroplex &nbsp;·&nbsp; themailboxrepairco.com</div>
+  `;
+}
+
+async function approve(token){
+  const btn=document.getElementById("appBtn");
+  if(!btn)return;btn.disabled=true;btn.textContent="Approving...";
+  await db.from("estimates").update({status:"Approved"}).eq("share_token",token);
+  await db.from("notifications").insert({id:crypto.randomUUID(),type:"approved",message:"Customer APPROVED the estimate! 🎉",timestamp:Date.now(),read:false});
+  btn.className="approve ok";btn.textContent="✅ Approved!";
+  setTimeout(()=>{const a=document.getElementById("actions");if(a)a.innerHTML='<div style="text-align:center;padding:16px;background:#dcfce7;border-radius:10px;color:#15803d;font-weight:700;font-size:15px">✅ Estimate Approved — We will be in touch soon!</div><button class="prt" onclick="window.print()">🖨️ Print / Save as PDF</button>';},1500);
+}
+
+function openSign(tbl,token,isEstimate){
+  var ov=document.createElement("div");ov.className="ovl";
+  ov.innerHTML=
+    '<div class="modal">'
+    +'<div class="mtitle">'+(isEstimate?"Sign &amp; Approve":"Sign to Accept")+'</div>'
+    +'<div class="msub">Draw your signature or type your name. This is your legal e-signature.</div>'
+    +'<div class="stab"><button id="tabDraw" class="on">✍️ Draw</button><button id="tabType">⌨️ Type</button></div>'
+    +'<div id="paneDraw"><canvas id="sigCanvas" class="sigpad"></canvas><div style="text-align:right;margin-top:6px"><button class="mclear" id="clearBtn">Clear</button></div></div>'
+    +'<div id="paneType" style="display:none"><div id="typePrev" class="typrev">Your Name</div></div>'
+    +'<div class="mlbl">Full Legal Name</div>'
+    +'<input id="signName" class="tinp" placeholder="Type your full name" autocomplete="name"/>'
+    +'<div class="merr" id="signErr"></div>'
+    +'<div class="mrow"><button class="mcancel" id="cancelBtn">Cancel</button><button class="msave" id="saveBtn">'+(isEstimate?"Sign &amp; Approve":"Sign &amp; Continue")+'</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  var mode="draw";
+  var canvas=ov.querySelector("#sigCanvas"),ctx=canvas.getContext("2d");
+  function sizeCanvas(){var r=canvas.getBoundingClientRect();canvas.width=r.width;canvas.height=r.height;ctx.lineWidth=2.5;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#0f172a";}
+  sizeCanvas();
+  var drawing=false,drew=false,last=null;
+  function pos(e){var r=canvas.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+  function down(e){e.preventDefault();drawing=true;last=pos(e);}
+  function move(e){if(!drawing)return;e.preventDefault();var p=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;drew=true;}
+  function up(){drawing=false;}
+  canvas.addEventListener("mousedown",down);canvas.addEventListener("mousemove",move);window.addEventListener("mouseup",up);
+  canvas.addEventListener("touchstart",down,{passive:false});canvas.addEventListener("touchmove",move,{passive:false});canvas.addEventListener("touchend",up);
+  ov.querySelector("#clearBtn").onclick=function(){ctx.clearRect(0,0,canvas.width,canvas.height);drew=false;};
+  var nameInp=ov.querySelector("#signName"),prev=ov.querySelector("#typePrev");
+  nameInp.addEventListener("input",function(){prev.textContent=nameInp.value||"Your Name";});
+  ov.querySelector("#tabDraw").onclick=function(){mode="draw";this.classList.add("on");ov.querySelector("#tabType").classList.remove("on");ov.querySelector("#paneDraw").style.display="";ov.querySelector("#paneType").style.display="none";sizeCanvas();};
+  ov.querySelector("#tabType").onclick=function(){mode="type";this.classList.add("on");ov.querySelector("#tabDraw").classList.remove("on");ov.querySelector("#paneType").style.display="";ov.querySelector("#paneDraw").style.display="none";};
+  ov.querySelector("#cancelBtn").onclick=function(){document.body.removeChild(ov);};
+  ov.querySelector("#saveBtn").onclick=async function(){
+    var err=ov.querySelector("#signErr");err.textContent="";
+    var name=(nameInp.value||"").trim();
+    if(!name){err.textContent="Please type your full name.";return;}
+    var dataUrl;
+    if(mode==="draw"){
+      if(!drew){err.textContent="Please draw your signature, or switch to Type.";return;}
+      dataUrl=canvas.toDataURL("image/png");
+    }else{
+      try{await document.fonts.load('64px "Dancing Script"');}catch(e){}
+      var c=document.createElement("canvas");c.width=640;c.height=170;var cx=c.getContext("2d");
+      cx.fillStyle="#ffffff";cx.fillRect(0,0,c.width,c.height);
+      cx.fillStyle="#0f172a";cx.font='64px "Dancing Script", cursive';cx.textAlign="center";cx.textBaseline="middle";
+      cx.fillText(name,c.width/2,c.height/2);
+      dataUrl=c.toDataURL("image/png");
+    }
+    var btn=this;btn.disabled=true;btn.textContent="Saving...";
+    // Save via SECURITY DEFINER RPC — RLS blocks direct table writes from the
+    // public/anon key (they return 200 with 0 rows and NO error, which silently
+    // dropped every customer signature). The RPC bypasses RLS and also inserts
+    // the "signed" notification server-side. Success = a row is returned.
+    var res=await db.rpc("sign_shared",{p_token:token,p_type:isEstimate?"estimate":"invoice",p_signature:dataUrl,p_signed_by:name});
+    if(res.error||!res.data){err.textContent="Could not save. Please call 817-592-6678.";btn.disabled=false;btn.textContent=isEstimate?"Sign & Approve":"Sign & Continue";return;}
+    location.reload();
+  };
+}
+
+init();
+</script>
+<script>
+(async function(){
+  function gp(k){return new URLSearchParams(location.search).get(k);}
+  if(gp('paid')){
+    var render=function(){
+      document.body.innerHTML='<div style="max-width:560px;margin:60px auto;padding:32px;background:#fff;border-radius:16px;box-shadow:0 2px 12px #0001;text-align:center;font-family:Segoe UI,sans-serif">'
+        +'<div style="font-size:54px">\u2705</div>'
+        +'<h1 style="color:#166534;margin:12px 0;font-size:24px">Payment received</h1>'
+        +'<p style="color:#475569;font-size:15px;line-height:1.5">Thank you! Your payment was successful and a receipt has been emailed to you.</p>'
+        +'<p style="color:#94a3b8;font-size:13px;margin-top:18px">The Mailbox Repair CO \u00b7 817-592-6678</p></div>';
+    };
+    render();
+    var c=0,t=setInterval(function(){render();if(++c>12)clearInterval(t);},250);
+    return;
+  }
+  // Support BOTH slug format (/q/slug) AND old token format (?token=xxx)
+  var inv;
+  var slug=(location.pathname.match(/\/q\/([^\/?#]+)/)||[])[1];
+  if(slug){
+    // New slug format — load by slug
+    try{
+      var sr=await db.rpc('get_shared_by_slug',{p_slug:decodeURIComponent(slug)});
+      inv=sr&&sr.data;
+      if(inv&&inv.record_type!=='invoice')return; // only show Pay Now for invoices
+    }catch(e){return;}
+  } else {
+    // Old token format
+    var token=gp('token'),type=gp('type')||'estimate';
+    if(!token||type!=='invoice')return;
+    try{var r=await db.rpc('get_shared_invoice',{tok:token}).single();inv=r&&r.data;}catch(e){return;}
+  }
+  if(!inv)return;
+  var paid=String(inv.status||'').toLowerCase()==='paid';
+  var n=0,iv=setInterval(function(){
+    var box=document.getElementById('actions');n++;
+    if(box){
+      clearInterval(iv);
+      if(paid){
+        var bd=document.createElement('div');
+        bd.style.cssText='display:block;text-align:center;background:#16a34a;color:#fff;font-weight:700;padding:12px;border-radius:10px;margin-bottom:10px;font-size:16px';
+        bd.textContent='\u2705 PAID \u2014 Thank you!';
+        box.insertBefore(bd,box.firstChild);
+      }else if(!inv.signature){
+        var sbtn=document.createElement('button');
+        sbtn.textContent='\u270d\ufe0f Sign to Accept';
+        sbtn.style.cssText='display:block;width:100%;padding:14px;margin-bottom:10px;background:#0369a1;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer';
+        sbtn.onclick=function(){openSign('invoices',inv.share_token,false);};
+        box.insertBefore(sbtn,box.firstChild);
+        var hint=document.createElement('div');
+        hint.style.cssText='text-align:center;color:#64748b;font-size:12px;margin-bottom:10px';
+        hint.textContent='Sign to accept this invoice, then the Pay Now button will appear.';
+        box.insertBefore(hint,sbtn.nextSibling);
+      }else{
+        var btn=document.createElement('button');
+        btn.textContent='\ud83d\udcb3 Pay Now';
+        btn.style.cssText='display:block;width:100%;padding:14px;margin-bottom:10px;background:#16a34a;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer';
+        btn.onclick=async function(){
+          btn.disabled=true;btn.textContent='Loading secure checkout\u2026';
+          try{
+            var resp=await fetch('https://zzaiqaknjvueytymqeul.functions.supabase.co/create-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:'invoice',id:inv.id})});
+            var j=await resp.json();
+            if(j&&j.url){location.href=j.url;}
+            else{btn.disabled=false;btn.textContent='\ud83d\udcb3 Pay Now';alert('Sorry, could not start checkout. Please call 817-592-6678.');}
+          }catch(e){btn.disabled=false;btn.textContent='\ud83d\udcb3 Pay Now';alert('Payment error. Please call 817-592-6678.');}
+        };
+        box.insertBefore(btn,box.firstChild);
+      }
+    }
+    if(n>40)clearInterval(iv);
+  },150);
+})();
+</script>
+</body>
+</html>
