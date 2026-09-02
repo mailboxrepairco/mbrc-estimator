@@ -337,6 +337,11 @@ function coName(){ return (COMPANY && COMPANY.name) || 'Your Company'; }
 function coContactLine(){ if(!COMPANY) return ''; return [COMPANY.phone,COMPANY.email,COMPANY.website].filter(Boolean).join('   \u2022   '); }
 function coPrintHeader(){ var logo=(COMPANY&&COMPANY.logo_url)||''; var line=coContactLine(); return (logo?('<img src="'+logo+'" alt="logo" style="max-height:70px;margin-bottom:8px"/><br/>'):'')+'<h1 style="margin:4px 0">'+coName()+'</h1>'+(line?('<div style="color:#555;font-size:13px;margin-bottom:6px">'+line+'</div>'):'')+'<hr/>'; }
 
+// Google review link — where customers leave a star rating.
+// Paste your Google Business review short link below (looks like https://g.page/r/XXXXXXXX/review).
+var REVIEW_LINK = 'https://g.page/r/CToYJos0msJWEAE/review';
+function reviewLink(){ return (COMPANY && COMPANY.review_url) || REVIEW_LINK; }
+
 // ── HELPERS ───────────────────────────────────────────────────────────────
 const fmt = n => '$' + (Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 const today = () => new Date().toISOString().split('T')[0];
@@ -734,7 +739,7 @@ function printInv(inv){
   w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
 }
 
-function EstimateDetail({id,onBack,onEdit,onConvert,onDuplicate}){
+function EstimateDetail({id,onBack,onEdit,onConvert,onDuplicate,onDelete}){
 const [est,setEst]=useState(null);
 const [tab,setTab]=useState('details');
 const [loading,setLoading]=useState(true);
@@ -792,6 +797,7 @@ h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),
 h('button',{className:'btn btn-ghost btn-sm',onClick:()=>onDuplicate(est)},'Duplicate'),
+h('button',{className:'btn btn-danger btn-sm',onClick:()=>onDelete(est)},'Delete'),
 h('button',{className:'btn btn-success btn-sm',onClick:()=>onConvert(est)},'→ Invoice')
 )
 ),
@@ -1056,7 +1062,7 @@ h('div',{style:{fontSize:11,color:'#64748b'}},inv.due_date?'Due: '+inv.due_date:
 }
 
 // ── INVOICE DETAIL ────────────────────────────────────────────────────────
-function InvoiceDetail({id,onBack,onEdit}){
+function InvoiceDetail({id,onBack,onEdit,onDelete}){
 const [inv,setInv]=useState(null);
 const [tab,setTab]=useState('details');
 const [loading,setLoading]=useState(true);
@@ -1078,6 +1084,10 @@ const sendSMS=()=>window.open('sms:'+inv.customer_phone+'?body=Hi '+inv.customer
 const sendEmail=()=>{var _b='Hi '+inv.customer_name+',\n\nYour invoice is ready. Total: '+fmt(total)+'\n\nView here: '+shareUrl+(inv.payment_link?'\n\nPay here: '+inv.payment_link:'')+'\n\nThank you!';var _s='Invoice '+inv.number+' - '+coName();window.location.href='mailto:'+(inv.customer_email||'')+'?subject='+encodeURIComponent(_s)+'&body='+encodeURIComponent(_b);};
 const copyLink=()=>{navigator.clipboard&&navigator.clipboard.writeText(shareUrl);alert('Link copied!')};
 
+const reviewMsg='Hi '+inv.customer_name+', thank you for choosing '+coName()+'! It would mean a lot if you could leave us a quick review — it really helps our small business: '+reviewLink();
+const reviewSMS=()=>window.open('sms:'+inv.customer_phone+'?body='+encodeURIComponent(reviewMsg));
+const reviewEmail=()=>{var _b='Hi '+inv.customer_name+',\n\nThank you for choosing '+coName()+'! It would mean a lot if you could leave us a quick review — it really helps our small business:\n\n'+reviewLink()+'\n\nWe appreciate you!\n'+coName();var _s='Thanks from '+coName()+' — quick favor?';window.location.href='mailto:'+(inv.customer_email||'')+'?subject='+encodeURIComponent(_s)+'&body='+encodeURIComponent(_b);};
+
 async function markPaid(){
 await sb.from('invoices').update({status:'Paid',paid_at:Date.now()}).eq('id',id);
 setInv(v=>({...v,status:'Paid',paid_at:Date.now()}));
@@ -1088,6 +1098,7 @@ h('div',{className:'section-header'},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onBack},'← Back'),
 h('div',{style:{display:'flex',gap:6}},
 h('button',{className:'btn btn-ghost btn-sm',onClick:onEdit},'Edit'),h('button',{className:'btn btn-ghost btn-sm',onClick:function(){printInv(inv);}},'Print / PDF'),
+h('button',{className:'btn btn-danger btn-sm',onClick:()=>onDelete(inv)},'Delete'),
 inv.status!=='Paid'&&h('button',{className:'btn btn-success btn-sm',onClick:markPaid},'✓ Mark Paid')
 )
 ),
@@ -1135,7 +1146,10 @@ tab==='send'&&h('div',null,
 h('div',{className:'alert alert-info'},'Send invoice to customer'),
 h('div',{className:'send-option',onClick:sendSMS},h('div',{className:'send-icon'},'💬'),h('div',null,h('div',{className:'send-label'},'Text Message'),h('div',{className:'send-sub'},inv.customer_phone))),
 h('div',{className:'send-option',onClick:sendEmail},h('div',{className:'send-icon'},'📧'),h('div',null,h('div',{className:'send-label'},'Email'),h('div',{className:'send-sub'},inv.customer_email))),
-h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'🔗'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},'Share invoice link')))
+h('div',{className:'send-option',onClick:copyLink},h('div',{className:'send-icon'},'🔗'),h('div',null,h('div',{className:'send-label'},'Copy Link'),h('div',{className:'send-sub'},'Share invoice link'))),
+h('div',{className:'alert alert-info',style:{marginTop:16}},'⭐ Ask for a review'+(inv.status==='Paid'?' (this invoice is paid — great time!)':'')),
+h('div',{className:'send-option',onClick:reviewSMS},h('div',{className:'send-icon'},'⭐'),h('div',null,h('div',{className:'send-label'},'Review Request — Text'),h('div',{className:'send-sub'},inv.customer_phone||'No phone on file'))),
+h('div',{className:'send-option',onClick:reviewEmail},h('div',{className:'send-icon'},'⭐'),h('div',null,h('div',{className:'send-label'},'Review Request — Email'),h('div',{className:'send-sub'},inv.customer_email||'No email on file')))
 ),
 
 tab==='print'&&h('div',null,
@@ -1712,6 +1726,13 @@ c.number='EST-'+Date.now().toString().slice(-4);
 c.date=today();
 c.items=(est.items||[]).map(it=>({...it,id:uid()}));
 setView({type:'edit-estimate',data:c});
+},
+onDelete:async(est)=>{
+if(!confirm('Delete estimate '+(est.number||'')+'? This permanently removes it and cannot be undone.'))return;
+try{
+await sb.from('estimates').delete().eq('id',est.id);
+setView(null);
+}catch(err){alert('Delete failed: '+(err&&err.message||err));}
 }
 })
 );
@@ -1732,6 +1753,13 @@ onEdit:()=>{
 sb.from('invoices').select('*').eq('id',view.id).single().then(r=>{
 if(r.data)setView({type:'edit-invoice',data:r.data});
 });
+},
+onDelete:async(inv)=>{
+if(!confirm('Delete invoice '+(inv.number||'')+'? This permanently removes it and cannot be undone.'))return;
+try{
+await sb.from('invoices').delete().eq('id',inv.id);
+setView(null);
+}catch(err){alert('Delete failed: '+(err&&err.message||err));}
 }
 })
 );
