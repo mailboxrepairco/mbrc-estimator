@@ -945,8 +945,8 @@ statuses.map(s=>h('button',{key:s,className:'btn btn-sm '+(filter===s?'btn-prima
 filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'📋'),h('div',null,'No estimates yet'),h('button',{className:'btn btn-primary',style:{marginTop:12},onClick:onNew},'Create First Estimate')):
 filtered.map(e=>h('div',{key:e.id,className:'list-item',onClick:()=>onSelect(e.id)},
 h('div',null,
-h('div',{className:'list-item-title'},e.number),
-h('div',{className:'list-item-sub'},e.customer_name||'No customer'),
+h('div',{className:'list-item-title'},e.customer_name||'No customer'),
+h('div',{className:'list-item-sub'},e.number),
 h('div',{style:{marginTop:4}},statusBadge(e.status))
 ),
 h('div',{style:{textAlign:'right'}},
@@ -1137,8 +1137,8 @@ h('div',{style:{display:'flex',gap:4,overflowX:'auto',marginBottom:12}},
 filtered.length===0?h('div',{className:'empty'},h('div',{className:'empty-icon'},'🧾'),h('div',null,'No invoices yet')):
 filtered.map(inv=>h('div',{key:inv.id,className:'list-item',onClick:()=>onSelect(inv.id)},
 h('div',null,
-h('div',{className:'list-item-title'},inv.number),
-h('div',{className:'list-item-sub'},inv.customer_name),
+h('div',{className:'list-item-title'},inv.customer_name||'No customer'),
+h('div',{className:'list-item-sub'},inv.number),
 h('div',{style:{marginTop:4}},statusBadge(inv.status))
 ),
 h('div',{style:{textAlign:'right'}},
